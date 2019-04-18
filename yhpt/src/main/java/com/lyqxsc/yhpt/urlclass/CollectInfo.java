@@ -2,7 +2,7 @@ package com.lyqxsc.yhpt.urlclass;
 
 import com.lyqxsc.yhpt.domain.Collect;
 
-public class AddCollect {
+public class CollectInfo {
 	String userToken;
 	Collect collect;
 	public String getUserToken() {

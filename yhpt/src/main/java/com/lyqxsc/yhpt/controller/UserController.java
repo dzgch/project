@@ -25,15 +25,15 @@ import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.ShopCar;
 import com.lyqxsc.yhpt.service.UserService;
-import com.lyqxsc.yhpt.urlclass.AddAppraise;
-import com.lyqxsc.yhpt.urlclass.AddCollect;
-import com.lyqxsc.yhpt.urlclass.AddShopCar;
+import com.lyqxsc.yhpt.urlclass.AppraiseInfo;
+import com.lyqxsc.yhpt.urlclass.CollectInfo;
+import com.lyqxsc.yhpt.urlclass.ShopCarInfo;
 import com.lyqxsc.yhpt.urlclass.BuyCommodity;
-import com.lyqxsc.yhpt.urlclass.CommonOperation;
+import com.lyqxsc.yhpt.urlclass.UserToken;
 import com.lyqxsc.yhpt.urlclass.PresentOrder;
 import com.lyqxsc.yhpt.urlclass.PresentRentOrder;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
-import com.lyqxsc.yhpt.urlclass.UserTokenAndID;
+import com.lyqxsc.yhpt.urlclass.UserTokenOne;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @RestController
@@ -74,7 +74,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/userlogout",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson logout(@RequestBody CommonOperation param) {
+	public RetJson logout(@RequestBody UserToken param) {
 		
 		String userToken = param.getUserToken();
 		if(userToken == null) {
@@ -116,9 +116,9 @@ public class UserController {
 	 * 填写邀请码
 	 */
 	@RequestMapping(value = "/addinvitationcode", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addInvitationCode(@RequestBody UserTokenAndID param) {
+	public RetJson addInvitationCode(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		String code = param.getId();
+		String code = param.getString();
 		if(userToken == null || code == null) {
 			return RetJson.urlError("invitation code error", null);
 		}
@@ -133,7 +133,7 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/home", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson homePage(@RequestBody CommonOperation param) {
+	public RetJson homePage(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
@@ -150,7 +150,7 @@ public class UserController {
 	 * 关于我们
 	 */
 	@RequestMapping(value = "/home/aboutus", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson aboutUs(@RequestBody CommonOperation param) {
+	public RetJson aboutUs(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
@@ -169,7 +169,7 @@ public class UserController {
 	 */
 	//TODO 暂时用首页界面
 	@RequestMapping(value = "/shop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson shop(@RequestBody CommonOperation param) {
+	public RetJson shop(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
@@ -187,9 +187,9 @@ public class UserController {
 	 * 查询分类列表
 	 */
 	@RequestMapping(value = "/shop/classlist", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson classList(@RequestBody UserTokenAndID param) {
+	public RetJson classList(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		String type = param.getId();
+		String type = param.getString();
 		if(userToken == null || type == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -206,9 +206,9 @@ public class UserController {
 	 * 分类查询物品
 	 */
 	@RequestMapping(value = "/shop/classlist/select", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodityByClass(@RequestBody UserTokenAndID param) {
+	public RetJson selectCommodityByClass(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		String classId = param.getId();
+		String classId = param.getString();
 		if(userToken == null || classId == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -225,9 +225,9 @@ public class UserController {
 	 * 查询物品名称
 	 */
 	@RequestMapping(value = "/shop/classlist/selectByName", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodityByName(@RequestBody UserTokenAndID param) {
+	public RetJson selectCommodityByName(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		String name = param.getId();
+		String name = param.getString();
 		if(userToken == null || name == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -245,7 +245,7 @@ public class UserController {
 	 * 新品  展示出售商品 最新10条
 	 */
 	@RequestMapping(value = "/shop/newshop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson newShopShow(@RequestBody CommonOperation param) {
+	public RetJson newShopShow(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
@@ -263,7 +263,7 @@ public class UserController {
 	 * 热卖  最出售最多10条
 	 */
 	@RequestMapping(value = "/shop/hotshop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson hotShopShow(@RequestBody CommonOperation param) {
+	public RetJson hotShopShow(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
@@ -280,8 +280,8 @@ public class UserController {
 	/**
 	 *  查看可出售商品
 	 */
-	@RequestMapping(value = "/shop/selectcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodity(@RequestBody CommonOperation param) {
+	@RequestMapping(value = "/shop/selectcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodity(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
@@ -296,8 +296,8 @@ public class UserController {
 	/**
 	 *  查看可租赁商品
 	 */
-	@RequestMapping(value = "/shop/selectrentcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectRentCommodity(@RequestBody CommonOperation param) {
+	@RequestMapping(value = "/shop/selectrentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectRentCommodity(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
@@ -312,25 +312,25 @@ public class UserController {
 	/**
 	 * 根据商品id查询商品
 	 */
-	@RequestMapping(value = "/shop/selectcommoditybyid",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodityByID(@RequestBody UserTokenAndID param) {
+	@RequestMapping(value = "/shop/selectcommoditybyid", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodityByID(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getId());
+		long id = Long.parseLong(param.getString());
 		
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		Commodity rentCommodityList = userService.selectCommodityByID(userToken,id);
-		if(rentCommodityList == null) {
+		Commodity commodity = userService.selectCommodityByID(userToken,id);
+		if(commodity == null) {
 			return RetJson.unknowError("没有该商品", null);
 		}
-		return RetJson.success("success", rentCommodityList);
+		return RetJson.success("success", commodity);
 	}
 	
 	/**
 	 * 购买
 	 */
-	@RequestMapping(value = "/shop/buycommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/shop/buycommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson buyCommodity(@RequestBody BuyCommodity param) {
 		String userToken = param.getUserToken();
 		long commodityID = param.getCommodityID();
@@ -349,7 +349,7 @@ public class UserController {
 	/**
 	 *  提交购买订单
 	 */
-	@RequestMapping(value = "/shop/pushorder",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/shop/pushorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson presentOrder(@RequestBody PresentOrder param) {
 		String userToken = param.getUserToken();
 		String addr = param.getAddr();
@@ -366,7 +366,7 @@ public class UserController {
 	/**
 	 * 租赁
 	 */
-	@RequestMapping(value = "/shop/rentcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/shop/rentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson rentCommodity(@RequestBody BuyCommodity param) {
 		String userToken = param.getUserToken();
 		long rentCommodityID = param.getCommodityID();
@@ -385,7 +385,7 @@ public class UserController {
 	/**
 	 *  提交租赁订单
 	 */
-	@RequestMapping(value = "/shop/pushrentorder",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/shop/pushrentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson presentRentOrder(@RequestBody PresentRentOrder param) {
 		String userToken = param.getUserToken();
 		String addr = param.getAddr();
@@ -404,7 +404,7 @@ public class UserController {
 	 * 我的全部订单
 	 */
 	@RequestMapping(value = "/usercenter/order", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  allOrder(@RequestBody CommonOperation param) {
+	public RetJson  allOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -420,7 +420,7 @@ public class UserController {
 	 * 待付款订单列表
 	 */
 	@RequestMapping(value = "/usercenter/order/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  noPayOrder(@RequestBody CommonOperation param) {
+	public RetJson  noPayOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -436,7 +436,7 @@ public class UserController {
 	 * 已付款订单列表
 	 */
 	@RequestMapping(value = "/usercenter/order/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  isPayOrder(@RequestBody CommonOperation param) {
+	public RetJson  isPayOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -448,11 +448,13 @@ public class UserController {
 		return RetJson.success("success", orderList);
 	}
 	
+	
+	
 	/**
 	 * 购物车
 	 */
 	@RequestMapping(value = "/usercenter/shopcar", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson shopCar(@RequestBody CommonOperation param) {
+	public RetJson shopCar(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list shopcar error", null);
@@ -468,7 +470,7 @@ public class UserController {
 	 * 购物车 增
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addShopCar(@RequestBody AddShopCar param) {
+	public RetJson addShopCar(@RequestBody ShopCarInfo param) {
 		String userToken = param.getUserToken();
 		ShopCar shopCar = param.getShopCar();
 		if(userToken == null || shopCar == null) {
@@ -484,9 +486,9 @@ public class UserController {
 	 * 购物车 删
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeShopCar(@RequestBody UserTokenAndID param) {
+	public RetJson removeShopCar(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getId());
+		long id = Long.parseLong(param.getString());
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("remove shopcar error", null);
 		}
@@ -500,7 +502,7 @@ public class UserController {
 	 * 购物车 改
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson updateShopCar(@RequestBody AddShopCar param) {
+	public RetJson updateShopCar(@RequestBody ShopCarInfo param) {
 		String userToken = param.getUserToken();
 		ShopCar shopCar = param.getShopCar();
 		if(userToken == null || shopCar == null) {
@@ -516,7 +518,7 @@ public class UserController {
 	 * 收藏夹列表
 	 */
 	@RequestMapping(value = "/usercenter/collect", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listCollect(@RequestBody CommonOperation param) {
+	public RetJson listCollect(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list collect error", null);
@@ -532,7 +534,7 @@ public class UserController {
 	 * 收藏夹 增
 	 */
 	@RequestMapping(value = "/usercenter/collect/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addCollect(@RequestBody AddCollect param) {
+	public RetJson addCollect(@RequestBody CollectInfo param) {
 		String userToken = param.getUserToken();
 		Collect collect = param.getCollect();
 		if(userToken == null || collect == null) {
@@ -548,9 +550,9 @@ public class UserController {
 	 * 收藏夹 删
 	 */
 	@RequestMapping(value = "/usercenter/collect/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeCollect(@RequestBody UserTokenAndID param) {
+	public RetJson removeCollect(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getId());
+		long id = Long.parseLong(param.getString());
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("remove collect error", null);
 		}
@@ -565,9 +567,9 @@ public class UserController {
 	 * 评价列表,根据物品ID查看评论
 	 */
 	@RequestMapping(value = "/usercenter/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listAppraise(@RequestBody UserTokenAndID param) {
+	public RetJson listAppraise(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getId());
+		long id = Long.parseLong(param.getString());
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
@@ -582,7 +584,7 @@ public class UserController {
 	 * 我的评价列表，根据用户ID查看评论
 	 */
 	@RequestMapping(value = "/usercenter/appraise/myappraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listMyAppraise(@RequestBody CommonOperation param) {
+	public RetJson listMyAppraise(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list appraise error", null);
@@ -598,7 +600,7 @@ public class UserController {
 	 * 评价 增
 	 */
 	@RequestMapping(value = "/usercenter/appraise/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addAppraise(@RequestBody AddAppraise param) {
+	public RetJson addAppraise(@RequestBody AppraiseInfo param) {
 		String userToken = param.getUserToken();
 		Appraise appraise = param.getAppraise();
 		if(userToken == null || appraise == null) {
@@ -614,9 +616,9 @@ public class UserController {
 	 * 评价 删
 	 */
 	@RequestMapping(value = "/usercenter/appraise/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeAppraise(@RequestBody UserTokenAndID param) {
+	public RetJson removeAppraise(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getId());
+		long id = Long.parseLong(param.getString());
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}

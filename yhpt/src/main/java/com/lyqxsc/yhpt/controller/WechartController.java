@@ -41,8 +41,8 @@ public class WechartController {
 	
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);  
 
-	@RequestMapping(value = "/getWxUserInfo", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public Map<String,String> doPost(@RequestBody UserLogin request) throws ServletException, IOException {
+	@RequestMapping(value = "/wxuserinfo", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public User doPost(@RequestBody UserLogin request) throws ServletException, IOException {
 		String code = request.getCode();
 		String ip = request.getIp();
 		
@@ -86,7 +86,7 @@ public class WechartController {
 		
 		User user = userService.login(wxUserInfo, ip);
 		//TODO 返回user+signature
-		return signature;
+		return user;
 	}
 	
     // 网页授权接口

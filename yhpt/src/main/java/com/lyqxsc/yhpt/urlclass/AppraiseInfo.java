@@ -2,7 +2,7 @@ package com.lyqxsc.yhpt.urlclass;
 
 import com.lyqxsc.yhpt.domain.Appraise;
 
-public class AddAppraise {
+public class AppraiseInfo {
 	String userToken;
 	Appraise appraise;
 	public String getUserToken() {

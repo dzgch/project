@@ -1,6 +1,6 @@
 package com.lyqxsc.yhpt.urlclass;
 
-public class CommonOperation {
+public class UserToken {
 	String userToken;
 
 	public String getUserToken() {

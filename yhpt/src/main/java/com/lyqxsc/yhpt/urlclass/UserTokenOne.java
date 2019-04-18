@@ -1,18 +1,19 @@
 package com.lyqxsc.yhpt.urlclass;
 
-public class UserTokenAndID {
+public class UserTokenOne {
 	String userToken;
-	String id;
+	String string;
+	
 	public String getUserToken() {
 		return userToken;
 	}
 	public void setUserToken(String userToken) {
 		this.userToken = userToken;
 	}
-	public String getId() {
-		return id;
+	public String getString() {
+		return string;
 	}
-	public void setId(String id) {
-		this.id = id;
+	public void setString(String string) {
+		this.string = string;
 	}
 }

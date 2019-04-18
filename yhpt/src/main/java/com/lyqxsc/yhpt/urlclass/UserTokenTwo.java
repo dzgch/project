@@ -1,6 +1,6 @@
 package com.lyqxsc.yhpt.urlclass;
 
-public class UserTokenAndString {
+public class UserTokenTwo {
 	String userToken;
 	String type;
 	String classStr;

@@ -21,7 +21,7 @@ import com.lyqxsc.yhpt.domain.Test;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.service.AdminService;
 import com.lyqxsc.yhpt.urlclass.AdminLogin;
-import com.lyqxsc.yhpt.urlclass.UserTokenAndString;
+import com.lyqxsc.yhpt.urlclass.UserTokenTwo;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @RestController
@@ -108,7 +108,7 @@ public class AdminController {
 	 * 添加物品分类
 	 */
 	@RequestMapping(value = "/addcommodityclass", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addClassify(@RequestBody UserTokenAndString param) {
+	public RetJson addClassify(@RequestBody UserTokenTwo param) {
 		String userToken = param.getUserToken();
 		String type = param.getType();
 		String string = param.getClassStr();

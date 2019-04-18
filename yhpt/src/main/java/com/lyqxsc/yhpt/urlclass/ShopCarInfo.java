@@ -2,7 +2,7 @@ package com.lyqxsc.yhpt.urlclass;
 
 import com.lyqxsc.yhpt.domain.ShopCar;
 
-public class AddShopCar {
+public class ShopCarInfo {
 	String userToken;
 	ShopCar shopCar;
 	public String getUserToken() {
