@@ -120,15 +120,15 @@ public class DistributorService {
 	/**
 	 * 商品列表
 	 */
-	public List<Commodity> listCommodity(String userToken){
-		//确定用户是否在线
-		UserInfo adminInfo = onlineMap.get(userToken);
-		if(adminInfo == null) {
-			return null;
-		}
-		List<Commodity> commodityList = commodityDao.selectCommodityByDistributor(adminInfo.getId());
-		return commodityList;
-	}
+//	public List<Commodity> listCommodity(String userToken){
+//		//确定用户是否在线
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return null;
+//		}
+//		List<Commodity> commodityList = commodityDao.selectCommodityByDistributor(adminInfo.getId());
+//		return commodityList;
+//	}
 	
 	/**
 	 * 添加商品

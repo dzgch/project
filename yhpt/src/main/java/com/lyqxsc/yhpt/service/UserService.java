@@ -98,6 +98,7 @@ public class UserService implements InitializingBean{
 		userInfo.setLoginTime(now);
 		
 		String userToken = user.getId() + "O" + now;
+		System.out.println(userToken);
 		onlineMap.put(userToken, userInfo);
 	}
 	
