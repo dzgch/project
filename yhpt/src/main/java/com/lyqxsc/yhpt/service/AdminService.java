@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.lyqxsc.yhpt.dao.IAdminDao;
+import com.lyqxsc.yhpt.dao.ICommodityClassifyDao;
 import com.lyqxsc.yhpt.dao.ICommodityDao;
 import com.lyqxsc.yhpt.dao.IDistributorDao;
 import com.lyqxsc.yhpt.dao.IOrderDao;
@@ -16,6 +17,7 @@ import com.lyqxsc.yhpt.dao.IRentCommodityDao;
 import com.lyqxsc.yhpt.dao.IUserDao;
 import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.Distributor;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
@@ -38,7 +40,10 @@ public class AdminService {
 	ICommodityDao commodityDao;
 	
 	@Autowired
-	IRentCommodityDao rentCommodityDao;
+	ICommodityClassifyDao commodityClassifyDao;
+	
+//	@Autowired
+//	IRentCommodityDao rentCommodityDao;
 	
 	@Autowired
 	IOrderDao orderDao;
@@ -143,6 +148,26 @@ public class AdminService {
 	}
 	
 	/**
+	 * 添加物品分类
+	 */
+	public boolean addClassify(String userToken, int type, String classStr) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		
+		int id = commodityClassifyDao.getMaxID();
+		CommodityClassify classify = new CommodityClassify();
+		classify.setClassId(id+1);
+		classify.setType(type);
+		classify.setClassStr(classStr);
+		if(1 != commodityClassifyDao.insert(classify)) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * 商品列表
 	 */
 	public List<Commodity> listCommodity(String userToken){
@@ -151,7 +176,7 @@ public class AdminService {
 		if(adminInfo == null) {
 			return null;
 		}
-		List<Commodity> commodityList = commodityDao.selectAllCommodity();
+		List<Commodity> commodityList = commodityDao.selectAll();
 		return commodityList;
 	}
 	
@@ -196,54 +221,54 @@ public class AdminService {
 	/**
 	 * 商品租赁列表
 	 */
-	public List<RentCommodity> listRentCommodity(String userToken){
+	public List<Commodity> listRentCommodity(String userToken){
 		//确定用户是否在线
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
 		}
 		
-		List<RentCommodity> rentCommodityList = rentCommodityDao.selectAllRentCommodity();
+		List<Commodity> rentCommodityList = commodityDao.selectRentCommodity();
 		return rentCommodityList;
 	}
 	
 	
-	/**
-	 * 添加租赁商品
-	 */
-	public boolean addRentCommodity(String userToken, RentCommodity rentCommodity) {
-		UserInfo adminInfo = onlineMap.get(userToken);
-		if(adminInfo == null) {
-			return false;
-		}
-		
-		Long maxID = rentCommodityDao.getMaxID();
-		if(maxID == null) {
-			return false;
-		}
-		rentCommodity.setId(maxID+1);
-		
-		int ret = rentCommodityDao.addRentCommodity(rentCommodity);
-		if(ret != 1) {
-			return false;
-		}
-		return true;
-	}
+//	/**
+//	 * 添加租赁商品
+//	 */
+//	public boolean addRentCommodity(String userToken, RentCommodity rentCommodity) {
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return false;
+//		}
+//		
+//		Long maxID = rentCommodityDao.getMaxID();
+//		if(maxID == null) {
+//			return false;
+//		}
+//		rentCommodity.setId(maxID+1);
+//		
+//		int ret = rentCommodityDao.addRentCommodity(rentCommodity);
+//		if(ret != 1) {
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	/**
 	 * 租赁商品下架
 	 */
-	public boolean removeRentCommodity(String userToken, int rentCommodityID, String rentCommodityName) {
-		UserInfo adminInfo = onlineMap.get(userToken);
-		if(adminInfo == null) {
-			return false;
-		}
-		int ret = rentCommodityDao.removeRentCommodity(rentCommodityID, rentCommodityName);
-		if(ret != 1) {
-			return false;
-		}
-		return true;
-	}
+//	public boolean removeRentCommodity(String userToken, int rentCommodityID, String rentCommodityName) {
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return false;
+//		}
+//		int ret = rentCommodityDao.removeRentCommodity(rentCommodityID, rentCommodityName);
+//		if(ret != 1) {
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	/**
 	 * 用户列表

@@ -16,13 +16,24 @@ import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.HomePage;
+import com.lyqxsc.yhpt.domain.HotCommodity;
+import com.lyqxsc.yhpt.domain.NewCommodity;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.ShopCar;
 import com.lyqxsc.yhpt.service.UserService;
+import com.lyqxsc.yhpt.urlclass.AddAppraise;
+import com.lyqxsc.yhpt.urlclass.AddCollect;
+import com.lyqxsc.yhpt.urlclass.AddShopCar;
+import com.lyqxsc.yhpt.urlclass.BuyCommodity;
+import com.lyqxsc.yhpt.urlclass.CommonOperation;
+import com.lyqxsc.yhpt.urlclass.PresentOrder;
+import com.lyqxsc.yhpt.urlclass.PresentRentOrder;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
+import com.lyqxsc.yhpt.urlclass.UserTokenAndID;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @RestController
@@ -36,25 +47,25 @@ public class UserController {
 	 * @param param
 	 * @return
 	 */
-	@RequestMapping(value = "/userlogin", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson login(@RequestBody UserLogin param) {
-		
+//	@RequestMapping(value = "/userlogin", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson login(@RequestBody UserLogin param) {
 //		String openID = param.getParameter("openID");
 //		String ip = param.getParameter("ip");
-		String openID = param.getOpenID();
-		String ip = param.getIp();
-		
-		if((openID == null)||(ip == null)) {
-			return RetJson.urlError("login error", null);
-		}
-		
-		User user = userService.login(openID,ip);
-		
-		if(user == null) {
-			return RetJson.urlError("login error", null);
-		}
-		return RetJson.success("success",user);
-	}
+//		String openID = param.getOpenID();
+//		String ip = "0.0.0.0";
+//		
+//		if((openID == null)||(ip == null)) {
+//			return RetJson.urlError("login error", null);
+//		}
+//		
+//		User user = userService.login(openID,ip);
+//		
+//		if(user == null) {
+//			return RetJson.urlError("login error", null);
+//		}
+//		return RetJson.success("success",user);
+//		return RetJson.success("success");
+//	}
 	
 	
 	/**
@@ -63,9 +74,9 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/userlogout",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson logout(ServletRequest param) {
+	public RetJson logout(@RequestBody CommonOperation param) {
 		
-		String userToken = param.getParameter("userToken");
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
@@ -83,22 +94,38 @@ public class UserController {
 	 * @param param
 	 * @return
 	 */
-	@RequestMapping(value = "/usersigup",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson signup(User param) {
-		if(param == null) {
-			RetJson.urlError("sigup error", null);
+//	@RequestMapping(value = "/usersigup",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson signup(User param) {
+//		if(param == null) {
+//			RetJson.urlError("sigup error", null);
+//		}
+//		
+//		int ret = userService.signup(param);
+//		if(ret == -1) {
+//			return RetJson.urlError("sigup error, user already exists ", null);
+//		}
+//		else if(ret == -2) {
+//			return RetJson.mysqlError("sigup error", null);
+//		}
+//		else {
+//			return RetJson.success("sigup seccess");
+//		}
+//	}
+	
+	/**
+	 * 填写邀请码
+	 */
+	@RequestMapping(value = "/addinvitationcode", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson addInvitationCode(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		String code = param.getId();
+		if(userToken == null || code == null) {
+			return RetJson.urlError("invitation code error", null);
 		}
-		
-		int ret = userService.signup(param);
-		if(ret == -1) {
-			return RetJson.urlError("sigup error, user already exists ", null);
+		if(userService.addInvitationCode(userToken,code)) {
+			return RetJson.success("success");
 		}
-		else if(ret == -2) {
-			return RetJson.mysqlError("sigup error", null);
-		}
-		else {
-			return RetJson.success("sigup seccess");
-		}
+		return RetJson.unknowError("invitation code error", null);
 	}
 	
 	/**
@@ -106,8 +133,8 @@ public class UserController {
 	 * @return
 	 */
 	@RequestMapping(value = "/home", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson homePage(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson homePage(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -116,7 +143,6 @@ public class UserController {
 		if(homePage == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
-		
 		return RetJson.success("success", homePage);
 	}
 	
@@ -124,8 +150,8 @@ public class UserController {
 	 * 关于我们
 	 */
 	@RequestMapping(value = "/home/aboutus", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson aboutUs(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson aboutUs(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -134,7 +160,6 @@ public class UserController {
 		if(msg == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
-		
 		return RetJson.success("success", msg);
 	}
 	
@@ -144,8 +169,8 @@ public class UserController {
 	 */
 	//TODO 暂时用首页界面
 	@RequestMapping(value = "/shop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson shop(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson shop(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
@@ -159,16 +184,74 @@ public class UserController {
 	}
 	
 	/**
+	 * 查询分类列表
+	 */
+	@RequestMapping(value = "/shop/classlist", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson classList(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		String type = param.getId();
+		if(userToken == null || type == null) {
+			return RetJson.urlError("no userToken", null);
+		}
+		
+		List<CommodityClassify> list = userService.classList(userToken,Integer.parseInt(type));
+		if(list == null) {
+			return RetJson.unknowError("class list error", null);
+		}
+		
+		return RetJson.success("success", list);
+	}
+	
+	/**
+	 * 分类查询物品
+	 */
+	@RequestMapping(value = "/shop/classlist/select", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodityByClass(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		String classId = param.getId();
+		if(userToken == null || classId == null) {
+			return RetJson.urlError("no userToken", null);
+		}
+		
+		List<Commodity> list = userService.selectCommodityByClass(userToken,Integer.parseInt(classId));
+		if(list == null) {
+			return RetJson.unknowError("class list error", null);
+		}
+		
+		return RetJson.success("success", list);
+	}
+	
+	/**
+	 * 查询物品名称
+	 */
+	@RequestMapping(value = "/shop/classlist/selectByName", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodityByName(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		String name = param.getId();
+		if(userToken == null || name == null) {
+			return RetJson.urlError("no userToken", null);
+		}
+		
+		List<Commodity> list = userService.selectCommodityByName(userToken,name);
+		if(list == null) {
+			return RetJson.unknowError("class list error", null);
+		}
+		
+		return RetJson.success("success", list);
+	}
+	
+	
+	/**
 	 * 新品  展示出售商品 最新10条
 	 */
 	@RequestMapping(value = "/shop/newshop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson newShopShow(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson newShopShow(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		List<Commodity> commodity = userService.newShopShow(userToken);
+		NewCommodity commodity = userService.newShopShow(userToken);
 		if(commodity == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
@@ -180,13 +263,13 @@ public class UserController {
 	 * 热卖  最出售最多10条
 	 */
 	@RequestMapping(value = "/shop/hotshop", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson hotShopShow(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson hotShopShow(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		List<Commodity> commodity = userService.hotShopShow(userToken);
+		HotCommodity commodity = userService.hotShopShow(userToken);
 		if(commodity == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
@@ -198,8 +281,8 @@ public class UserController {
 	 *  查看可出售商品
 	 */
 	@RequestMapping(value = "/shop/selectcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson selectCommodity(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
@@ -214,14 +297,32 @@ public class UserController {
 	 *  查看可租赁商品
 	 */
 	@RequestMapping(value = "/shop/selectrentcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectRentCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson selectRentCommodity(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		List<RentCommodity> rentCommodityList = userService.selectRentCommodity(userToken);
+		List<Commodity> rentCommodityList = userService.selectRentCommodity(userToken);
 		if(rentCommodityList == null) {
 			return RetJson.unknowError("用户不在线", null);
+		}
+		return RetJson.success("success", rentCommodityList);
+	}
+	
+	/**
+	 * 根据商品id查询商品
+	 */
+	@RequestMapping(value = "/shop/selectcommoditybyid",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodityByID(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getId());
+		
+		if(userToken == null || id == 0) {
+			return RetJson.urlError("logout error, please give me userToken", null);
+		}
+		Commodity rentCommodityList = userService.selectCommodityByID(userToken,id);
+		if(rentCommodityList == null) {
+			return RetJson.unknowError("没有该商品", null);
 		}
 		return RetJson.success("success", rentCommodityList);
 	}
@@ -230,15 +331,15 @@ public class UserController {
 	 * 购买
 	 */
 	@RequestMapping(value = "/shop/buycommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson buyCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String commodityID = param.getParameter("commodityID");
-		String count = param.getParameter("count");
-		String ip = param.getParameter("ip");
-		if((userToken == null) || (commodityID == null) || (count == null) || (ip == null)) {
+	public RetJson buyCommodity(@RequestBody BuyCommodity param) {
+		String userToken = param.getUserToken();
+		long commodityID = param.getCommodityID();
+		int count = param.getCount();
+		String ip = param.getIp();
+		if((userToken == null) || (commodityID == 0) || count == 0) {
 			return RetJson.urlError("buy commodity error", null);
 		}
-		Order order = userService.makeCommodityOrder(userToken,Integer.parseInt(commodityID),Integer.parseInt(count),ip);
+		Order order = userService.makeCommodityOrder(userToken,commodityID,count,ip);
 		if(order == null) {
 			return RetJson.unknowError("buy commodity error", null);
 		}
@@ -246,12 +347,13 @@ public class UserController {
 	}
 	
 	/**
-	 *  提交订单
+	 *  提交购买订单
 	 */
 	@RequestMapping(value = "/shop/pushorder",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentOrder(ServletRequest param,@RequestBody Order order) {
-		String userToken = param.getParameter("userToken");
-		String addr = param.getParameter("addr");
+	public RetJson presentOrder(@RequestBody PresentOrder param) {
+		String userToken = param.getUserToken();
+		String addr = param.getAddr();
+		Order order = param.getOrder();
 		if(userToken == null || order == null || addr == null) {
 			return RetJson.urlError("push order error", null);
 		}
@@ -265,15 +367,15 @@ public class UserController {
 	 * 租赁
 	 */
 	@RequestMapping(value = "/shop/rentcommodity",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson rentCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String rentCommodityID = param.getParameter("rentCommodityid");
-		String count = param.getParameter("count");
-		String ip = param.getParameter("ip");
-		if((userToken == null) || (rentCommodityID == null) || (count == null) || (ip == null)) {
+	public RetJson rentCommodity(@RequestBody BuyCommodity param) {
+		String userToken = param.getUserToken();
+		long rentCommodityID = param.getCommodityID();
+		int count = param.getCount();
+		String ip = param.getIp();
+		if((userToken == null) || (rentCommodityID == 0) || (count == 0)) {
 			return RetJson.urlError("buy commodity error", null);
 		}
-		RentOrder rentOrder = userService.makeRentCommodityOrder(userToken,Integer.parseInt(rentCommodityID),Integer.parseInt(count),ip);
+		RentOrder rentOrder = userService.makeRentCommodityOrder(userToken,rentCommodityID,count,ip);
 		if(rentOrder == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
@@ -284,9 +386,10 @@ public class UserController {
 	 *  提交租赁订单
 	 */
 	@RequestMapping(value = "/shop/pushrentorder",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentRentOrder(ServletRequest param,@RequestBody RentOrder rentOrder) {
-		String userToken = param.getParameter("userToken");
-		String addr = param.getParameter("addr");
+	public RetJson presentRentOrder(@RequestBody PresentRentOrder param) {
+		String userToken = param.getUserToken();
+		String addr = param.getAddr();
+		RentOrder rentOrder = param.getRentOrder();
 		if(userToken == null || rentOrder == null || addr == null) {
 			return RetJson.urlError("push order error", null);
 		}
@@ -301,8 +404,8 @@ public class UserController {
 	 * 我的全部订单
 	 */
 	@RequestMapping(value = "/usercenter/order", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  allOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson  allOrder(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
@@ -317,8 +420,8 @@ public class UserController {
 	 * 待付款订单列表
 	 */
 	@RequestMapping(value = "/usercenter/order/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  noPayOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson  noPayOrder(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
@@ -333,8 +436,8 @@ public class UserController {
 	 * 已付款订单列表
 	 */
 	@RequestMapping(value = "/usercenter/order/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  isPayOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson  isPayOrder(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
@@ -349,8 +452,8 @@ public class UserController {
 	 * 购物车
 	 */
 	@RequestMapping(value = "/usercenter/shopcar", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson shopCar(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson shopCar(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list shopcar error", null);
 		}
@@ -365,8 +468,9 @@ public class UserController {
 	 * 购物车 增
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addShopCar(ServletRequest param, @RequestBody ShopCar shopCar) {
-		String userToken = param.getParameter("userToken");
+	public RetJson addShopCar(@RequestBody AddShopCar param) {
+		String userToken = param.getUserToken();
+		ShopCar shopCar = param.getShopCar();
 		if(userToken == null || shopCar == null) {
 			return RetJson.urlError("add shopcar error", null);
 		}
@@ -380,13 +484,13 @@ public class UserController {
 	 * 购物车 删
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeShopCar(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String id = param.getParameter("id");
-		if(userToken == null || id == null) {
+	public RetJson removeShopCar(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getId());
+		if(userToken == null || id == 0) {
 			return RetJson.urlError("remove shopcar error", null);
 		}
-		if(userService.removeShopCar(userToken, Long.parseLong(id))) {
+		if(userService.removeShopCar(userToken, id)) {
 			return RetJson.success("success");
 		}
 		return RetJson.unknowError("false", null);
@@ -396,8 +500,9 @@ public class UserController {
 	 * 购物车 改
 	 */
 	@RequestMapping(value = "/usercenter/shopcar/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson updateShopCar(ServletRequest param, @RequestBody ShopCar shopCar) {
-		String userToken = param.getParameter("userToken");
+	public RetJson updateShopCar(@RequestBody AddShopCar param) {
+		String userToken = param.getUserToken();
+		ShopCar shopCar = param.getShopCar();
 		if(userToken == null || shopCar == null) {
 			return RetJson.urlError("update shopcar error", null);
 		}
@@ -411,8 +516,8 @@ public class UserController {
 	 * 收藏夹列表
 	 */
 	@RequestMapping(value = "/usercenter/collect", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listCollect(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson listCollect(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list collect error", null);
 		}
@@ -427,8 +532,9 @@ public class UserController {
 	 * 收藏夹 增
 	 */
 	@RequestMapping(value = "/usercenter/collect/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addCollect(ServletRequest param, @RequestBody Collect collect) {
-		String userToken = param.getParameter("userToken");
+	public RetJson addCollect(@RequestBody AddCollect param) {
+		String userToken = param.getUserToken();
+		Collect collect = param.getCollect();
 		if(userToken == null || collect == null) {
 			return RetJson.urlError("add collect error", null);
 		}
@@ -442,13 +548,13 @@ public class UserController {
 	 * 收藏夹 删
 	 */
 	@RequestMapping(value = "/usercenter/collect/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeCollect(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String id = param.getParameter("id");
-		if(userToken == null || id == null) {
+	public RetJson removeCollect(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getId());
+		if(userToken == null || id == 0) {
 			return RetJson.urlError("remove collect error", null);
 		}
-		if(userService.removeCollect(userToken, Long.parseLong(id))) {
+		if(userService.removeCollect(userToken, id)) {
 			return RetJson.success("success");
 		}
 		
@@ -459,13 +565,13 @@ public class UserController {
 	 * 评价列表,根据物品ID查看评论
 	 */
 	@RequestMapping(value = "/usercenter/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listAppraise(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String id = param.getParameter("id");
-		if(userToken == null || id == null) {
+	public RetJson listAppraise(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getId());
+		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		List<Appraise> appraise = userService.listAppraise(userToken, Long.parseLong(id));
+		List<Appraise> appraise = userService.listAppraise(userToken, id);
 		if(appraise == null) {
 			return RetJson.unknowError("false", null);
 		}
@@ -476,8 +582,8 @@ public class UserController {
 	 * 我的评价列表，根据用户ID查看评论
 	 */
 	@RequestMapping(value = "/usercenter/appraise/myappraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listMyAppraise(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	public RetJson listMyAppraise(@RequestBody CommonOperation param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
@@ -492,8 +598,9 @@ public class UserController {
 	 * 评价 增
 	 */
 	@RequestMapping(value = "/usercenter/appraise/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addAppraise(ServletRequest param, @RequestBody Appraise appraise) {
-		String userToken = param.getParameter("userToken");
+	public RetJson addAppraise(@RequestBody AddAppraise param) {
+		String userToken = param.getUserToken();
+		Appraise appraise = param.getAppraise();
 		if(userToken == null || appraise == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
@@ -507,15 +614,39 @@ public class UserController {
 	 * 评价 删
 	 */
 	@RequestMapping(value = "/usercenter/appraise/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeAppraise(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String id = param.getParameter("id");
-		if(userToken == null || id == null) {
+	public RetJson removeAppraise(@RequestBody UserTokenAndID param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getId());
+		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(userService.removeAppraise(userToken, Long.parseLong(id))) {
+		if(userService.removeAppraise(userToken, id)) {
 			return RetJson.unknowError("false", null);
 		}
 		return RetJson.success("success",null);
 	}
+	
+	/**
+	 * 地址 增
+	 */
+	
+	/**
+	 * 地址 删
+	 */
+	
+	/**
+	 * 地址 改
+	 */
+	
+	/**
+	 * 地址 查
+	 */
+	
+	/**
+	 * 获取默认地址
+	 */
+	
+	/**
+	 * 设置默认地址
+	 */
 }

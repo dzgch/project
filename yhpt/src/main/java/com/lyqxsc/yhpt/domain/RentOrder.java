@@ -9,6 +9,8 @@ public class RentOrder {
 	String ownerName;
 	//商品ID
 	long rentCommodityID;
+	//商品图片
+	String url;
 	//商品名称
 	String rentCommodityName;
 	//商品单价
@@ -29,16 +31,14 @@ public class RentOrder {
 	long completeTime;
 	//订单提交时间
 	long makeOrdertime;
-	//订单状态0未支付，1已支付，2已取消，3已冻结
+	//订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	int status;
 	//支付类型0微信
 	int payType;
 	//支付IP
 	String payIP;
-	//订单类型，1购买，2租赁
-	int orderType;
-	//处理进度，1已处理，2未处理
-	int schedule;
+	//上一个交易状态 0待支付, 1已支付, 5交易完成, 6交易已取消
+	int lastPayStatus;
 	//收货地址
 	String addr;
 	public String getOrderNumber() {
@@ -143,22 +143,23 @@ public class RentOrder {
 	public void setPayIP(String payIP) {
 		this.payIP = payIP;
 	}
-	public int getOrderType() {
-		return orderType;
-	}
-	public void setOrderType(int orderType) {
-		this.orderType = orderType;
-	}
-	public int getSchedule() {
-		return schedule;
-	}
-	public void setSchedule(int schedule) {
-		this.schedule = schedule;
-	}
 	public String getAddr() {
 		return addr;
 	}
 	public void setAddr(String addr) {
 		this.addr = addr;
 	}
+	public String getUrl() {
+		return url;
+	}
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	public int getLastPayStatus() {
+		return lastPayStatus;
+	}
+	public void setLastPayStatus(int lastPayStatus) {
+		this.lastPayStatus = lastPayStatus;
+	}
+	
 }

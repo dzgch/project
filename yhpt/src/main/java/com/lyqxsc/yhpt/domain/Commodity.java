@@ -12,23 +12,23 @@ public class Commodity {
 	String picurl;
 	//价格
 	float price;
-	//分类
+	//分类 1:租赁  2:出售  3:租赁+出售
 	String type;
 	//库存
 	int inventory;
 	//订单数量
 	int ordernum;
+	//押金
+	float deposit;
 	//商品描述
 	String note;
 	//分销商
 	long distributor;
+	//种类
+	int classId;
+	//种类
+	String classStr;
 	
-	public long getDistributor() {
-		return distributor;
-	}
-	public void setDistributor(long distributor) {
-		this.distributor = distributor;
-	}
 	public long getId() {
 		return id;
 	}
@@ -71,11 +71,34 @@ public class Commodity {
 	public void setOrdernum(int ordernum) {
 		this.ordernum = ordernum;
 	}
+	public float getDeposit() {
+		return deposit;
+	}
+	public void setDeposit(float deposit) {
+		this.deposit = deposit;
+	}
 	public String getNote() {
 		return note;
 	}
 	public void setNote(String note) {
 		this.note = note;
 	}
-	
+	public long getDistributor() {
+		return distributor;
+	}
+	public void setDistributor(long distributor) {
+		this.distributor = distributor;
+	}
+	public int getClassId() {
+		return classId;
+	}
+	public void setClassId(int classId) {
+		this.classId = classId;
+	}
+	public String getClassStr() {
+		return classStr;
+	}
+	public void setClassStr(String classStr) {
+		this.classStr = classStr;
+	}
 }

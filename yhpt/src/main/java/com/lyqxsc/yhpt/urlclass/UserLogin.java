@@ -1,13 +1,13 @@
 package com.lyqxsc.yhpt.urlclass;
 
 public class UserLogin {
-	String openID;
+	String code;
 	String ip;
-	public String getOpenID() {
-		return openID;
+	public String getCode() {
+		return code;
 	}
-	public void setOpenID(String openID) {
-		this.openID = openID;
+	public void setCode(String code) {
+		this.code = code;
 	}
 	public String getIp() {
 		return ip;

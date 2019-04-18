@@ -15,9 +15,13 @@ public class User {
 	//openid
 	@JsonIgnore
 	String openID;
+	//昵称
+	String nikeName;
 	//真实姓名
 	@JsonIgnore
-	String realname;
+	String realName;
+	//头像地址
+	String headImgUrl;
 	//邮箱
 	@JsonIgnore
 	String email;
@@ -43,7 +47,7 @@ public class User {
 	//上次登录IP
 	String lastLoginIP;
 	//账户余额
-	String wallet;
+	long wallet;
 	//分销商
 	long distributor;
 	//注册时间
@@ -61,11 +65,23 @@ public class User {
 	public void setOpenID(String openID) {
 		this.openID = openID;
 	}
-	public String getRealname() {
-		return realname;
+	public String getNikeName() {
+		return nikeName;
 	}
-	public void setRealname(String realname) {
-		this.realname = realname;
+	public void setNikeName(String nikeName) {
+		this.nikeName = nikeName;
+	}
+	public String getRealName() {
+		return realName;
+	}
+	public void setRealName(String realName) {
+		this.realName = realName;
+	}
+	public String getHeadImgUrl() {
+		return headImgUrl;
+	}
+	public void setHeadImgUrl(String headImgUrl) {
+		this.headImgUrl = headImgUrl;
 	}
 	public String getEmail() {
 		return email;
@@ -127,10 +143,10 @@ public class User {
 	public void setLastLoginIP(String lastLoginIP) {
 		this.lastLoginIP = lastLoginIP;
 	}
-	public String getWallet() {
+	public long getWallet() {
 		return wallet;
 	}
-	public void setWallet(String wallet) {
+	public void setWallet(long wallet) {
 		this.wallet = wallet;
 	}
 	public long getDistributor() {

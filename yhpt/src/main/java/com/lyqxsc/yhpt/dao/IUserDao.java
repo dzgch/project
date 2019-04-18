@@ -47,6 +47,12 @@ public interface IUserDao {
 			+ "where id=#{userID}")
 	int updateUser(@Param("userID")long userID,User user);
 	
+	/**
+	 * 绑定分销商
+	 */
+	@Update("update user set distributor=#{distributorID} where id=#{userID}")
+	int bindDistributor(@Param("userID") long userID,@Param("distributorID") long distributorID);
+	
 	@Insert({"insert into user(id, openID, realname, email, phone, sex, province, city, address, thisLoginTime, thisLoginIP, lastLoginTime, lastLoginIP, wallet, distributor, addTime) "
 			+ "values(#{id},#{openID},#{realname},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
 	int addUser(User user);

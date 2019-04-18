@@ -12,7 +12,7 @@ public class RentCommodity {
 	String picurl;
 	//价格
 	float price;
-	//分类
+	//分类 1:租赁  2:出售  3:租赁+出售
 	String type;
 	//库存
 	int inventory;
@@ -24,6 +24,8 @@ public class RentCommodity {
 	String note;
 	//分销商
 	long distributor;
+	//种类
+	int classify;
 	
 	public long getDistributor() {
 		return distributor;
@@ -85,5 +87,10 @@ public class RentCommodity {
 	public void setNote(String note) {
 		this.note = note;
 	}
-	
+	public int getClassify() {
+		return classify;
+	}
+	public void setClassify(int classify) {
+		this.classify = classify;
+	}
 }

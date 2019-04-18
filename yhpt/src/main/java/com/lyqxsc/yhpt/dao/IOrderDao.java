@@ -31,14 +31,14 @@ public interface IOrderDao {
 	@Select("select * from orderlist where schedule=0")
 	List<Order> selectUndoOrderList();
 	
-	@Insert("insert into orderlist(orderNumber,owner,ownerName,commodityID,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,orderType,schedule,addr)"
-			+ "values({orderNumber}, #{owner}, #{ownerName}, #{commodityID}, #{commodityName}, #{price}, #{count}, #{totalPrice}, #{payMoney}, #{orderPrice}, #{completeTime}, #{payOrdertime}, #{status}, #{payType}, #{payIP}, #{orderType}, #{schedule}, #{addr})")
+	@Insert("insert into orderlist(orderNumber,owner,ownerName,commodityID,url,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,orderType,schedule,addr)"
+			+ "values({orderNumber}, #{owner}, #{ownerName}, #{commodityID}, #{url}, #{commodityName}, #{price}, #{count}, #{totalPrice}, #{payMoney}, #{orderPrice}, #{completeTime}, #{payOrdertime}, #{status}, #{payType}, #{payIP}, #{orderType}, #{schedule}, #{addr})")
 	int addOrderList(Order order);
 	
 	@Delete("delete from orderlist where orderNumber=#{orderNumber}")
 	int removeOrderList(@Param("orderNumber") String orderNumber);
 	
-	@Update("update orderlist set owner=#{owner}, commodityID=#{commodityID}, commodityName=#{commodityName}, price=#{price}, count=#{count}, totalPrice=#{totalPrice}, payMoney=#{payMoney}, orderPrice=#{orderPrice}, completeTime=#{completeTime}, payOrdertime=#{payOrdertime}, status=#{status}, payType=#{payType}, payIP=#{payIP}, orderType=#{orderType}, schedule=#{schedule}, addr=#{addr}"
+	@Update("update orderlist set owner=#{owner}, commodityID=#{commodityID}, url=#{url}, commodityName=#{commodityName}, price=#{price}, count=#{count}, totalPrice=#{totalPrice}, payMoney=#{payMoney}, orderPrice=#{orderPrice}, completeTime=#{completeTime}, payOrdertime=#{payOrdertime}, status=#{status}, payType=#{payType}, payIP=#{payIP}, orderType=#{orderType}, schedule=#{schedule}, addr=#{addr}"
 			+ "where orderNumber=#{orderNumber}")
 	int updateOrderList(Order order);
 }

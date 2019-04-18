@@ -21,6 +21,7 @@ import com.lyqxsc.yhpt.domain.Test;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.service.AdminService;
 import com.lyqxsc.yhpt.urlclass.AdminLogin;
+import com.lyqxsc.yhpt.urlclass.UserTokenAndString;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @RestController
@@ -103,6 +104,23 @@ public class AdminController {
 	 * 修改信息
 	 */
 	
+	/**
+	 * 添加物品分类
+	 */
+	@RequestMapping(value = "/addcommodityclass", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson addClassify(@RequestBody UserTokenAndString param) {
+		String userToken = param.getUserToken();
+		String type = param.getType();
+		String string = param.getClassStr();
+		if(userToken == null || type == null || string == null) {
+			return RetJson.urlError("error, please give me userToken", null);
+		}
+		
+		if(adminService.addClassify(userToken,Integer.parseInt(type),string)) {
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("error", null);
+	}
 	
 	/**
 	 * 商品列表
@@ -166,39 +184,39 @@ public class AdminController {
 		return RetJson.success("success",commodityList);
 	}
 	
-	/**
-	 * 添加租赁商品
-	 */
-	@RequestMapping(value = "/addrentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addRentCommodity(ServletRequest param, @RequestBody RentCommodity rentCommodity) {
-		String userToken = param.getParameter("userToken");
-		if(userToken == null || rentCommodity == null) {
-			return RetJson.urlError("add commodity error", null);
-		}
-		
-		if(adminService.addRentCommodity(userToken, rentCommodity)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("add commodity error", null);
-	}
+//	/**
+//	 * 添加租赁商品
+//	 */
+//	@RequestMapping(value = "/addrentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson addRentCommodity(ServletRequest param, @RequestBody RentCommodity rentCommodity) {
+//		String userToken = param.getParameter("userToken");
+//		if(userToken == null || rentCommodity == null) {
+//			return RetJson.urlError("add commodity error", null);
+//		}
+//		
+//		if(adminService.addRentCommodity(userToken, rentCommodity)) {
+//			return RetJson.success("success");
+//		}
+//		return RetJson.unknowError("add commodity error", null);
+//	}
 	
-	/**
-	 * 租赁物品下架
-	 */
-	@RequestMapping(value = "/removerentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeRentCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String rentCommodityID = param.getParameter("rentCommodityID");
-		String rentCommodityName = param.getParameter("rentCommodityName");
-		if(userToken == null || rentCommodityID == null || rentCommodityName == null) {
-			return RetJson.urlError("add commodity error", null);
-		}
-		
-		if(adminService.removeRentCommodity(userToken, Integer.parseInt(rentCommodityID), rentCommodityName)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("add commodity error", null);
-	}
+//	/**
+//	 * 租赁物品下架
+//	 */
+//	@RequestMapping(value = "/removerentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson removeRentCommodity(ServletRequest param) {
+//		String userToken = param.getParameter("userToken");
+//		String rentCommodityID = param.getParameter("rentCommodityID");
+//		String rentCommodityName = param.getParameter("rentCommodityName");
+//		if(userToken == null || rentCommodityID == null || rentCommodityName == null) {
+//			return RetJson.urlError("add commodity error", null);
+//		}
+//		
+//		if(adminService.removeRentCommodity(userToken, Integer.parseInt(rentCommodityID), rentCommodityName)) {
+//			return RetJson.success("success");
+//		}
+//		return RetJson.unknowError("add commodity error", null);
+//	}
 	
 	/**
 	 * 用户列表

@@ -5,27 +5,41 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.lyqxsc.yhpt.controller.WechartController;
+import com.lyqxsc.yhpt.dao.IAddressDao;
 import com.lyqxsc.yhpt.dao.IAppraiseDao;
 import com.lyqxsc.yhpt.dao.ICollectDao;
+import com.lyqxsc.yhpt.dao.ICommodityClassifyDao;
 import com.lyqxsc.yhpt.dao.ICommodityDao;
+import com.lyqxsc.yhpt.dao.IInvitationCodeDao;
 import com.lyqxsc.yhpt.dao.IOrderDao;
 import com.lyqxsc.yhpt.dao.IRentCommodityDao;
 import com.lyqxsc.yhpt.dao.IRentOrderDao;
 import com.lyqxsc.yhpt.dao.IShopCarDao;
 import com.lyqxsc.yhpt.dao.IUserDao;
+import com.lyqxsc.yhpt.domain.Address;
 import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.HomePage;
+import com.lyqxsc.yhpt.domain.HotCommodity;
+import com.lyqxsc.yhpt.domain.InvitationCode;
+import com.lyqxsc.yhpt.domain.NewCommodity;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.ShopCar;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.domain.UserInfo;
+
+import net.sf.json.JSONObject;
 
 @Service
 public class UserService {
@@ -35,6 +49,9 @@ public class UserService {
 	
 	@Autowired
 	IOrderDao orderDao;
+	
+	@Autowired
+	IAddressDao addressDao;
 	
 	@Autowired
 	IRentOrderDao rentOrderDao;
@@ -51,8 +68,14 @@ public class UserService {
 	@Autowired
 	ICommodityDao commodityDao;
 	
+//	@Autowired
+//	IRentCommodityDao rentCommodityDao;
+	
 	@Autowired
-	IRentCommodityDao rentCommodityDao;
+	IInvitationCodeDao invitationCodeDao;
+	
+	@Autowired
+	ICommodityClassifyDao commodityClassifyDao;
 	
 	static int NEWSHOPCOUNT = 10;
 	
@@ -62,8 +85,7 @@ public class UserService {
 	// 可出售的商品集合
 	List<Commodity> commodityList = new ArrayList<Commodity>();
 	
-	// 可租赁的商品集合
-	List<RentCommodity> rentCommodityList = new ArrayList<RentCommodity>();
+	static final Logger log = LoggerFactory.getLogger(WechartController.class);
 	
 	/**
 	 *  用户注册
@@ -71,40 +93,35 @@ public class UserService {
 	 * @return -1 用户已存在
 	 *         -2 注册失败
 	 */
-	public int signup(User param) {
-		//判断用户名是否存在
-		User user = userDao.selectOpenID(param.getOpenID());
-		if(user != null) {
-			return -1;
-		}
-		
+	public User signup(JSONObject wxUserInfo) {
 		Long maxID = userDao.getMaxID();
 		if(maxID == null) {
-			return -1;
+			return null;
 		}
 		
-		String openID = param.getOpenID();
-		String realname = param.getRealname();
-		String email = param.getEmail();
-		String phone = param.getPhone();
-		int sex = param.getSex();
-		String province = param.getProvince();
-		String city = param.getCity();
-		String address = param.getAddress();
-		long distributor = param.getDistributor();
-		
-		if(openID == null || realname == null || email == null || phone == null || sex == 0 || province == null || city == null || address == null || distributor == 0) {
-			return -2;
-		}
-		
-		param.setAddTime(Calendar.getInstance().getTime().getTime());
-		param.setId(maxID+1);
+		User user = new User();
+		user.setId(maxID+1);
+		user.setOpenID((String)wxUserInfo.get("openid"));
+		user.setNikeName((String)wxUserInfo.get("nickname"));
+//		user.setRealName(String realName);
+//		user.setEmail(String email);
+//		user.setPhone(String phone);
+		user.setSex((int)wxUserInfo.get("sex"));
+		user.setProvince((String)wxUserInfo.get("province"));
+		user.setCity((String)wxUserInfo.get("city"));
+		user.setHeadImgUrl((String)wxUserInfo.get("headimgurl"));
+//		user.setAddress(String address);
+		user.setWallet(0);
+
+		//TODO 添加分销商（0为总部，记得修改）
+		user.setDistributor(0);
+		user.setAddTime(System.currentTimeMillis());
+
 		//TODO
-		if(userDao.addUser(param) < 0) {
-			return -2;
+		if(userDao.addUser(user) < 0) {
+			return null;
 		}
-		
-		return 0;
+		return user;
 	}
 
 	/**
@@ -113,10 +130,16 @@ public class UserService {
 	 * @param password 密码
 	 * @return
 	 */
-	public User login(String openID, String ip) {
+	public User login(JSONObject wxUserInfo, String ip) {
+		String openID = (String)wxUserInfo.get("openid");
+		
 		User user = userDao.selectUser(openID);
 		if(user == null) {
-			return null;
+			user = signup(wxUserInfo);
+			if(user == null) {
+				log.warn("sigup error openID : " + openID);
+				return null;
+			}
 		}
 		/*向数据库更新时间和本次登录的IP*/
 		long now = Calendar.getInstance().getTime().getTime();
@@ -168,6 +191,30 @@ public class UserService {
 	}
 	
 	/**
+	 * 添加邀请码
+	 */
+	public boolean addInvitationCode(String userToken, String code) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return false;
+		}
+		long userID = userInfo.getId();
+		InvitationCode invitationCode = invitationCodeDao.selectInvitationCodeByCode(code);
+		if(invitationCode == null) {
+			return false;
+		}
+		long distributorID = invitationCode.getDistributorID();
+		
+		if(1 != userDao.bindDistributor(userID, distributorID)) {
+			return false;
+		}
+		if(1 != invitationCodeDao.bindInvitationCode(code)) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
 	 * 首页
 	 * @param userToken
 	 * @return
@@ -176,22 +223,21 @@ public class UserService {
 		//确定用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
-			System.out.println("logout error");
 			return null;
 		}
 		
 		HomePage homePage = new HomePage();
-		homePage.setPic1("./pic1");
-		homePage.setPic2("./pic2");
-		homePage.setPic3("./pic3");
+		String[] pic = new String[3];
+		pic[0] = "./pic1";
+		pic[1] = "./pic2";
+		pic[2] = "./pic3";
+		homePage.setPic(pic);
 		
 		Long userID = Long.parseLong(userToken.split("O")[0]);
 		long distributorID = userDao.selectDistributor(userID);
-		List<Commodity> commodity = commodityDao.selectCommodityByDistributor(distributorID);
-		List<RentCommodity> rentcommodity = rentCommodityDao.selectRentCommodityByDistributor(distributorID);
+		List<Commodity> commodity = commodityDao.selectAllCommodityForUser(distributorID);
 		
 		homePage.setCommodityList(commodity);
-		homePage.setRentCommodityList(rentcommodity);
 		return homePage;
 	}
 	
@@ -202,7 +248,6 @@ public class UserService {
 		//确定用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
-			System.out.println("logout error");
 			return null;
 		}
 		String msg = "关于我们";
@@ -212,69 +257,142 @@ public class UserService {
 	/**
 	 * 商城
 	 */
-	//TODO copy HomePage
+	//TODO  home page
 	public HomePage shop(String userToken) {
 		//确定用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
-			System.out.println("logout error");
 			return null;
 		}
 		
 		HomePage homePage = new HomePage();
-		homePage.setPic1("./pic1");
-		homePage.setPic2("./pic2");
-		homePage.setPic3("./pic3");
+		String[] pic = new String[3];
+		pic[0] = "./pic1";
+		pic[1] = "./pic2";
+		pic[2] = "./pic3";
+		homePage.setPic(pic);
 		
 		Long userID = Long.parseLong(userToken.split("O")[0]);
 		long distributorID = userDao.selectDistributor(userID);
-		List<Commodity> commodity = commodityDao.selectCommodityByDistributor(distributorID);
-		List<RentCommodity> rentcommodity = rentCommodityDao.selectRentCommodityByDistributor(distributorID);
+		List<Commodity> commodity = commodityDao.selectAllCommodityForUser(distributorID);
 		
 		homePage.setCommodityList(commodity);
-		homePage.setRentCommodityList(rentcommodity);
 		return homePage;
+	}
+	
+	/**
+	 * 分类列表
+	 */
+	public List<CommodityClassify> classList(String userToken,int type){
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		List<CommodityClassify> list = commodityClassifyDao.selectClass(type);
+		return list;
+	}
+	
+	/**
+	 * 查询一类物品集合
+	 */
+	public List<Commodity> selectCommodityByClass(String userToken,int classId){
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		long distributor = userDao.selectDistributor(userInfo.getId());
+		if(distributor == 0) {
+			return null;
+		}
+		List<Commodity> list = commodityDao.selectCommodityByClass(distributor,classId);
+		return list;
+	}
+	
+	/**
+	 * 按名称查询
+	 */
+	//TODO 后期添加模糊查询
+	public List<Commodity> selectCommodityByName(String userToken,String name){
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		long distributor = userDao.selectDistributor(userInfo.getId());
+		if(distributor == 0) {
+			return null;
+		}
+		List<Commodity> list = commodityDao.selectCommodityByName(distributor,name);
+		return list;
 	}
 	
 	/**
 	 * 新品   展示出售商品 maxID-10 范围内的商品
 	 */
-	public List<Commodity> newShopShow(String userToken) {
+	//TODO 效率低，后期改为后端定时统计数据，有前端直接取值
+	public NewCommodity newShopShow(String userToken) {
 		//确定用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
-			System.out.println("logout error");
 			return null;
 		}
-		Long userID = Long.parseLong(userToken.split("O")[0]);
+		long userID = userInfo.getId();
 		long distributorID = userDao.selectDistributor(userID);
 		long commodityMaxID = commodityDao.getMaxID();
-		List<Commodity> commodity = commodityDao.selectNewCommodityByDistributor(distributorID,commodityMaxID - NEWSHOPCOUNT);
+		
+		NewCommodity commodity = new NewCommodity();
+		List<String> pic = new ArrayList<String>();
+		List<Commodity> commodityList = new ArrayList<Commodity>();
+		
+		//TODO  添加图片，后期改为读取配置文件
+		pic.add("");
+		while(commodityList.size() < 10) {
+			Commodity temp =  commodityDao.selectNewCommodityByDistributor(distributorID,commodityMaxID);
+			commodityList.add(temp);
+			commodityMaxID = commodityMaxID - 1;
+			if(commodityMaxID < 1) {
+				break;
+			}
+		}
+		commodity.setCommodity(commodityList);
+		commodity.setPic(pic);
 		return commodity;
 	}
 	
 	/**
 	 * 热卖品   
 	 */
-	//copy newShop
-	public List<Commodity> hotShopShow(String userToken) {
-		//确定用户是否在线
+	//TODO 效率低，后期改为后端定时统计数据，有前端直接取值
+	public HotCommodity hotShopShow(String userToken) {
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
-			System.out.println("logout error");
 			return null;
 		}
-		Long userID = Long.parseLong(userToken.split("O")[0]);
+		long userID = userInfo.getId();
 		long distributorID = userDao.selectDistributor(userID);
-		long commodityMaxID = commodityDao.getMaxID();
-		List<Commodity> commodity = commodityDao.selectNewCommodityByDistributor(distributorID,commodityMaxID - NEWSHOPCOUNT);
+		Integer maxNum = commodityDao.getMaxOrdernum();
+		
+		HotCommodity commodity = new HotCommodity();
+		List<String> pic = new ArrayList<String>();
+		List<Commodity> commodityList = new ArrayList<Commodity>();
+		
+		//TODO  添加图片，后期改为读取配置文件
+		pic.add("");
+		while(commodityList.size() < 10) {
+			Commodity temp =  commodityDao.selectHotCommodityByDistributor(distributorID,maxNum);
+			commodityList.add(temp);
+			maxNum = maxNum - 1;
+			if(maxNum < 1) {
+				break;
+			}
+		}
+		commodity.setCommodity(commodityList);
+		commodity.setPic(pic);
 		return commodity;
 	}
 	
 	/**
 	 *  查看可出售商品
 	 */
-	//TODO
 	public List<Commodity> selectCommodity(String userToken) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
@@ -282,7 +400,7 @@ public class UserService {
 			return null;
 		}
 		Long distributor = userDao.selectDistributor(userInfo.getId());
-		commodityList = commodityDao.selectCommodityByDistributor(distributor);
+		commodityList = commodityDao.selectCommodityForUser(distributor);
 		return commodityList;
 	}
 	
@@ -290,16 +408,25 @@ public class UserService {
 	/**
 	 *  查看可租赁商品
 	 */
-	//TODO
-	public List<RentCommodity> selectRentCommodity(String userToken) {
+	public List<Commodity> selectRentCommodity(String userToken) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
 		Long distributor = userDao.selectDistributor(userInfo.getId());
-		rentCommodityList = rentCommodityDao.selectRentCommodityByDistributor(distributor);
-		return rentCommodityList;
+		commodityList = commodityDao.selectRentCommodityForUser(distributor);
+		return commodityList;
+	}
+	
+	public Commodity selectCommodityByID(String userToken,long id) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		Long distributor = userDao.selectDistributor(userInfo.getId());
+		Commodity commodity = commodityDao.selectCommodityByIDForUser(id,distributor);
+		return commodity;
 	}
 	
 	/**
@@ -308,7 +435,7 @@ public class UserService {
 	 * @param commodityid
 	 * @return
 	 */
-	public Order makeCommodityOrder(String userToken, int commodityid, int count, String ip) {
+	public Order makeCommodityOrder(String userToken, long commodityid, int count, String ip) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
@@ -324,6 +451,7 @@ public class UserService {
 		order.setOwner(userInfo.getId());
 		order.setOwnerName(username);
 		order.setCommodityID(commodity.getId());
+		order.setUrl(commodity.getPicurl());
 		order.setCommodityName(commodity.getName());
 		order.setPrice(price);
 		order.setCount(count);
@@ -335,8 +463,7 @@ public class UserService {
 		order.setStatus(0);
 		order.setPayType(0);
 		order.setPayIP(ip);
-		order.setOrderType(1);
-		order.setSchedule(0);
+		order.setLastPayStatus(0);
 		order.setAddr(null);
 		
 		return order;
@@ -367,15 +494,17 @@ public class UserService {
 	 * @param commodityid
 	 * @return
 	 */
-	//TODO 点击租赁，生成订单
-	public RentOrder makeRentCommodityOrder(String userToken, int id, int count, String ip) {
+	public RentOrder makeRentCommodityOrder(String userToken, long id, int count, String ip) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
 		long now = Calendar.getInstance().getTime().getTime();
-		RentCommodity rentCommodity = rentCommodityDao.selectRentCommodityByID(id);
+		Commodity rentCommodity = commodityDao.selectCommodityByID(id);
+		if(rentCommodity.getDeposit() == 0) {
+			return null;
+		}
 		String username = userDao.selectUsername(userInfo.getId());
 		float price = rentCommodity.getPrice();
 		float deposit = rentCommodity.getDeposit(); 
@@ -385,6 +514,7 @@ public class UserService {
 		rentOrder.setOwner(userInfo.getId());
 		rentOrder.setOwnerName(username);
 		rentOrder.setRentCommodityID(rentCommodity.getId());
+		rentOrder.setUrl(rentCommodity.getPicurl());
 		rentOrder.setRentCommodityName(rentCommodity.getName());
 		rentOrder.setPrice(price);
 		rentOrder.setDeposit(deposit);
@@ -398,8 +528,7 @@ public class UserService {
 		rentOrder.setStatus(0);
 		rentOrder.setPayType(0);
 		rentOrder.setPayIP(ip);
-		rentOrder.setOrderType(1);
-		rentOrder.setSchedule(0);
+		rentOrder.setLastPayStatus(0);
 		rentOrder.setAddr(null);
 		
 		return rentOrder;
@@ -631,5 +760,115 @@ public class UserService {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 收货地址 增
+	 */
+	public boolean addAddress(String userToken, Address addr) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return false;
+		}
+		Long maxID = addressDao.getMaxID();
+		if(maxID == null) {
+			return false;
+		}
+		addr.setId(maxID + 1);
+		addr.setUserId(userInfo.getId());
+		int ret = addressDao.addAddress(addr);
+		if(ret == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 收货地址 删
+	 */
+	public boolean removeAddress(String userToken, long id) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return false;
+		}
+		long userId = userInfo.getId();
+		int ret = addressDao.removeAddress(userId, id);
+		if(ret == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * 收货地址 改
+	 */
+	public boolean updateAddress(String userToken, Address addr) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return false;
+		}
+		int ret = addressDao.updateAddress(addr);
+		if(ret == 1) {
+			return true;
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * 收货地址 查
+	 */
+	public List<Address> selectAddress(String userToken){
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		long userId = userInfo.getId();
+		List<Address> addr = addressDao.selectAddressByUser(userId);
+		return addr;
+	}
+	
+	/**
+	 * 设置默认地址
+	 */
+	public boolean setMainAddr(String userToken, long id) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return false;
+		}
+		long userId = userInfo.getId();
+		List<Address> addrList = addressDao.selectAddressByUser(userId);
+		for(Address addr:addrList) {
+			if(addr.getId() == id) {
+				addr.setMain(1);
+				addressDao.updateAddress(addr);
+				continue;
+			}
+			if(addr.getMain() == 1) {
+				addr.setMain(0);
+				addressDao.updateAddress(addr);
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * 获取默认地址
+	 */
+	public Address getMainAddr(String userToken) {
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		long userId = userInfo.getId();
+		Address ret = null;
+		List<Address> addrList = addressDao.selectAddressByUser(userId);
+		for(Address addr:addrList) {
+			ret = addr;
+			if(addr.getMain() == 1) {
+				break;
+			}
+		}
+		return ret;
 	}
 }
