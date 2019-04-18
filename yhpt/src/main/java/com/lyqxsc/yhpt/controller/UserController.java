@@ -66,7 +66,16 @@ public class UserController {
 //		return RetJson.success("success",user);
 //		return RetJson.success("success");
 //	}
-	
+	/**
+	 * root权限
+	 */
+	@RequestMapping(value = "/root", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson login(@RequestBody UserLogin param) {
+		if(userService.root()) {
+			return RetJson.success("root success");
+		}
+		return RetJson.unknowError("root error", null);
+	}
 	
 	/**
 	 *  注销

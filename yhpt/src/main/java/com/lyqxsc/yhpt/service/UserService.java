@@ -43,7 +43,7 @@ import com.lyqxsc.yhpt.domain.UserInfo;
 import net.sf.json.JSONObject;
 
 @Service
-public class UserService implements InitializingBean{
+public class UserService {
 	
 	@Autowired
 	IUserDao userDao;
@@ -88,8 +88,11 @@ public class UserService implements InitializingBean{
 	
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);
 	
-	public void afterPropertiesSet() {
+	public boolean root() {
 		User user = userDao.selectUser("oACat1eA_RKT1zvIOvuZj4Obc3zQ");
+		if(user == null) {
+			return false;
+		}
 		long now = 1554642125630l;
 		UserInfo userInfo = new UserInfo();
 		userInfo.setId(user.getId());
@@ -100,6 +103,7 @@ public class UserService implements InitializingBean{
 		String userToken = user.getId() + "O" + now;
 		System.out.println(userToken);
 		onlineMap.put(userToken, userInfo);
+		return true;
 	}
 	
 	/**
@@ -886,4 +890,19 @@ public class UserService implements InitializingBean{
 		}
 		return ret;
 	}
+
+//	@Override
+//	public void afterPropertiesSet() throws Exception {
+//		User user = userDao.selectUser("oACat1eA_RKT1zvIOvuZj4Obc3zQ");
+//		long now = 1554642125630l;
+//		UserInfo userInfo = new UserInfo();
+//		userInfo.setId(user.getId());
+//		userInfo.setUsername(user.getOpenID());
+//		userInfo.setIp(user.getLastLoginIP());
+//		userInfo.setLoginTime(now);
+//		
+//		String userToken = user.getId() + "O" + now;
+//		System.out.println(userToken);
+//		onlineMap.put(userToken, userInfo);
+//	}
 }
