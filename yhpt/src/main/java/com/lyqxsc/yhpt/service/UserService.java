@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +43,7 @@ import com.lyqxsc.yhpt.domain.UserInfo;
 import net.sf.json.JSONObject;
 
 @Service
-public class UserService {
+public class UserService implements InitializingBean{
 	
 	@Autowired
 	IUserDao userDao;
@@ -86,6 +87,19 @@ public class UserService {
 	List<Commodity> commodityList = new ArrayList<Commodity>();
 	
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);
+	
+	public void afterPropertiesSet() {
+		User user = userDao.selectUser("oACat1eA_RKT1zvIOvuZj4Obc3zQ");
+		long now = 1554642125630l;
+		UserInfo userInfo = new UserInfo();
+		userInfo.setId(user.getId());
+		userInfo.setUsername(user.getOpenID());
+		userInfo.setIp(user.getLastLoginIP());
+		userInfo.setLoginTime(now);
+		
+		String userToken = user.getId() + "O" + now;
+		onlineMap.put(userToken, userInfo);
+	}
 	
 	/**
 	 *  用户注册
