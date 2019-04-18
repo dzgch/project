@@ -9,10 +9,10 @@ public class RentOrder {
 	String ownerName;
 	//商品ID
 	long rentCommodityID;
-	//商品图片
-	String url;
 	//商品名称
 	String rentCommodityName;
+	//商品图片
+	String url;
 	//商品单价
 	float price;
 	//押金

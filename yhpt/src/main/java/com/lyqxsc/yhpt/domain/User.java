@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *  用户实体类
  */
 public class User {
-	
 	//id
 	long id;
 	//userToken

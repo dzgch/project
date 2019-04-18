@@ -4,13 +4,21 @@ package com.lyqxsc.yhpt.domain;
  * 购物车
  */
 public class ShopCar {
+	//ID
 	long carid;
+	//用户ID
 	long userid;
+	//物品ID
 	int commodityid;
+	//数量
 	int count;
+	//物品名称
 	String name;
+	//图片地址
 	String picurl;
+	//价格
 	float price;
+	//商品描述
 	String note;
 	
 	public long getCarid() {
