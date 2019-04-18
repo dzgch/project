@@ -4,14 +4,20 @@ package com.lyqxsc.yhpt.domain;
  * 收藏夹 
  */
 public class Collect {
+	//ID
 	long id;
+	//用户ID
 	long userid;
+	//物品ID
 	long commodityid;
+	//物品名称
 	String name;
+	//图片地址
 	String picurl;
+	//价格
 	float price;
+	//商品描述
 	String note;
-	
 	public long getId() {
 		return id;
 	}

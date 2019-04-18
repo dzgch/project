@@ -136,7 +136,7 @@ public class AdminService {
 	/**
 	 * 修改信息
 	 */
-	//TODO
+	//TODO需要判断字段是否为空
 	public boolean updateAdmin(String userToken, Admin param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
@@ -194,7 +194,8 @@ public class AdminService {
 			return false;
 		}
 		commodity.setId(maxID+1);
-		
+		//总部分销商编号为0
+		commodity.setDistributor(0);
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
 			return false;
@@ -205,12 +206,12 @@ public class AdminService {
 	/**
 	 * 商品下架
 	 */
-	public boolean removeCommodity(String userToken, int commodityID, String commodityName) {
+	public boolean removeCommodity(String userToken, long commodityID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
-		int ret = commodityDao.removeCommodity(commodityID, commodityName);
+		int ret = commodityDao.removeCommodity(commodityID);
 		if(ret != 1) {
 			return false;
 		}
@@ -282,21 +283,6 @@ public class AdminService {
 		return userList;
 	}
 	
-	/**
-	 * 删除用户
-	 */
-	public boolean removeUser(String userToken, String openID) {
-		UserInfo adminInfo = onlineMap.get(userToken);
-		if(adminInfo == null) {
-			return false;
-		}
-		
-		int ret = userDao.removeUser(openID);
-		if(ret != 1) {
-			return false;
-		}
-		return true;
-	}
 	
 	/**
 	 * 新增用户
@@ -320,16 +306,32 @@ public class AdminService {
 		return 0;
 	}
 	
-	
 	/**
-	 * 修改用户
+	 * 删除用户
 	 */
-	public boolean updateUser(String userToken, long userID, User user) {
+	public boolean removeUser(String userToken, long id) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
-		int ret = userDao.updateUser(userID, user);
+		
+		int ret = userDao.removeUser(id);
+		if(ret != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * 修改用户
+	 */
+	public boolean updateUser(String userToken, User user) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		int ret = userDao.updateUser(user);
 		if(ret != 1) {
 			return false;
 		}
@@ -393,13 +395,28 @@ public class AdminService {
 	/**
 	 * 允许经销商开设店铺
 	 */
-	public boolean authorizeDistributor(String userToken, int distributorID) {
+	public boolean authorizeDistributor(String userToken, long distributorID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
 		
-		if(distributorDao.authorizeDistributor(distributorID) != 1) {
+		if(distributorDao.authorizeDistributor(distributorID,1) != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 取消分销商资格
+	 */
+	public boolean unAuthorizeDistributor(String userToken, long distributorID) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		
+		if(distributorDao.authorizeDistributor(distributorID,0) != 1) {
 			return false;
 		}
 		return true;
@@ -421,13 +438,14 @@ public class AdminService {
 	
 	/**
 	 * 查看已处理订单
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
 	public List<Order> listDoOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
 		}
-		List<Order> orderList = orderDao.selectDoOrderList();
+		List<Order> orderList = orderDao.getOrderListByStatus(3);
 		return orderList;
 	}
 	
@@ -439,7 +457,7 @@ public class AdminService {
 		if(adminInfo == null) {
 			return null;
 		}
-		List<Order> orderList = orderDao.selectUndoOrderList();
+		List<Order> orderList = orderDao.getOrderListByStatus(1);
 		return orderList;
 	}
 	

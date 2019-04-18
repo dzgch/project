@@ -3,6 +3,8 @@ package com.lyqxsc.yhpt.domain;
 public class Distributor {
 	//ID
 	long id;
+	//登录凭证
+	String userToken;
 	//用户名
 	String username;
 	//密码
@@ -97,4 +99,11 @@ public class Distributor {
 	public void setAuthority(String authority) {
 		this.authority = authority;
 	}
+	public String getUserToken() {
+		return userToken;
+	}
+	public void setUserToken(String userToken) {
+		this.userToken = userToken;
+	}
+	
 }

@@ -19,26 +19,30 @@ public interface IOrderDao {
 	@Select("select * from orderlist")
 	List<Order> selectAllOrderList();
 	
+	//订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	@Select("select * from orderlist where status=#{status}")
+	List<Order> getOrderListByStatus(@Param("status") int status);
+	
+	@Select("select * from orderlist where distributorID=#{id}")
+	List<Order> getOrderByDistributor(@Param("id") long id);
+	
+	@Select("select * from orderlist where distributorID=#{id} and status=#{status}")
+	List<Order> getOrderStatusByDistributor(@Param("id") long id,@Param("status") int status);
+	
 	@Select("select * from orderlist where owner=#{id}")
-	List<Order> getAllOrderByID(@Param("id") long id);
+	List<Order> getAllOrderByUser(@Param("id") long id);
 	
-	@Select("select * from orderlist where status=#{type} and owner=#{id}")
-	List<Order> getTypeOrderByID(@Param("id") long id, @Param("type") int type);
+	@Select("select * from orderlist where owner=#{id} and status=#{status}")
+	List<Order> getOrderStatusByUser(@Param("id") long id, @Param("status") int status);
 	
-	@Select("select * from orderlist where schedule=1")
-	List<Order> selectDoOrderList();
-
-	@Select("select * from orderlist where schedule=0")
-	List<Order> selectUndoOrderList();
-	
-	@Insert("insert into orderlist(orderNumber,owner,ownerName,commodityID,url,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,orderType,schedule,addr)"
-			+ "values({orderNumber}, #{owner}, #{ownerName}, #{commodityID}, #{url}, #{commodityName}, #{price}, #{count}, #{totalPrice}, #{payMoney}, #{orderPrice}, #{completeTime}, #{payOrdertime}, #{status}, #{payType}, #{payIP}, #{orderType}, #{schedule}, #{addr})")
+	@Insert("insert into orderlist(orderNumber,owner,ownerName,distributorID,commodityID,url,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,lastPayStatus,addr)"
+			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{commodityID},#{url},#{commodityName},#{price},#{count},#{totalPrice},#{payMoney},#{orderPrice},#{completeTime},#{payOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addr})")
 	int addOrderList(Order order);
 	
 	@Delete("delete from orderlist where orderNumber=#{orderNumber}")
 	int removeOrderList(@Param("orderNumber") String orderNumber);
 	
-	@Update("update orderlist set owner=#{owner}, commodityID=#{commodityID}, url=#{url}, commodityName=#{commodityName}, price=#{price}, count=#{count}, totalPrice=#{totalPrice}, payMoney=#{payMoney}, orderPrice=#{orderPrice}, completeTime=#{completeTime}, payOrdertime=#{payOrdertime}, status=#{status}, payType=#{payType}, payIP=#{payIP}, orderType=#{orderType}, schedule=#{schedule}, addr=#{addr}"
+	@Update("update orderlist set status=#{status}, lastPayStatus=#{lastPayStatus}"
 			+ "where orderNumber=#{orderNumber}")
 	int updateOrderList(Order order);
 }

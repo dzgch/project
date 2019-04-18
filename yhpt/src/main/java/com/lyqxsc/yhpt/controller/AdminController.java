@@ -20,7 +20,13 @@ import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.Test;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.service.AdminService;
-import com.lyqxsc.yhpt.urlclass.AdminLogin;
+import com.lyqxsc.yhpt.urlclass.AdminInfo;
+import com.lyqxsc.yhpt.urlclass.PasswordLogin;
+import com.lyqxsc.yhpt.urlclass.CommodityInfo;
+import com.lyqxsc.yhpt.urlclass.DistributorInfo;
+import com.lyqxsc.yhpt.urlclass.UserInfo;
+import com.lyqxsc.yhpt.urlclass.UserToken;
+import com.lyqxsc.yhpt.urlclass.UserTokenOne;
 import com.lyqxsc.yhpt.urlclass.UserTokenTwo;
 import com.lyqxsc.yhpt.utils.RetJson;
 
@@ -35,8 +41,8 @@ public class AdminController {
 	 * @param param
 	 * @return
 	 */
-	@RequestMapping(value = "/adminsigup", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson signup(Admin param) {
+	@RequestMapping(value = "/admin/sigup", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson signup(@RequestBody Admin param) {
 		if(param == null) {
 			RetJson.urlError("sigup error", null);
 		}
@@ -58,8 +64,8 @@ public class AdminController {
 	 * @param param
 	 * @return
 	 */
-	@RequestMapping(value = "/adminlogin", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson login(@RequestBody AdminLogin param) {
+	@RequestMapping(value = "/admin/login", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson login(@RequestBody PasswordLogin param) {
 		
 //		String username = param.getParameter("username");
 //		String password = param.getParameter("password");
@@ -85,15 +91,15 @@ public class AdminController {
 	 * @param param
 	 * @return
 	 */
-	@RequestMapping(value = "/adminlogout", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson logout(ServletRequest param) {
+	@RequestMapping(value = "/admin/logout", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson logout(@RequestBody UserToken  param) {
 		
-		String id = param.getParameter("userToken");
-		if(id == null) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
 		
-		if(!adminService.logout(id)) {
+		if(!adminService.logout(userToken)) {
 			return RetJson.urlError("logout error", null);
 		}
 		
@@ -103,15 +109,31 @@ public class AdminController {
 	/**
 	 * 修改信息
 	 */
+	@RequestMapping(value = "/admin/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson logout(@RequestBody AdminInfo  param) {
+		String userToken = param.getUserToken();
+		Admin admin = param.getAdmin();
+		if(userToken == null || admin == null) {
+			return RetJson.urlError("update error", null);
+		}
+		
+		if(!adminService.updateAdmin(userToken, admin)) {
+			return RetJson.urlError("update error", null);
+		}
+		
+		return RetJson.success("update success",null);
+	}
+	
 	
 	/**
 	 * 添加物品分类
+	 * 1药剂 2器械
 	 */
-	@RequestMapping(value = "/addcommodityclass", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/admin/addcommodityclass", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson addClassify(@RequestBody UserTokenTwo param) {
 		String userToken = param.getUserToken();
-		String type = param.getType();
-		String string = param.getClassStr();
+		String type = param.getOne();
+		String string = param.getTwo();
 		if(userToken == null || type == null || string == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -125,9 +147,9 @@ public class AdminController {
 	/**
 	 * 商品列表
 	 */
-	@RequestMapping(value = "/listcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listCommodity(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -139,9 +161,10 @@ public class AdminController {
 	/**
 	 * 添加商品
 	 */
-	@RequestMapping(value = "/addcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addCommodity(ServletRequest param, @RequestBody Commodity commodity) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/addcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson addCommodity(@RequestBody CommodityInfo param) {
+		String userToken = param.getUserToken();
+		Commodity commodity = param.getCommodity();
 		if(userToken == null || commodity == null) {
 			return RetJson.urlError("add commodity error", null);
 		}
@@ -155,16 +178,15 @@ public class AdminController {
 	/**
 	 * 商品下架
 	 */
-	@RequestMapping(value = "/removecommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String commodityID = param.getParameter("commodityID");
-		String commodityName = param.getParameter("commodityName");
-		if(userToken == null || commodityID == null || commodityName == null) {
+	@RequestMapping(value = "/admin/removecommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson removeCommodity(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String commodityID = param.getString();
+		if(userToken == null || commodityID == null) {
 			return RetJson.urlError("add commodity error", null);
 		}
 		
-		if(adminService.removeCommodity(userToken, Integer.parseInt(commodityID), commodityName)) {
+		if(adminService.removeCommodity(userToken, Long.parseLong(commodityID))) {
 			return RetJson.success("success");
 		}
 		return RetJson.unknowError("add commodity error", null);
@@ -173,14 +195,14 @@ public class AdminController {
 	/**
 	 * 商品租赁列表
 	 */
-	@RequestMapping(value = "/listrentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listRentCommodity(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listrentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listRentCommodity(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
 		
-		List<Commodity> commodityList = adminService.listCommodity(userToken);
+		List<Commodity> commodityList = adminService.listRentCommodity(userToken);
 		return RetJson.success("success",commodityList);
 	}
 	
@@ -221,9 +243,9 @@ public class AdminController {
 	/**
 	 * 用户列表
 	 */
-	@RequestMapping(value = "/listuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listUser(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listUser(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -233,28 +255,12 @@ public class AdminController {
 	}
 	
 	/**
-	 * 删除用户
-	 */
-	@RequestMapping(value = "/removeuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeUser(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String openID = param.getParameter("openID");
-		if(userToken == null || openID == null) {
-			return RetJson.urlError("error, please give me userToken", null);
-		}
-		
-		if(adminService.removeUser(userToken, openID)){
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("error", null);
-	}
-	
-	/**
 	 * 新增用户
 	 */
-	@RequestMapping(value = "/adduser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addUser(ServletRequest param, @RequestBody User user) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/adduser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson addUser(@RequestBody UserInfo param) {
+		String userToken = param.getUserToken();
+		User user = param.getUser();
 		if(userToken == null || user == null) {
 			return RetJson.urlError("add commodity error", null);
 		}
@@ -266,17 +272,35 @@ public class AdminController {
 	}
 	
 	/**
+	 * 删除用户
+	 */
+	@RequestMapping(value = "/admin/removeuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson removeUser(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		if(userToken == null || id == null) {
+			return RetJson.urlError("error, please give me userToken", null);
+		}
+		
+		if(adminService.removeUser(userToken, Long.parseLong(id))){
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("error", null);
+	}
+	
+	
+	/**
 	 * 修改用户
 	 */
-	@RequestMapping(value = "/updateuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson updateUser(ServletRequest param, @RequestBody User user) {
-		String userToken = param.getParameter("userToken");
-		String userID = param.getParameter("userID");
-		if(userToken == null || userID == null || user == null) {
+	@RequestMapping(value = "/admin/updateuser", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson updateUser(@RequestBody UserInfo param) {
+		String userToken = param.getUserToken();
+		User user = param.getUser();
+		if(userToken == null || user == null) {
 			return RetJson.urlError("add commodity error", null);
 		}
 		
-		if(adminService.updateUser(userToken, Long.parseLong(userID), user)) {
+		if(adminService.updateUser(userToken, user)) {
 			return RetJson.success("success");
 		}
 		return RetJson.unknowError("add user error", null);
@@ -285,9 +309,9 @@ public class AdminController {
 	/**
 	 * 分销商列表
 	 */
-	@RequestMapping(value = "/listdistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listAllDistributor(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listdistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listAllDistributor(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -299,9 +323,10 @@ public class AdminController {
 	/**
 	 * 添加分销商
 	 */
-	@RequestMapping(value = "/adddistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listAllDistributor(ServletRequest param, @RequestBody Distributor distributor) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/adddistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listAllDistributor(@RequestBody DistributorInfo param) {
+		String userToken = param.getUserToken();
+		Distributor distributor = param.getDistributor();
 		if(userToken == null || distributor == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -315,10 +340,10 @@ public class AdminController {
 	/**
 	 * 删除分销商
 	 */
-	@RequestMapping(value = "/removedistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson removeDistributor(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
-		String distributorID = param.getParameter("distributorID");
+	@RequestMapping(value = "/admin/removedistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson removeDistributor(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String distributorID = param.getString();
 		if(userToken == null || distributorID == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -330,11 +355,45 @@ public class AdminController {
 	}
 	
 	/**
+	 * 分销商授权
+	 */
+	@RequestMapping(value = "/admin/authorizedistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson authorizeDistributor(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String distributorID = param.getString();
+		if(userToken == null || distributorID == null) {
+			return RetJson.urlError("error, please give me userToken", null);
+		}
+		
+		if(adminService.authorizeDistributor(userToken, Long.parseLong(distributorID))){
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("error", null);
+	}
+	
+	/**
+	 * 取消授权
+	 */
+	@RequestMapping(value = "/admin/unauthorizedistributor", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson unAuthorizeDistributor(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String distributorID = param.getString();
+		if(userToken == null || distributorID == null) {
+			return RetJson.urlError("error, please give me userToken", null);
+		}
+		
+		if(adminService.unAuthorizeDistributor(userToken, Long.parseLong(distributorID))){
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("error", null);
+	}
+	
+	/**
 	 * 订单列表
 	 */
-	@RequestMapping(value = "/listorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listAllOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listAllOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -346,9 +405,9 @@ public class AdminController {
 	/**
 	 * 查看已处理订单
 	 */
-	@RequestMapping(value = "/listdoorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listDoOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listdoorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listDoOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
@@ -360,9 +419,9 @@ public class AdminController {
 	/**
 	 * 查看未处理订单
 	 */
-	@RequestMapping(value = "/listundoorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson listUndoOrder(ServletRequest param) {
-		String userToken = param.getParameter("userToken");
+	@RequestMapping(value = "/admin/listundoorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson listUndoOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}

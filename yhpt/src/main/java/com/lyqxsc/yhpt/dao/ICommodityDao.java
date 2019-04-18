@@ -43,6 +43,8 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where distributor=#{distributor}")
 	List<Commodity> selectAllByDistributor(@Param("distributor") long distributor);
 	
+	
+	
 	/*
 	 * 用户四连
 	 */
@@ -71,18 +73,18 @@ public interface ICommodityDao {
 	List<Commodity> selectCommodityByName(@Param("distributor") long distributor, @Param("name") String name);
 
 	
-	@Insert("insert into commoditylist(id,name,picurl,price,type,inventory,ordernum,deposit,note,distributor,classify)"
-			+ "values(#{id}, #{name}, #{picurl}, #{price}, #{type}, #{inventory}, #{ordernum}, #{deposit}, #{note}, #{distributor}, #{classify})")
+	@Insert("insert into commoditylist(id,name,picurl,price,type,inventory,ordernum,deposit,note,distributor,classId,classStr)"
+			+ "values(#{id},#{name},#{picurl},#{price},#{type},#{inventory},#{ordernum},#{deposit},#{note},#{distributor},#{classId},#{classStr})")
 	int addCommodity(Commodity commodity);
 	
-	@Delete("delete from commoditylist where id=#{id} and name=#{name}")
-	int removeCommodity(@Param("id") long id, @Param("name")String name);
+	@Delete("delete from commoditylist where id=#{id}")
+	int removeCommodity(@Param("id") long id);
 	
-	@Delete("delete from commoditylist where id=#{id} and name=#{name} and distributor=#{distributor}")
-	int removeCommodityByDistributor(@Param("id") long id, @Param("name")String name, @Param("distributor")long distributor);
+	@Delete("delete from commoditylist where id=#{id} and distributor=#{distributor}")
+	int removeCommodityByDistributor(@Param("id") long id, @Param("distributor")long distributor);
 	
 	
-	@Update("update commoditylist set name=#{name}, picurl=#{picurl}, price=#{price}, type=#{type}, inventory=#{inventory}, ordernum=#{ordernum}, deposit=#{deposit}, note=#{note}, classify=#{classify}"
+	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note}"
 			+ "where id=#{id}")
 	int updateCommodity(Commodity commodity);
 }

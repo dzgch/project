@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lyqxsc.yhpt.domain.User;
+import com.lyqxsc.yhpt.domain.Address;
 import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
@@ -25,13 +26,14 @@ import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.ShopCar;
 import com.lyqxsc.yhpt.service.UserService;
+import com.lyqxsc.yhpt.urlclass.AddressInfo;
 import com.lyqxsc.yhpt.urlclass.AppraiseInfo;
 import com.lyqxsc.yhpt.urlclass.CollectInfo;
 import com.lyqxsc.yhpt.urlclass.ShopCarInfo;
 import com.lyqxsc.yhpt.urlclass.BuyCommodity;
 import com.lyqxsc.yhpt.urlclass.UserToken;
-import com.lyqxsc.yhpt.urlclass.PresentOrder;
-import com.lyqxsc.yhpt.urlclass.PresentRentOrder;
+import com.lyqxsc.yhpt.urlclass.OrderInfo;
+import com.lyqxsc.yhpt.urlclass.RentOrderInfo;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
 import com.lyqxsc.yhpt.urlclass.UserTokenOne;
 import com.lyqxsc.yhpt.utils.RetJson;
@@ -70,7 +72,7 @@ public class UserController {
 	 * root权限
 	 */
 	@RequestMapping(value = "/root", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson login(@RequestBody UserLogin param) {
+	public RetJson login() {
 		if(userService.root()) {
 			return RetJson.success("root success");
 		}
@@ -359,14 +361,13 @@ public class UserController {
 	 *  提交购买订单
 	 */
 	@RequestMapping(value = "/shop/pushorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentOrder(@RequestBody PresentOrder param) {
+	public RetJson presentOrder(@RequestBody OrderInfo param) {
 		String userToken = param.getUserToken();
-		String addr = param.getAddr();
 		Order order = param.getOrder();
-		if(userToken == null || order == null || addr == null) {
+		if(userToken == null || order == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.presentOrder(userToken,order,addr)) {
+		if(!userService.presentOrder(userToken,order)) {
 			return RetJson.urlError("push order error", null);
 		}
 		return RetJson.success("success");
@@ -395,14 +396,13 @@ public class UserController {
 	 *  提交租赁订单
 	 */
 	@RequestMapping(value = "/shop/pushrentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentRentOrder(@RequestBody PresentRentOrder param) {
+	public RetJson presentRentOrder(@RequestBody RentOrderInfo param) {
 		String userToken = param.getUserToken();
-		String addr = param.getAddr();
 		RentOrder rentOrder = param.getRentOrder();
-		if(userToken == null || rentOrder == null || addr == null) {
+		if(userToken == null || rentOrder == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.presentRentOrder(userToken,rentOrder,addr)) {
+		if(!userService.presentRentOrder(userToken,rentOrder)) {
 			return RetJson.urlError("push order error", null);
 		}
 		return RetJson.success("success");
@@ -443,6 +443,7 @@ public class UserController {
 	
 	/**
 	 * 已付款订单列表
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
 	@RequestMapping(value = "/usercenter/order/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson  isPayOrder(@RequestBody UserToken param) {
@@ -457,6 +458,56 @@ public class UserController {
 		return RetJson.success("success", orderList);
 	}
 	
+	/**
+	 * 待发货订单列表
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/order/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  noSendOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 2);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 待收货订单列表
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/order/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  isSendOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 3);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 待评价订单列表
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/order/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  appraiseOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 4);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
 	
 	
 	/**
@@ -640,24 +691,102 @@ public class UserController {
 	/**
 	 * 地址 增
 	 */
+	@RequestMapping(value = "/usercenter/address/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson addAddress(@RequestBody AddressInfo param) {
+		String userToken = param.getUserToken();
+		Address address = param.getAddress();
+		if(userToken == null || address == null) {
+			return RetJson.urlError("list appraise error", null);
+		}
+		if(userService.addAddress(userToken, address)) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success",null);
+	}
+	
 	
 	/**
 	 * 地址 删
 	 */
+	@RequestMapping(value = "/usercenter/address/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson removeAddress(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		long id = Long.parseLong(param.getString());
+		if(userToken == null || id == 0) {
+			return RetJson.urlError("list appraise error", null);
+		}
+		if(userService.removeAddress(userToken, id)) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success",null);
+	}
+	
 	
 	/**
 	 * 地址 改
 	 */
+	@RequestMapping(value = "/usercenter/address/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson updateAddress(@RequestBody AddressInfo param) {
+		String userToken = param.getUserToken();
+		Address address = param.getAddress();
+		if(userToken == null || address == null) {
+			return RetJson.urlError("update shopcar error", null);
+		}
+		if(userService.updateAddress(userToken, address)) {
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("false", null);
+	}
 	
 	/**
 	 * 地址 查
 	 */
-	
-	/**
-	 * 获取默认地址
-	 */
+	@RequestMapping(value = "/usercenter/address/select", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectAddress(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("list appraise error", null);
+		}
+		List<Address> address = userService.selectAddress(userToken);
+		if(address == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success",address);
+	}
 	
 	/**
 	 * 设置默认地址
 	 */
+	@RequestMapping(value = "/usercenter/address/setmain", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson setMainAddr(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		if(userToken == null || id == null) {
+			return RetJson.urlError("list appraise error", null);
+		}
+		if(!userService.setMainAddr(userToken, Long.parseLong(id))) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success");
+	}
+
+	
+	/**
+	 * 获取默认地址
+	 */
+	@RequestMapping(value = "/usercenter/address/getmain", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson getMainAddr(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("list appraise error", null);
+		}
+		Address address = userService.getMainAddr(userToken);
+		if(address == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success",address);
+	}
+	
+	
+	
 }

@@ -2,8 +2,8 @@ package com.lyqxsc.yhpt.urlclass;
 
 public class UserTokenTwo {
 	String userToken;
-	String type;
-	String classStr;
+	String one;
+	String two;
 	
 	public String getUserToken() {
 		return userToken;
@@ -11,16 +11,16 @@ public class UserTokenTwo {
 	public void setUserToken(String userToken) {
 		this.userToken = userToken;
 	}
-	public String getType() {
-		return type;
+	public String getOne() {
+		return one;
 	}
-	public void setType(String type) {
-		this.type = type;
+	public void setOne(String one) {
+		this.one = one;
 	}
-	public String getClassStr() {
-		return classStr;
+	public String getTwo() {
+		return two;
 	}
-	public void setClassStr(String classStr) {
-		this.classStr = classStr;
+	public void setTwo(String two) {
+		this.two = two;
 	}
 }

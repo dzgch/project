@@ -125,7 +125,7 @@ public class UserService {
 //		user.setRealName(String realName);
 //		user.setEmail(String email);
 //		user.setPhone(String phone);
-		user.setSex((int)wxUserInfo.get("sex"));
+		user.setSex((String)wxUserInfo.get("sex"));
 		user.setProvince((String)wxUserInfo.get("province"));
 		user.setCity((String)wxUserInfo.get("city"));
 		user.setHeadImgUrl((String)wxUserInfo.get("headimgurl"));
@@ -491,14 +491,12 @@ public class UserService {
 	/**
 	 *  提交订单
 	 */
-	public boolean presentOrder(String userToken, Order order, String addr) {
+	public boolean presentOrder(String userToken, Order order) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return false;
 		}
-		
-		order.setAddr(addr);
 		
 		if(orderDao.addOrderList(order) != 1) {
 			return false;
@@ -556,14 +554,12 @@ public class UserService {
 	/**
 	 *  提交租赁订单
 	 */
-	public boolean presentRentOrder(String userToken, RentOrder rentOrder, String addr) {
+	public boolean presentRentOrder(String userToken, RentOrder rentOrder) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return false;
 		}
-		
-		rentOrder.setAddr(addr);
 		
 		if(rentOrderDao.addRentOrderList(rentOrder) != 1) {
 			return false;
@@ -582,7 +578,7 @@ public class UserService {
 			return null;
 		}
 		Long id = userInfo.getId();
-		List<Order> orderList = orderDao.getAllOrderByID(id);
+		List<Order> orderList = orderDao.getAllOrderByUser(id);
 		return orderList;
 	}
 	
@@ -596,7 +592,7 @@ public class UserService {
 			return null;
 		}
 		Long id = userInfo.getId();
-		List<Order> orderList = orderDao.getTypeOrderByID(id,type);
+		List<Order> orderList = orderDao.getOrderStatusByUser(id,type);
 		return orderList;
 	}
 	

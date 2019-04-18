@@ -18,6 +18,12 @@ public class Appraise {
 	int grade;
 	//评价时间
 	long time;
+	//描述相符
+	int describe;
+	//物流服务
+	int logistics;
+	//服务态度
+	int service;
 	
 	public long getId() {
 		return id;
@@ -60,5 +66,23 @@ public class Appraise {
 	}
 	public void setTime(long time) {
 		this.time = time;
+	}
+	public int getDescribe() {
+		return describe;
+	}
+	public void setDescribe(int describe) {
+		this.describe = describe;
+	}
+	public int getLogistics() {
+		return logistics;
+	}
+	public void setLogistics(int logistics) {
+		this.logistics = logistics;
+	}
+	public int getService() {
+		return service;
+	}
+	public void setService(int service) {
+		this.service = service;
 	}
 }

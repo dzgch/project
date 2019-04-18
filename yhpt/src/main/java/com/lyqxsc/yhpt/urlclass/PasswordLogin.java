@@ -1,6 +1,6 @@
 package com.lyqxsc.yhpt.urlclass;
 
-public class AdminLogin {
+public class PasswordLogin {
 	String username;
 	String password;
 	String ip;

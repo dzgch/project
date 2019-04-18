@@ -29,7 +29,7 @@ public class User {
 	String phone;
 	//性别
 	@JsonIgnore
-	int sex;
+	String sex;
 	//省份
 	String province;
 	//城市
@@ -46,7 +46,7 @@ public class User {
 	//上次登录IP
 	String lastLoginIP;
 	//账户余额
-	long wallet;
+	float wallet;
 	//分销商
 	long distributor;
 	//注册时间
@@ -94,10 +94,10 @@ public class User {
 	public void setPhone(String phone) {
 		this.phone = phone;
 	}
-	public int getSex() {
+	public String getSex() {
 		return sex;
 	}
-	public void setSex(int sex) {
+	public void setSex(String sex) {
 		this.sex = sex;
 	}
 	public String getProvince() {
@@ -142,10 +142,10 @@ public class User {
 	public void setLastLoginIP(String lastLoginIP) {
 		this.lastLoginIP = lastLoginIP;
 	}
-	public long getWallet() {
+	public float getWallet() {
 		return wallet;
 	}
-	public void setWallet(long wallet) {
+	public void setWallet(float wallet) {
 		this.wallet = wallet;
 	}
 	public long getDistributor() {

@@ -7,6 +7,8 @@ public class Order {
 	long owner;
 	//购买者名字
 	String ownerName;
+	//店家ID
+	long distributorID;
 	//商品
 	long commodityID;
 	//商品图片
@@ -37,6 +39,14 @@ public class Order {
 	int lastPayStatus;
 	//收货地址
 	String addr;
+	
+	
+	public long getDistributorID() {
+		return distributorID;
+	}
+	public void setDistributorID(long distributorID) {
+		this.distributorID = distributorID;
+	}
 	public String getOrderNumber() {
 		return orderNumber;
 	}

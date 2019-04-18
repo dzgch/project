@@ -31,14 +31,14 @@ public interface IRentOrderDao {
 	@Select("select * from rentorderlist where schedule=0")
 	List<RentOrder> selectUndoRentOrderList();
 	
-	@Insert("insert into rentorderlist(orderNumber,owner,ownerName,commodityID,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,orderType,schedule,addr)"
-			+ "values({orderNumber}, #{owner}, #{ownerName}, #{commodityID}, #{commodityName}, #{price}, #{count}, #{totalPrice}, #{payMoney}, #{orderPrice}, #{completeTime}, #{payOrdertime}, #{status}, #{payType}, #{payIP}, #{orderType}, #{schedule}, #{addr})")
+	@Insert("insert into rentorderlist(orderNumber,owner,ownerName,distributorID,rentCommodityID,rentCommodityName,url,price,deposit,count,totalDeposit,totalPrice,orderPrice,payMoney,completeTime,makeOrdertime,status,payType,payIP,lastPayStatus,addr)"
+			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{rentCommodityID},#{rentCommodityName},#{url},#{price},#{deposit},#{count},#{totalDeposit},#{totalPrice},#{orderPrice},#{payMoney},#{completeTime},#{makeOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addr})")
 	int addRentOrderList(RentOrder order);
 	
 	@Delete("delete from rentorderlist where orderNumber=#{orderNumber}")
 	int removeRentOrderList(@Param("orderNumber") String orderNumber);
 	
-	@Update("update rentorderlist set owner=#{owner}, commodityID=#{commodityID}, commodityName=#{commodityName}, price=#{price}, count=#{count}, totalPrice=#{totalPrice}, payMoney=#{payMoney}, orderPrice=#{orderPrice}, completeTime=#{completeTime}, payOrdertime=#{payOrdertime}, status=#{status}, payType=#{payType}, payIP=#{payIP}, orderType=#{orderType}, schedule=#{schedule}, addr=#{addr}"
+	@Update("update rentorderlist set status=#{status}, lastPayStatus=#{lastPayStatus}"
 			+ "where orderNumber=#{orderNumber}")
 	int updateRentOrderList(RentOrder order);
 }

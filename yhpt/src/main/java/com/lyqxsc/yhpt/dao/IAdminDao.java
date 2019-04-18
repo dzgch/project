@@ -28,12 +28,12 @@ public interface IAdminDao {
 	@Update("update admin set lastLogintime=#{now} , lastLoginIP=#{ip} WHERE id=#{id}")
 	int updateLogoutState(@Param("now") long now, @Param("ip") String ip, @Param("id") long id);
 	
-	@Update("update admin set username=#{username} , password=#{password} , realname=#{realname} , sex=#{sex} , phone=#{phone} , thisloginip=#{thisloginip} , thislogintime=#{thislogintime} , lastloginip=#{lastloginip} , lastlogintime=#{lastlogintime} , addtime=#{addtime}"
+	@Update("update admin set username=#{username} , password=#{password} , realname=#{realname} , sex=#{sex} , phone=#{phone}"
 			+ "where id=#{id}")
 	int updateAdmin(@Param("id") long id, Admin admin); 
 	
-	@Insert("insert into admin(id,username,password,realname,sex,phone,thisloginip,thislogintime,lastloginip,lastlogintime,addtime) "
-			+ "values(#{id},#{username},#{password},#{realName},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime})")
+	@Insert("insert into admin(id,userToken,username,password,realName,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime) "
+			+ "values(#{id},#{userToken},#{username},#{password},#{realName},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime})")
 	int addAdmin(Admin admin);
 	
 }

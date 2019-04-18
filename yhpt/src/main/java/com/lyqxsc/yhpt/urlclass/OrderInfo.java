@@ -2,9 +2,8 @@ package com.lyqxsc.yhpt.urlclass;
 
 import com.lyqxsc.yhpt.domain.Order;
 
-public class PresentOrder {
+public class OrderInfo {
 	String userToken;
-	String addr;
 	Order order;
 	
 	public String getUserToken() {
@@ -12,12 +11,6 @@ public class PresentOrder {
 	}
 	public void setUserToken(String userToken) {
 		this.userToken = userToken;
-	}
-	public String getAddr() {
-		return addr;
-	}
-	public void setAddr(String addr) {
-		this.addr = addr;
 	}
 	public Order getOrder() {
 		return order;

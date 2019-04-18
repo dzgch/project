@@ -28,7 +28,7 @@ public interface IShopCarDao {
 	@Delete("delete from shopcarlist where id=#{id}")
 	int removeShopCar(@Param("id") long id);
 	
-	@Update("update shopcarlist set userid=#{userid}, commodityid=#{commodityid}, name=#{name}, picurl=#{picurl}, price=#{price}, count=#{count}, note=#{note}"
+	@Update("update shopcarlist set count=#{count}"
 			+ "where carid=#{carid}")
 	int updateShopCar(ShopCar shopCar);
 }

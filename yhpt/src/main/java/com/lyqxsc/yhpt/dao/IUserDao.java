@@ -40,12 +40,12 @@ public interface IUserDao {
 	@Select("select max(id) from user")
 	Long getMaxID();
 	
-	@Delete("delete from user where openID=#{openid}")
-	int removeUser(@Param("openid") String openID);
+	@Delete("delete from user where id=#{id}")
+	int removeUser(@Param("id") long id);
 	
-	@Update("update user set realname=#{realname}, email=#{email}, phone=#{phone}, sex=#{sex}, province=#{province}, city=#{city}, address=#{address}, thisLoginTime=#{thisLoginTime}, thisLoginIP=#{thisLoginIP}, lastLoginTime=#{lastLoginTime}, lastLoginIP=#{lastLoginIP}, wallet=#{wallet}, distributor=#{distributor}, addTime=#{addTime}"
+	@Update("update user set email=#{email}, phone=#{phone}, province=#{province}, city=#{city}, address=#{address}, wallet=#{wallet}"
 			+ "where id=#{userID}")
-	int updateUser(@Param("userID")long userID,User user);
+	int updateUser(User user);
 	
 	/**
 	 * 绑定分销商
@@ -53,8 +53,8 @@ public interface IUserDao {
 	@Update("update user set distributor=#{distributorID} where id=#{userID}")
 	int bindDistributor(@Param("userID") long userID,@Param("distributorID") long distributorID);
 	
-	@Insert({"insert into user(id, openID, realname, email, phone, sex, province, city, address, thisLoginTime, thisLoginIP, lastLoginTime, lastLoginIP, wallet, distributor, addTime) "
-			+ "values(#{id},#{openID},#{realname},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
+	@Insert({"insert into user(id,userToken,openID,nikeName,realname,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
+			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realname},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
 	int addUser(User user);
 	
 	

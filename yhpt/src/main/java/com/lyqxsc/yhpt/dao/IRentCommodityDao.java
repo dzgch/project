@@ -35,10 +35,10 @@ public interface IRentCommodityDao {
 			+ "values(#{id},#{name},#{picurl},#{price},#{type},#{inventory},#{ordernum},#{deposit},#{note},#{distributor})")
 	int addRentCommodity(RentCommodity rentcommodity);
 	
-	@Delete("delete from rentcommoditylist where id = #{id} and name = #{name}")
+	@Delete("delete from rentcommoditylist where id=#{id} and name=#{name}")
 	int removeRentCommodity(@Param("id") int id,@Param("name")String name);
 	
-	@Update("update rentcommoditylist set name=#{name},picurl=#{picurl},price=#{price},type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note},distributor=#{distributor}"
+	@Update("update rentcommoditylist set type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note},distributor=#{distributor}"
 			+ "where id=#{id}")
 	int updateRentCommodity(RentCommodity rentcommodity);
 	

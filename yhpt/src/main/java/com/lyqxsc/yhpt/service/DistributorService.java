@@ -12,8 +12,10 @@ import com.lyqxsc.yhpt.dao.ICommodityDao;
 import com.lyqxsc.yhpt.dao.IDistributorDao;
 import com.lyqxsc.yhpt.dao.IOrderDao;
 import com.lyqxsc.yhpt.dao.IRentCommodityDao;
+import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.UserInfo;
 
@@ -85,11 +87,11 @@ public class DistributorService {
 		adminInfo.setLoginTime(now);
 		
 		for(String userToken:onlineMap.keySet()) {
-			if(id == Long.parseLong(userToken.split("&")[0])) {
+			if(id == Long.parseLong(userToken.split("O")[0])) {
 				logout(userToken);
 			}
 		}
-		String userToken = id + "&" + now;
+		String userToken = id + "O" + now;
 		onlineMap.put(userToken, adminInfo);
 		
 		/*更新返回前端的admin ip和time*/
@@ -118,17 +120,30 @@ public class DistributorService {
 	}
 	
 	/**
+	 * 修改信息
+	 */
+	//TODO需要判断字段是否为空
+	public boolean updateDistributor(String userToken, Distributor param) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		distributorDao.updateDistributor(param);
+		
+		return true;
+	}
+	
+	/**
 	 * 商品列表
 	 */
-//	public List<Commodity> listCommodity(String userToken){
-//		//确定用户是否在线
-//		UserInfo adminInfo = onlineMap.get(userToken);
-//		if(adminInfo == null) {
-//			return null;
-//		}
-//		List<Commodity> commodityList = commodityDao.selectCommodityByDistributor(adminInfo.getId());
-//		return commodityList;
-//	}
+	public List<Commodity> listCommodity(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		List<Commodity> commodityList = commodityDao.selectCommodityForUser(adminInfo.getId());
+		return commodityList;
+	}
 	
 	/**
 	 * 添加商品
@@ -138,6 +153,13 @@ public class DistributorService {
 		if(adminInfo == null) {
 			return false;
 		}
+		
+		Long maxID = commodityDao.getMaxID();
+		if(maxID == null) {
+			return false;
+		}
+		commodity.setId(maxID+1);
+		
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
 			return false;
@@ -148,12 +170,12 @@ public class DistributorService {
 	/**
 	 * 商品下架
 	 */
-	public boolean removeCommodity(String userToken, int commodityID, String commodityName) {
+	public boolean removeCommodity(String userToken, long commodityID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
-		int ret = commodityDao.removeCommodity(commodityID, commodityName);
+		int ret = commodityDao.removeCommodityByDistributor(adminInfo.getId(), commodityID);
 		if(ret != 1) {
 			return false;
 		}
@@ -164,48 +186,82 @@ public class DistributorService {
 	/**
 	 * 商品租赁列表
 	 */
-	public List<RentCommodity> listRentCommodity(String userToken){
-		//确定用户是否在线
+	public List<Commodity> listRentCommodity(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
 		}
 		
-		List<RentCommodity> rentCommodityList = rentCommodityDao.selectRentCommodityByDistributor(adminInfo.getId());
+		List<Commodity> rentCommodityList = commodityDao.selectRentCommodityForUser(adminInfo.getId());
 		return rentCommodityList;
 	}
 	
 	/**
 	 * 添加租赁商品
 	 */
-	public boolean addRentCommodity(String userToken, RentCommodity rentCommodity) {
-		UserInfo adminInfo = onlineMap.get(userToken);
-		if(adminInfo == null) {
-			return false;
-		}
-		int ret = rentCommodityDao.addRentCommodity(rentCommodity);
-		if(ret != 1) {
-			return false;
-		}
-		return true;
-	}
+//	public boolean addRentCommodity(String userToken, RentCommodity rentCommodity) {
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return false;
+//		}
+//		int ret = rentCommodityDao.addRentCommodity(rentCommodity);
+//		if(ret != 1) {
+//			return false;
+//		}
+//		return true;
+//	}
 	
 	/**
 	 * 租赁商品下架
 	 */
-	public boolean removeRentCommodity(String userToken, int rentCommodityID, String rentCommodityName) {
+//	public boolean removeRentCommodity(String userToken, int rentCommodityID, String rentCommodityName) {
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return false;
+//		}
+//		int ret = rentCommodityDao.removeRentCommodity(rentCommodityID, rentCommodityName);
+//		if(ret != 1) {
+//			return false;
+//		}
+//		return true;
+//	}
+	
+	/**
+	 * 订单列表
+	 */
+	public List<Order> listAllOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return null;
 		}
-		int ret = rentCommodityDao.removeRentCommodity(rentCommodityID, rentCommodityName);
-		if(ret != 1) {
-			return false;
-		}
-		return true;
+		
+		List<Order> orderList = orderDao.getOrderByDistributor(adminInfo.getId());
+		return orderList;
 	}
 	
+	/**
+	 * 查看已处理订单
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	public List<Order> listDoOrder(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		List<Order> orderList = orderDao.getOrderStatusByDistributor(adminInfo.getId(), 3);
+		return orderList;
+	}
 	
-	
+	/**
+	 * 查看未处理订单
+	 */
+	public List<Order> listUndoOrder(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		List<Order> orderList = orderDao.getOrderStatusByDistributor(adminInfo.getId(), 1);
+		return orderList;
+	}
 	
 }

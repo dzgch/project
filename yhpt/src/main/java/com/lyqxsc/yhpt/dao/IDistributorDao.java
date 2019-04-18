@@ -31,15 +31,15 @@ public interface IDistributorDao {
 	@Select("select max(id) from distributor")
 	Long getMaxID();
 	
-	@Insert("insert into distributor(id,username,password,realname,sex,phone,thisloginip,thislogintime,lastloginip,lastlogintime,addtime,authority)"
-			+ "values(#{id}, #{username}, #{password}, #{realname}, #{sex}, #{phone}, #{thisloginip}, #{thislogintime}, #{lastloginip}, #{lastlogintime}, #{addtime}, #{authority})")
+	@Insert("insert into distributor(id,username,password,realname,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime,authority)"
+			+ "values(#{id},#{username},#{password},#{realname},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime},#{authority})")
 	int addDistributor(Distributor distributor);
 
 	@Delete("delete from distributor where id=#{id}")
 	int removeDistributor(@Param("id") long distributorID);
 
-	@Update("update distributor set authority=1 where id=#{id}")
-	int authorizeDistributor(@Param("id") int distributorID);
+	@Update("update distributor set authority=#{authority} where id=#{id}")
+	int authorizeDistributor(@Param("id") long distributorID, @Param("authority")int authority);
 	
 	@Update("update distributor set authority=0 where id=#{id}")
 	int unAuthorizeDistributor(@Param("id") int distributorID);
@@ -49,4 +49,8 @@ public interface IDistributorDao {
 	
 	@Update("update distributor set lastLogintime=#{now} , lastLoginIP=#{ip} WHERE id=#{id}")
 	int updateLogoutState(@Param("now") long now, @Param("ip") String ip, @Param("id") long id);
+	
+	@Update("update distributor set password=#{password},realname=#{realname},sex=#{sex},phone=#{phone}"
+			+ "where id=#{id}")
+	int updateDistributor(Distributor param);
 }
