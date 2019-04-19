@@ -136,6 +136,10 @@ public class UserService {
 		user.setDistributor(0);
 		user.setAddTime(System.currentTimeMillis());
 
+		System.out.println("------------------------");
+		System.out.println((String)wxUserInfo.get("openid"));
+		System.out.println(user.getOpenID());
+		System.out.println("------------------------");
 		//TODO
 		if(userDao.addUser(user) < 0) {
 			return null;
@@ -151,7 +155,9 @@ public class UserService {
 	 */
 	public User login(JSONObject wxUserInfo, String ip) {
 		String openID = (String)wxUserInfo.get("openid");
-		
+		System.out.println("------------------------");
+		System.out.println((String)wxUserInfo.get("openid"));
+		System.out.println("------------------------");
 		User user = userDao.selectUser(openID);
 		if(user == null) {
 			user = signup(wxUserInfo);

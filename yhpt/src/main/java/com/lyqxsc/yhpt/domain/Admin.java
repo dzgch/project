@@ -1,7 +1,6 @@
 package com.lyqxsc.yhpt.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  *  管理员实体类
@@ -35,7 +34,12 @@ public class Admin {
 	long lastLoginTime;
 	//注册时间
 	long addTime;
-	
+	//等级等级0为管理员，1为1级分销商，以此类推
+	int grade;
+	//父级id
+	long parent;
+	//权限1有权限，0无权限，由父级或管理员授权
+	int authority;
 	
 	public long getId() {
 		return id;
@@ -110,5 +114,22 @@ public class Admin {
 	public void setAddTime(long addTime) {
 		this.addTime = addTime;
 	}
-	
+	public int getGrade() {
+		return grade;
+	}
+	public void setGrade(int grade) {
+		this.grade = grade;
+	}
+	public long getParent() {
+		return parent;
+	}
+	public void setParent(long parent) {
+		this.parent = parent;
+	}
+	public int getAuthority() {
+		return authority;
+	}
+	public void setAuthority(int authority) {
+		this.authority = authority;
+	}
 }

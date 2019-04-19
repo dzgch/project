@@ -53,9 +53,12 @@ public interface IUserDao {
 	@Update("update user set distributor=#{distributorID} where id=#{userID}")
 	int bindDistributor(@Param("userID") long userID,@Param("distributorID") long distributorID);
 	
-	@Insert({"insert into user(id,userToken,openID,nikeName,realname,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
-			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realname},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
+	@Insert({"insert into user(id,userToken,openID,nikeName,realName,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
+			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realName},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
 	int addUser(User user);
 	
+//	@Insert({"insert into user(id,userToken,openID,nikeName,realname,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
+//			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realname},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
+//	int addUser(User user);
 	
 }

@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lyqxsc.yhpt.domain.User;
+import com.lyqxsc.yhpt.domain.UserSignature;
 import com.lyqxsc.yhpt.service.UserService;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
 import com.lyqxsc.yhpt.utils.HttpRequestor;
@@ -42,7 +43,7 @@ public class WechartController {
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);  
 
 	@RequestMapping(value = "/wxuserinfo", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public User doPost(@RequestBody UserLogin request) throws ServletException, IOException {
+	public UserSignature doPost(@RequestBody UserLogin request) throws ServletException, IOException {
 		String code = request.getCode();
 		String ip = request.getIp();
 		
@@ -74,7 +75,7 @@ public class WechartController {
 		JSONObject wxUserInfo = JSONObject.fromObject(userInfoStr); 
 		log.info((String)wxUserInfo.get("openid"));
 		log.info((String)wxUserInfo.get("nickname"));
-		log.info((String)wxUserInfo.get("sex"));
+		log.info((int)wxUserInfo.get("sex")+"");
 		log.info((String)wxUserInfo.get("city"));
 		log.info((String)wxUserInfo.get("province"));
 		log.info((String)wxUserInfo.get("country"));
@@ -83,10 +84,13 @@ public class WechartController {
 		String accessToken = getAccessToken();
 		String ticket = JsapiTicket(accessToken);
 		Map<String,String> signature = getSignature(ticket);
-		
 		User user = userService.login(wxUserInfo, ip);
+		
+		UserSignature ret = new UserSignature();
+		ret.setSignature(signature);
+		ret.setUser(user);
 		//TODO 返回user+signature
-		return user;
+		return ret;
 	}
 	
     // 网页授权接口
