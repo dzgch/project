@@ -16,8 +16,25 @@ import com.lyqxsc.yhpt.domain.RentOrder;
 @Mapper
 @Component
 public interface IRentOrderDao {
+	@Select("select count(*) from rentorderlist")
+	Integer getTotalOrder();
+	
 	@Select("select * from rentorderlist")
 	List<RentOrder> selectAllRentOrderList();
+	
+	@Select("select * from rentorderlist where status=#{type}")
+	List<RentOrder> getRentOrderListByStatus(@Param("type") int type);
+	
+	//分销商获取租赁订单
+	@Select("select * from rentorderlist where distributorID=#{distributorID}")
+	List<RentOrder> getRentOrderListByDistributorID(@Param("distributorID") long distributorID);
+	
+	@Select("select * from rentorderlist where status=#{status} and distributorID=#{distributorID}")
+	List<RentOrder> getRentOrderStatusByDistributor(@Param("distributorID") long distributorID,@Param("status") int type);
+	
+	@Select("select * from rentorderlist where orderNumber=#{orderNumber}")
+	RentOrder listOneRentOrder(@Param("orderNumber") String id);
+	
 	
 	@Select("select * from rentorderlist where owner=#{id}")
 	List<RentOrder> getAllRentOrderByID(@Param("id") long id);
@@ -25,11 +42,17 @@ public interface IRentOrderDao {
 	@Select("select * from rentorderlist where status=#{type} and owner=#{id}")
 	List<RentOrder> getTypeRentOrderByID(@Param("id") long id, @Param("type") int type);
 	
-	@Select("select * from rentorderlist where schedule=1")
-	List<RentOrder> selectDoRentOrderList();
+	//获取订单状态
+	@Select("select status from rentorderlist where orderNumber=#{orderNumber}")
+	Integer getRentOrderStatus(@Param("orderNumber") String id);
+	
+	//分销商计算租赁订单进账
+	@Select("select sum(totalPrice) from rentorderlist where distributorID=#{distributorID}")
+	Float getSumPayMoney(@Param("distributorID") long distributorID);
 
-	@Select("select * from rentorderlist where schedule=0")
-	List<RentOrder> selectUndoRentOrderList();
+	//计算分销商的租赁订单数量
+	@Select("select count(*) from rentorderlist where distributorID=#{distributorID}")
+	Integer getRentOrderCount(@Param("distributorID") long distributorID);
 	
 	@Insert("insert into rentorderlist(orderNumber,owner,ownerName,distributorID,rentCommodityID,rentCommodityName,url,price,deposit,count,totalDeposit,totalPrice,orderPrice,payMoney,completeTime,makeOrdertime,status,payType,payIP,lastPayStatus,addr)"
 			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{rentCommodityID},#{rentCommodityName},#{url},#{price},#{deposit},#{count},#{totalDeposit},#{totalPrice},#{orderPrice},#{payMoney},#{completeTime},#{makeOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addr})")
@@ -38,7 +61,7 @@ public interface IRentOrderDao {
 	@Delete("delete from rentorderlist where orderNumber=#{orderNumber}")
 	int removeRentOrderList(@Param("orderNumber") String orderNumber);
 	
-	@Update("update rentorderlist set status=#{status}, lastPayStatus=#{lastPayStatus}"
-			+ "where orderNumber=#{orderNumber}")
-	int updateRentOrderList(RentOrder order);
+	//更新订单状态
+	@Update("update rentorderlist set status=#{status} reason=#{reason} where orderNumber=#{orderNumber}")
+	int updateRentOrderList(@Param("status") int status, @Param("orderNumber") String orderNumber, @Param("reason") String reason);
 }

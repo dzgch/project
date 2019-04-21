@@ -2,6 +2,9 @@ package com.lyqxsc.yhpt.domain;
 
 import java.util.Map;
 
+/**
+ * wx数据
+ */
 public class UserSignature {
 	Map<String,String> signature;
 	User user;

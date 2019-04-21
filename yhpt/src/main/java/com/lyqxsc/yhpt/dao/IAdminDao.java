@@ -19,6 +19,12 @@ public interface IAdminDao {
 	@Select("select * from admin where username=#{username}")
 	Admin adminIsExist(@Param("username") String username);
 	
+	@Select("select * from admin where id=#{id}")
+	Admin selectAdminByID(@Param("id") long id);
+	
+	@Select("select max(id) from admin where id<100")
+	Long getMaxAdminID();
+	
 	@Select("select max(id) from admin")
 	Long getMaxID();
 	

@@ -89,7 +89,6 @@ public class WechartController {
 		UserSignature ret = new UserSignature();
 		ret.setSignature(signature);
 		ret.setUser(user);
-		//TODO 返回user+signature
 		return ret;
 	}
 	

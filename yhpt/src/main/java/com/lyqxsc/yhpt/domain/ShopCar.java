@@ -10,14 +10,16 @@ public class ShopCar {
 	long userid;
 	//物品ID
 	int commodityid;
-	//数量
-	int count;
 	//物品名称
 	String name;
 	//图片地址
 	String picurl;
 	//价格
 	float price;
+	//数量
+	int count;
+	//库存
+	int inventory;
 	//商品描述
 	String note;
 	
@@ -68,5 +70,11 @@ public class ShopCar {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public int getInventory() {
+		return inventory;
+	}
+	public void setInventory(int inventory) {
+		this.inventory = inventory;
 	}
 }

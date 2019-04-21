@@ -20,7 +20,10 @@ public interface IUserDao {
 	List<User> selectAllUser();
 	
 	@Select("select * from user where openID=#{openID}")
-	User selectUser(@Param("openID") String openID);
+	User selectUserByOpenID(@Param("openID") String openID);
+	
+	@Select("select * from user where id=#{id}")
+	User selectUserByID(@Param("id") long id);
 	
 	@Select("select realname from user where id=#{id}")
 	String selectUsername(@Param("id") long id);
@@ -28,8 +31,9 @@ public interface IUserDao {
 	@Select("select distributor from user where id=#{id}")
 	Long selectDistributor(@Param("id") long id);
 	
-	@Select("select * from user where openID=#{openID}")
-	User selectOpenID(@Param("openID") String openID);
+	//计算绑定分销商的用户数
+	@Select("select Count(*) from user where distributor=#{id}")
+	Integer getUserCount(@Param("id") long id);
 	
 	@Update("update user set thisLogintime=#{now} , thisLoginIP=#{ip} WHERE openid=#{openid}")
 	int updateLoginState(@Param("now") long now, @Param("ip") String ip, @Param("openid") String openid);
@@ -47,18 +51,17 @@ public interface IUserDao {
 			+ "where id=#{userID}")
 	int updateUser(User user);
 	
-	/**
-	 * 绑定分销商
-	 */
+	//修改用户权限
+	@Update("update user set authority=#{authority} where id=#{id}")
+	int updateUserAuthority(@Param("id") long id,@Param("authority") int code);
+	
+	//绑定分销商
 	@Update("update user set distributor=#{distributorID} where id=#{userID}")
 	int bindDistributor(@Param("userID") long userID,@Param("distributorID") long distributorID);
+	
 	
 	@Insert({"insert into user(id,userToken,openID,nikeName,realName,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
 			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realName},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
 	int addUser(User user);
-	
-//	@Insert({"insert into user(id,userToken,openID,nikeName,realname,headImgUrl,email,phone,sex,province,city,address,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime) "
-//			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realname},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime})"})
-//	int addUser(User user);
 	
 }

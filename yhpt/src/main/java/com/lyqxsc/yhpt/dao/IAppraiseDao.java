@@ -28,7 +28,7 @@ public interface IAppraiseDao {
 	Long getMaxID();
 	
 	@Insert({"insert into appraiselist(id, userID, username, thingID, text, grade, time,describe,logistics,service)"
-			+ "values(#{id}, #{userID}, #{username}, #{thingID}, #{text}, #{grade}, #{time}),#{describe},#{logistics},#{service}"})
+			+ "values(#{id}, #{userID}, #{username}, #{thingID}, #{text}, #{grade}, #{time}),#{describe},#{logistics},#{service})"})
 	int addAppraise(Appraise appraise);
 	
 	@Delete("delete from appraiselist where id=#{id}")

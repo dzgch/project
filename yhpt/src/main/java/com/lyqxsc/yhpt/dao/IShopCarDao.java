@@ -16,7 +16,10 @@ import com.lyqxsc.yhpt.domain.ShopCar;
 @Component
 public interface IShopCarDao {
 	@Select("select * from shopcarlist where userid=#{id}")
-	List<ShopCar> getShoppingByID(@Param("id") long id);
+	List<ShopCar> getShoppingByUserID(@Param("id") long id);
+	
+	@Select("select * from shopcarlist where carid=#{id}")
+	ShopCar getShoppingByID(@Param("id") long id);
 	
 	@Select("select max(id) from shopcarlist")
 	Long getMaxID();

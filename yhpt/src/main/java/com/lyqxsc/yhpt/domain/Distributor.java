@@ -1,20 +1,38 @@
 package com.lyqxsc.yhpt.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 public class Distributor {
 	//ID
 	long id;
-	//登录凭证
+	//userToken
 	String userToken;
 	//用户名
 	String username;
 	//密码
+	@JsonIgnore
 	String password;
+	//分销商名称
+	String distributorName;
 	//真实姓名
+	@JsonIgnore
 	String realname;
 	//性别
-	int sex;
+	@JsonIgnore
+	String sex;
 	//电话
+	@JsonIgnore
 	String phone;
+	//省份
+	String province;
+	//城市
+	String city;
+	//地址
+	String address;
+	//商品订单数
+	int orderNum;
+	//租赁订单数
+	int rentOrderNum;
 	//这次登录IP
 	String thisLoginIP;
 	//这次登录时间
@@ -25,13 +43,29 @@ public class Distributor {
 	long lastLoginTime;
 	//注册时间
 	long addTime;
-	//权限
-	String authority;
+	//等级1为1级分销商，以此类推
+	int grade;
+	//祖级id
+	long grandParent;
+	//父级id
+	long parent;
+	//权限1有权限，0无权限，由父级或管理员授权
+	int authority;
+	//添加者ID
+	long addId;
+	
 	public long getId() {
 		return id;
 	}
 	public void setId(long id) {
 		this.id = id;
+	}
+	
+	public String getUserToken() {
+		return userToken;
+	}
+	public void setUserToken(String userToken) {
+		this.userToken = userToken;
 	}
 	public String getUsername() {
 		return username;
@@ -51,10 +85,10 @@ public class Distributor {
 	public void setRealname(String realname) {
 		this.realname = realname;
 	}
-	public int getSex() {
+	public String getSex() {
 		return sex;
 	}
-	public void setSex(int sex) {
+	public void setSex(String sex) {
 		this.sex = sex;
 	}
 	public String getPhone() {
@@ -93,17 +127,70 @@ public class Distributor {
 	public void setAddTime(long addTime) {
 		this.addTime = addTime;
 	}
-	public String getAuthority() {
+	public int getGrade() {
+		return grade;
+	}
+	public void setGrade(int grade) {
+		this.grade = grade;
+	}
+	public long getParent() {
+		return parent;
+	}
+	public void setParent(long parent) {
+		this.parent = parent;
+	}
+	public int getAuthority() {
 		return authority;
 	}
-	public void setAuthority(String authority) {
+	public void setAuthority(int authority) {
 		this.authority = authority;
 	}
-	public String getUserToken() {
-		return userToken;
+	public long getGrandParent() {
+		return grandParent;
 	}
-	public void setUserToken(String userToken) {
-		this.userToken = userToken;
+	public void setGrandParent(long grandParent) {
+		this.grandParent = grandParent;
 	}
-	
+	public String getProvince() {
+		return province;
+	}
+	public void setProvince(String province) {
+		this.province = province;
+	}
+	public String getCity() {
+		return city;
+	}
+	public void setCity(String city) {
+		this.city = city;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public int getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(int orderNum) {
+		this.orderNum = orderNum;
+	}
+	public int getRentOrderNum() {
+		return rentOrderNum;
+	}
+	public void setRentOrderNum(int rentOrderNum) {
+		this.rentOrderNum = rentOrderNum;
+	}
+	public long getAddId() {
+		return addId;
+	}
+	public void setAddId(long addId) {
+		this.addId = addId;
+	}
+	public String getDistributorName() {
+		return distributorName;
+	}
+	public void setDistributorName(String distributorName) {
+		this.distributorName = distributorName;
+	}
 }

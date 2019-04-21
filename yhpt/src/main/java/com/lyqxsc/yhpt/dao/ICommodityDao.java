@@ -12,9 +12,16 @@ import org.springframework.stereotype.Component;
 
 import com.lyqxsc.yhpt.domain.Commodity;
 
+
+/**
+ * 总部出售商品和租赁商品数据库接口
+ */
 @Mapper
 @Component
 public interface ICommodityDao {
+	
+	@Select("select sum(sales) from commoditylist")
+	Integer getTotalSales();
 	
 	@Select("select max(id) from commoditylist")
 	Long getMaxID();
@@ -25,9 +32,7 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where id=#{id}")
 	Commodity selectCommodityByID(@Param("id") long id);
 	
-	/*
-	 * 管理员三连
-	 */
+	//查询所有商品
 	@Select("select * from commoditylist")
 	List<Commodity> selectAll();
 	
@@ -37,17 +42,18 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where type=1 or type=3")
 	List<Commodity> selectRentCommodity();
 	
+
+	@Insert({"insert into commoditylist(id,name,picurl,price,price1,price2,price3,price4,price5,price6,rentPrice,rentPrice1,rentPrice2,rentPrice3,rentPrice4,rentPrice5,rentPrice6,type,inventory,sales,ordernumDay,ordernumMouth,ordernumTotal,deposit,note,distributor,classId,classStr,online) "
+			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},#{ordernumTotal},#{deposit},#{note},#{distributor},#{classId},#{classStr},#{online})"})
+	int addCommodity(Commodity commodity);
+	
 	/*
 	 * 分销商三连
 	 */
 	@Select("select * from commoditylist where distributor=#{distributor}")
 	List<Commodity> selectAllByDistributor(@Param("distributor") long distributor);
 	
-	
-	
-	/*
-	 * 用户四连
-	 */
+	//获取分销商的商品
 	@Select("select * from commoditylist where (type=2 or type=3) and (distributor=#{distributor} or distributor=0)")
 	List<Commodity> selectCommodityForUser(@Param("distributor") long distributor);
 	
@@ -72,10 +78,9 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where distributor=#{distributor} and name=#{name}")
 	List<Commodity> selectCommodityByName(@Param("distributor") long distributor, @Param("name") String name);
 
+	@Select("select * from commoditylist where inventory<#{inventory} and distributor=#{distributor}")
+	List<Commodity> inventoryWarning(@Param("inventory") int num,@Param("id") long id);
 	
-	@Insert("insert into commoditylist(id,name,picurl,price,type,inventory,ordernum,deposit,note,distributor,classId,classStr)"
-			+ "values(#{id},#{name},#{picurl},#{price},#{type},#{inventory},#{ordernum},#{deposit},#{note},#{distributor},#{classId},#{classStr})")
-	int addCommodity(Commodity commodity);
 	
 	@Delete("delete from commoditylist where id=#{id}")
 	int removeCommodity(@Param("id") long id);
@@ -87,4 +92,20 @@ public interface ICommodityDao {
 	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note}"
 			+ "where id=#{id}")
 	int updateCommodity(Commodity commodity);
+	
+	//物品上架/下架
+	@Update("update commoditylist set online=#{online} where id=#{id}")
+	int updateOnline(@Param("id") long id,@Param("online") int option);
+	
+	
+	
+	//更新商品日订单和月订单
+	@Update("update commoditylist set ordernumDay=#{ordernumDay},ordernumMouth=#{ordernumMouth} where id=#{id}")
+	int updateOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumMouth") int ordernumMouth,@Param("id") long id);
+	
+	//设置商品数量
+	@Update("update commoditylist set inventory=#{inventory} where distributor=#{distributor}")
+	int setCommodityCount(@Param("distributor")long id, @Param("inventory") int inventory);
+	
+	
 }

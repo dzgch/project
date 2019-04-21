@@ -22,7 +22,6 @@ public class User {
 	//头像地址
 	String headImgUrl;
 	//邮箱
-	@JsonIgnore
 	String email;
 	//手机号
 	@JsonIgnore
@@ -35,8 +34,13 @@ public class User {
 	//城市
 	String city;
 	//地址
-	@JsonIgnore
 	String address;
+	//订单总数
+	int totalOrderNum;
+	//出售商品订单数
+	int orderNum;
+	//租赁商品订单数
+	int rentOrderNum;
 	//这次登录时间
 	long thisLoginTime;
 	//这次登录IP
@@ -51,6 +55,8 @@ public class User {
 	long distributor;
 	//注册时间
 	long addTime;
+	//权限
+	int authority;
 	
 	public long getId() {
 		return id;
@@ -165,5 +171,29 @@ public class User {
 	}
 	public void setUserToken(String userToken) {
 		this.userToken = userToken;
+	}
+	public int getAuthority() {
+		return authority;
+	}
+	public void setAuthority(int authority) {
+		this.authority = authority;
+	}
+	public int getTotalOrderNum() {
+		return totalOrderNum;
+	}
+	public void setTotalOrderNum(int totalOrderNum) {
+		this.totalOrderNum = totalOrderNum;
+	}
+	public int getOrderNum() {
+		return orderNum;
+	}
+	public void setOrderNum(int orderNum) {
+		this.orderNum = orderNum;
+	}
+	public int getRentOrderNum() {
+		return rentOrderNum;
+	}
+	public void setRentOrderNum(int rentOrderNum) {
+		this.rentOrderNum = rentOrderNum;
 	}
 }

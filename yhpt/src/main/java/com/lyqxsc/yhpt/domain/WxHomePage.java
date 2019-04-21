@@ -2,7 +2,7 @@ package com.lyqxsc.yhpt.domain;
 
 import java.util.List;
 
-public class HomePage {
+public class WxHomePage {
 
 	//首页图片3张
 	String[] pic;

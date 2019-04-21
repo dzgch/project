@@ -8,6 +8,10 @@ public class Address {
 	long id;
 	//用户id
 	long userId;
+	//收货人姓名
+	String username;
+	//收货人手机
+	String phone; 
 	//用户地址
 	String addr;
 	//默认地址
@@ -36,5 +40,17 @@ public class Address {
 	}
 	public void setMain(int main) {
 		this.main = main;
+	}
+	public String getUsername() {
+		return username;
+	}
+	public void setUsername(String username) {
+		this.username = username;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 }

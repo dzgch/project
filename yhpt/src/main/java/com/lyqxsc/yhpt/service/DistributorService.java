@@ -1,5 +1,9 @@
 package com.lyqxsc.yhpt.service;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -7,17 +11,26 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.lyqxsc.yhpt.dao.ICommodityClassifyDao;
 import com.lyqxsc.yhpt.dao.ICommodityDao;
 import com.lyqxsc.yhpt.dao.IDistributorDao;
 import com.lyqxsc.yhpt.dao.IOrderDao;
-import com.lyqxsc.yhpt.dao.IRentCommodityDao;
+import com.lyqxsc.yhpt.dao.IRentOrderDao;
+import com.lyqxsc.yhpt.dao.IUserDao;
+import com.lyqxsc.yhpt.dao.IDeputyCommodityDao;
 import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorHomePage;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
+import com.lyqxsc.yhpt.domain.RentOrder;
+import com.lyqxsc.yhpt.domain.RetProfit;
 import com.lyqxsc.yhpt.domain.UserInfo;
+import com.lyqxsc.yhpt.urlclass.ClassifyList;
 
 @Service
 public class DistributorService {
@@ -29,10 +42,19 @@ public class DistributorService {
 	ICommodityDao commodityDao;
 	
 	@Autowired
-	IRentCommodityDao rentCommodityDao;
+	IDeputyCommodityDao rentCommodityDao;
 	
 	@Autowired
 	IOrderDao orderDao;
+	
+	@Autowired
+	IRentOrderDao rentOrderDao;
+	
+	@Autowired
+	IUserDao userDao;
+	
+	@Autowired
+	ICommodityClassifyDao commodityClassifyDao;
 	
 	Map<String, UserInfo> onlineMap = new HashMap<String, UserInfo>();
 	
@@ -134,6 +156,48 @@ public class DistributorService {
 	}
 	
 	/**
+	 * 首页
+	 */
+	public DistributorHomePage homepage(String userToken) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		
+		long id = adminInfo.getId();
+		
+		float profit = orderDao.getSumPayMoney(id) + rentOrderDao.getSumPayMoney(id);
+		int orderCount = orderDao.getOrderCount(id);
+		int rentOrderCount = rentOrderDao.getRentOrderCount(id);
+		int userCount = userDao.getUserCount(id);
+		List<RetProfit> retProfitList= null;
+		
+		DistributorHomePage home = new DistributorHomePage();
+		home.setProfit(profit);
+		home.setRentOrderCount(rentOrderCount);
+		home.setOrderCount(orderCount);
+		home.setUserCount(userCount);
+		home.setRetProfitList(retProfitList);
+		return home;
+	}
+	
+	/**
+	 * 查询分类
+	 */
+	public ClassifyList selectClassify(String userToken) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		ClassifyList list = new ClassifyList();
+		List<CommodityClassify> mechanical = commodityClassifyDao.selectClass(2);
+		List<CommodityClassify> agentia = commodityClassifyDao.selectClass(1);
+		list.setAgentia(agentia);
+		list.setMechanical(mechanical);
+		return list;
+	}
+	
+	/**
 	 * 商品列表
 	 */
 	public List<Commodity> listCommodity(String userToken){
@@ -146,14 +210,32 @@ public class DistributorService {
 	}
 	
 	/**
+	 * 商品详情
+	 */
+	public Commodity getCommodityInfo(String userToken, long id) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		Commodity commodity = commodityDao.selectCommodityByID(id);
+		return commodity;
+	}
+	
+	/**
 	 * 添加商品
 	 */
-	public boolean addCommodity(String userToken, Commodity commodity) {
+	public boolean addCommodity(String userToken, Commodity commodity, MultipartFile pic) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
 		
+		String path = "D:\\test1\\";
+    	String name = System.currentTimeMillis() + ".png";
+    	String filename = path+name;
+		if(!savePic(pic, filename)) {
+			return false;
+		}
 		Long maxID = commodityDao.getMaxID();
 		if(maxID == null) {
 			return false;
@@ -168,7 +250,45 @@ public class DistributorService {
 	}
 	
 	/**
-	 * 商品下架
+	 * 添加商品时保存图片
+	 */
+	private boolean savePic(MultipartFile file, String filename) {
+		if (!file.isEmpty()) {
+            try {
+                BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(filename)));    
+                System.out.println(file.getName());
+                out.write(file.getBytes());    
+                out.flush();    
+                out.close();
+                return true;
+            } catch (IOException e) {    
+                e.printStackTrace();    
+                return false;
+            } 
+		}
+        return false;  
+	}
+	
+	/**
+	 * 添加商品数量
+	 */
+	public boolean addCommodityCount(String userToken, long commodityID, int count) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		Commodity commodity = commodityDao.selectCommodityByID(commodityID);
+		int raw = commodity.getInventory();
+		
+		raw = raw + count;
+		if(commodityDao.setCommodityCount(commodityID, raw) != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 删除商品
 	 */
 	public boolean removeCommodity(String userToken, long commodityID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
@@ -182,6 +302,40 @@ public class DistributorService {
 		return true;
 	}
 	
+	/**
+	 * 商品上架/下架
+	 * @param userToken
+	 * @param id
+	 * @param option 1 上架
+	 *               0 下架
+	 * @return
+	 */
+	public boolean onlineCommodity(String userToken,long commodityID, int option) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		
+		//TODO以后加分销商id判断
+		if(commodityDao.updateOnline(commodityID,option) != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 商品库存管理
+	 */
+	public List<Commodity> inventoryWarning(String userToken,int num){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		
+		long id = adminInfo.getId();
+		List<Commodity> commodityList = commodityDao.inventoryWarning(num,id);
+		return commodityList;
+	}
 	
 	/**
 	 * 商品租赁列表
@@ -240,6 +394,18 @@ public class DistributorService {
 	}
 	
 	/**
+	 * 查看订单详情
+	 */
+	public Order getOrder(String userToken, String id){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		Order order = orderDao.getOrderByID(id);
+		return order;
+	}
+	
+	/**
 	 * 查看已处理订单
 	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
@@ -263,5 +429,86 @@ public class DistributorService {
 		List<Order> orderList = orderDao.getOrderStatusByDistributor(adminInfo.getId(), 1);
 		return orderList;
 	}
+	
+	/**
+	 * 商品发货
+	 */
+	public boolean sendOrder(String userToken, String id) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		if(orderDao.updateOrderList(3,id, null) != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * 租赁订单列表
+	 */
+	public List<RentOrder> listAllRentOrder(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		long distributorID = adminInfo.getId();
+		List<RentOrder> orderList = rentOrderDao.getRentOrderListByDistributorID(distributorID);
+		return orderList;
+	}
+	
+	/**
+	 * 查看租赁订单详情
+	 */
+	public RentOrder listOneRentOrder(String userToken, String id){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		RentOrder order = rentOrderDao.listOneRentOrder(id);
+		return order;
+	}
+	
+	/**
+	 * 查看已处理租赁订单
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	public List<RentOrder> listDoRentOrder(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		long id = adminInfo.getId();
+		List<RentOrder> orderList = rentOrderDao.getRentOrderStatusByDistributor(id, 3);
+		return orderList;
+	}
+	
+	/**
+	 * 查看为处理租赁订单
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	public List<RentOrder> listUndoRentOrder(String userToken){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		long id = adminInfo.getId();
+		List<RentOrder> orderList = rentOrderDao.getRentOrderStatusByDistributor(id, 1);
+		return orderList;
+	}
+	
+	/**
+	 * 租赁商品发货
+	 */
+//	public boolean sendRentOrder(String userToken, String id) {
+//		UserInfo adminInfo = onlineMap.get(userToken);
+//		if(adminInfo == null) {
+//			return false;
+//		}
+//		if(rentOrderDao.updateRentOrderList(3,id) != 1) {
+//			return false;
+//		}
+//		return true;
+//	}
 	
 }

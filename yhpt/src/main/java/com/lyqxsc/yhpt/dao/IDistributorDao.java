@@ -28,6 +28,18 @@ public interface IDistributorDao {
 	@Select("select * from distributor where username=#{username} and password=#{password}")
 	Distributor selectDistributor(@Param("username") String username,@Param("password") String password);
 	
+	//根据城市查询分销商
+	@Select("select * from distributor where city=#{city}")
+	List<Distributor> getDistributorByCity(@Param("city") String city);
+	
+	//根据省份查询分销商
+	@Select("select * from distributor where province=#{province}")
+	List<Distributor> getDistributorByProvince(@Param("province") String province);
+	
+	//根据用户最多搜索分销商
+	@Select(" select * from distributor where userNum=(select max(userNum) from distributor);")
+	List<Distributor> getDistributorByUserNum();
+	
 	@Select("select max(id) from distributor")
 	Long getMaxID();
 	
@@ -50,7 +62,7 @@ public interface IDistributorDao {
 	@Update("update distributor set lastLogintime=#{now} , lastLoginIP=#{ip} WHERE id=#{id}")
 	int updateLogoutState(@Param("now") long now, @Param("ip") String ip, @Param("id") long id);
 	
-	@Update("update distributor set password=#{password},realname=#{realname},sex=#{sex},phone=#{phone}"
+	@Update("update distributor set distributorName=#{distributorName},password=#{password},realname=#{realname},sex=#{sex},phone=#{phone},province=#{province},city=#{city},address=#{address},grade=#{grade},grandParent=#{grandParent},parent=#{parent},authority=#{authority}"
 			+ "where id=#{id}")
 	int updateDistributor(Distributor param);
 }

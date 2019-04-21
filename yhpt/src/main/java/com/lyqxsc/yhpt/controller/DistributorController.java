@@ -128,22 +128,22 @@ public class DistributorController {
 		return RetJson.success("success",commodityList);
 	}
 	
-	/**
-	 * 添加商品
-	 */
-	@RequestMapping(value = "/distributor/addcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson addCommodity(@RequestBody CommodityInfo param) {
-		String userToken = param.getUserToken();
-		Commodity commodity = param.getCommodity();
-		if(userToken == null || commodity == null) {
-			return RetJson.urlError("add commodity error", null);
-		}
-		
-		if(distributorService.addCommodity(userToken, commodity)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("add commodity error", null);
-	}
+//	/**
+//	 * 添加商品
+//	 */
+//	@RequestMapping(value = "/distributor/addcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson addCommodity(@RequestBody CommodityInfo param) {
+//		String userToken = param.getUserToken();
+//		Commodity commodity = param.getCommodity();
+//		if(userToken == null || commodity == null) {
+//			return RetJson.urlError("add commodity error", null);
+//		}
+//		
+//		if(distributorService.addCommodity(userToken, commodity)) {
+//			return RetJson.success("success");
+//		}
+//		return RetJson.unknowError("add commodity error", null);
+//	}
 	
 	/**
 	 * 商品下架

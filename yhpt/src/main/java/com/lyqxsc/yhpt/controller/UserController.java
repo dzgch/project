@@ -18,7 +18,7 @@ import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
-import com.lyqxsc.yhpt.domain.HomePage;
+import com.lyqxsc.yhpt.domain.WxHomePage;
 import com.lyqxsc.yhpt.domain.HotCommodity;
 import com.lyqxsc.yhpt.domain.NewCommodity;
 import com.lyqxsc.yhpt.domain.Order;
@@ -29,13 +29,16 @@ import com.lyqxsc.yhpt.service.UserService;
 import com.lyqxsc.yhpt.urlclass.AddressInfo;
 import com.lyqxsc.yhpt.urlclass.AppraiseInfo;
 import com.lyqxsc.yhpt.urlclass.CollectInfo;
+import com.lyqxsc.yhpt.urlclass.OrderBatchInfo;
 import com.lyqxsc.yhpt.urlclass.ShopCarInfo;
 import com.lyqxsc.yhpt.urlclass.BuyCommodity;
 import com.lyqxsc.yhpt.urlclass.UserToken;
 import com.lyqxsc.yhpt.urlclass.OrderInfo;
+import com.lyqxsc.yhpt.urlclass.RentOrderBatchInfo;
 import com.lyqxsc.yhpt.urlclass.RentOrderInfo;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
 import com.lyqxsc.yhpt.urlclass.UserTokenOne;
+import com.lyqxsc.yhpt.urlclass.UserTokenTwo;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @RestController
@@ -140,6 +143,21 @@ public class UserController {
 	}
 	
 	/**
+	 *	不填写邀请码，直接进入
+	 */
+	@RequestMapping(value = "/noinvitationcode", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson noInvitationCode(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("error", null);
+		}
+		if(userService.noInvitationCode(userToken)) {
+			return RetJson.success("success");
+		}
+		return RetJson.unknowError("error", null);
+	}
+	
+	/**
 	 * 首页
 	 * @return
 	 */
@@ -150,7 +168,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		HomePage homePage = userService.homePage(userToken);
+		WxHomePage homePage = userService.homePage(userToken);
 		if(homePage == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
@@ -186,7 +204,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		HomePage homePage = userService.shop(userToken);
+		WxHomePage homePage = userService.shop(userToken);
 		if(homePage == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
@@ -233,7 +251,7 @@ public class UserController {
 	}
 	
 	/**
-	 * 查询物品名称
+	 * 名称查询物品
 	 */
 	@RequestMapping(value = "/shop/classlist/selectByName", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson selectCommodityByName(@RequestBody UserTokenOne param) {
@@ -251,6 +269,23 @@ public class UserController {
 		return RetJson.success("success", list);
 	}
 	
+	/**
+	 * 根据商品id查询商品
+	 */
+	@RequestMapping(value = "/shop/selectcommoditybyid", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson selectCommodityByID(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		
+		if(userToken == null || id == null) {
+			return RetJson.urlError("logout error, please give me userToken", null);
+		}
+		List<Commodity> commodity = userService.selectCommodityByID(userToken,id);
+		if(commodity == null) {
+			return RetJson.unknowError("没有该商品", null);
+		}
+		return RetJson.success("success", commodity);
+	}
 	
 	/**
 	 * 新品  展示出售商品 最新10条
@@ -320,89 +355,104 @@ public class UserController {
 		return RetJson.success("success", rentCommodityList);
 	}
 	
-	/**
-	 * 根据商品id查询商品
-	 */
-	@RequestMapping(value = "/shop/selectcommoditybyid", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodityByID(@RequestBody UserTokenOne param) {
-		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getString());
-		
-		if(userToken == null || id == 0) {
-			return RetJson.urlError("logout error, please give me userToken", null);
-		}
-		Commodity commodity = userService.selectCommodityByID(userToken,id);
-		if(commodity == null) {
-			return RetJson.unknowError("没有该商品", null);
-		}
-		return RetJson.success("success", commodity);
-	}
+	
+	
+//	/**
+//	 * 购买
+//	 */
+//	@RequestMapping(value = "/shop/buycommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson buyCommodity(@RequestBody UserTokenOne param) {
+//		String userToken = param.getUserToken();
+//		String commodityID = param.getString();
+//		if((userToken == null) || (commodityID == 0)) {
+//			return RetJson.urlError("buy commodity error", null);
+//		}
+//		Commodity commodity = userService.makeCommodityOrder(userToken,commodityID,count,ip);
+//		if(order == null) {
+//			return RetJson.unknowError("buy commodity error", null);
+//		}
+//		return RetJson.success("success", order);
+//	}
+	
+//	/**
+//	 *  提交购买订单
+//	 */
+//	@RequestMapping(value = "/shop/pushorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson presentOrder(@RequestBody OrderInfo param) {
+//		String userToken = param.getUserToken();
+//		Order order = param.getOrder();
+//		if(userToken == null || order == null) {
+//			return RetJson.urlError("push order error", null);
+//		}
+//		if(!userService.presentOrder(userToken,order)) {
+//			return RetJson.urlError("push order error", null);
+//		}
+//		return RetJson.success("success");
+//	}
 	
 	/**
-	 * 购买
+	 * 批量提交订单
 	 */
-	@RequestMapping(value = "/shop/buycommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson buyCommodity(@RequestBody BuyCommodity param) {
+	@RequestMapping(value = "/shop/commodity/batchorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson batchPresentOrder(@RequestBody OrderBatchInfo param) {
 		String userToken = param.getUserToken();
-		long commodityID = param.getCommodityID();
-		int count = param.getCount();
-		String ip = param.getIp();
-		if((userToken == null) || (commodityID == 0) || count == 0) {
-			return RetJson.urlError("buy commodity error", null);
-		}
-		Order order = userService.makeCommodityOrder(userToken,commodityID,count,ip);
-		if(order == null) {
-			return RetJson.unknowError("buy commodity error", null);
-		}
-		return RetJson.success("success", order);
-	}
-	
-	/**
-	 *  提交购买订单
-	 */
-	@RequestMapping(value = "/shop/pushorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentOrder(@RequestBody OrderInfo param) {
-		String userToken = param.getUserToken();
-		Order order = param.getOrder();
-		if(userToken == null || order == null) {
+		List<Order> orderList = param.getOrder();
+		if(userToken == null || orderList == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.presentOrder(userToken,order)) {
+		if(!userService.batchPresentOrder(userToken,orderList)) {
 			return RetJson.urlError("push order error", null);
 		}
 		return RetJson.success("success");
 	}
+	
 	
 	/**
 	 * 租赁
 	 */
-	@RequestMapping(value = "/shop/rentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson rentCommodity(@RequestBody BuyCommodity param) {
-		String userToken = param.getUserToken();
-		long rentCommodityID = param.getCommodityID();
-		int count = param.getCount();
-		String ip = param.getIp();
-		if((userToken == null) || (rentCommodityID == 0) || (count == 0)) {
-			return RetJson.urlError("buy commodity error", null);
-		}
-		RentOrder rentOrder = userService.makeRentCommodityOrder(userToken,rentCommodityID,count,ip);
-		if(rentOrder == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		return RetJson.success("success", rentOrder);
-	}
+//	@RequestMapping(value = "/shop/rentcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson rentCommodity(@RequestBody BuyCommodity param) {
+//		String userToken = param.getUserToken();
+//		long rentCommodityID = param.getCommodityID();
+//		int count = param.getCount();
+//		String ip = param.getIp();
+//		if((userToken == null) || (rentCommodityID == 0) || (count == 0)) {
+//			return RetJson.urlError("buy commodity error", null);
+//		}
+//		RentOrder rentOrder = userService.makeRentCommodityOrder(userToken,rentCommodityID,count,ip);
+//		if(rentOrder == null) {
+//			return RetJson.unknowError("用户不在线", null);
+//		}
+//		return RetJson.success("success", rentOrder);
+//	}
+	
+//	/**
+//	 *  提交租赁订单
+//	 */
+//	@RequestMapping(value = "/shop/pushrentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson presentRentOrder(@RequestBody RentOrderInfo param) {
+//		String userToken = param.getUserToken();
+//		RentOrder rentOrder = param.getRentOrder();
+//		if(userToken == null || rentOrder == null) {
+//			return RetJson.urlError("push order error", null);
+//		}
+//		if(!userService.presentRentOrder(userToken,rentOrder)) {
+//			return RetJson.urlError("push order error", null);
+//		}
+//		return RetJson.success("success");
+//	}
 	
 	/**
-	 *  提交租赁订单
+	 * 批量提交租赁订单
 	 */
-	@RequestMapping(value = "/shop/pushrentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson presentRentOrder(@RequestBody RentOrderInfo param) {
+	@RequestMapping(value = "/shop/commodity/batchrentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson batchPresentOrder(@RequestBody RentOrderBatchInfo param) {
 		String userToken = param.getUserToken();
-		RentOrder rentOrder = param.getRentOrder();
-		if(userToken == null || rentOrder == null) {
+		List<RentOrder> orderList = param.getRentOrder();
+		if(userToken == null || orderList == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.presentRentOrder(userToken,rentOrder)) {
+		if(!userService.batchPresentRentOrder(userToken,orderList)) {
 			return RetJson.urlError("push order error", null);
 		}
 		return RetJson.success("success");
@@ -410,7 +460,7 @@ public class UserController {
 	
 	
 	/**
-	 * 我的全部订单
+	 * 我的全部购买订单
 	 */
 	@RequestMapping(value = "/usercenter/order", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson  allOrder(@RequestBody UserToken param) {
@@ -426,27 +476,29 @@ public class UserController {
 	}
 	
 	/**
+	 * 订单详情
+	 */
+	@RequestMapping(value = "/usercenter/order/particulars", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson orderParticulars(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		
+		if(userToken == null || id == null) {
+			return RetJson.urlError("logout error, please give me userToken", null);
+		}
+		Order order = userService.getOrder(userToken,id);
+		if(order == null) {
+			return RetJson.unknowError("没有该商品", null);
+		}
+		return RetJson.success("success", order);
+	}
+	
+	
+	/**
 	 * 待付款订单列表
 	 */
 	@RequestMapping(value = "/usercenter/order/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson  noPayOrder(@RequestBody UserToken param) {
-		String userToken = param.getUserToken();
-		if(userToken == null) {
-			return RetJson.urlError("present order error", null);
-		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 0);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
-	}
-	
-	/**
-	 * 已付款订单列表
-	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
-	 */
-	@RequestMapping(value = "/usercenter/order/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  isPayOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -459,11 +511,11 @@ public class UserController {
 	}
 	
 	/**
-	 * 待发货订单列表
-	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 * 已付款订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
 	 */
-	@RequestMapping(value = "/usercenter/order/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  noSendOrder(@RequestBody UserToken param) {
+	@RequestMapping(value = "/usercenter/order/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  isPayOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -476,11 +528,11 @@ public class UserController {
 	}
 	
 	/**
-	 * 待收货订单列表
-	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 * 待发货订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
 	 */
-	@RequestMapping(value = "/usercenter/order/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  isSendOrder(@RequestBody UserToken param) {
+	@RequestMapping(value = "/usercenter/order/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  noSendOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -493,11 +545,11 @@ public class UserController {
 	}
 	
 	/**
-	 * 待评价订单列表
-	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 * 待收货订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
 	 */
-	@RequestMapping(value = "/usercenter/order/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  appraiseOrder(@RequestBody UserToken param) {
+	@RequestMapping(value = "/usercenter/order/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  isSendOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
@@ -508,6 +560,147 @@ public class UserController {
 		}
 		return RetJson.success("success", orderList);
 	}
+	
+	/**
+	 * 待评价订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/order/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  appraiseOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 5);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 交易完成
+	 */
+	@RequestMapping(value = "/usercenter/order/end", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  endOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 6);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	
+	/**
+	 * 已取消订单
+	 */
+	@RequestMapping(value = "/usercenter/order/getcancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  getCancelOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getTypeOrder(userToken, 0);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 取消订单
+	 */
+	@RequestMapping(value = "/usercenter/order/cancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  cancelOrder(@RequestBody UserTokenTwo param) {
+		String userToken = param.getUserToken();
+		String id = param.getOne();
+		String reason = param.getTwo();
+		
+		if(userToken == null || id == null || reason == null) {
+			return RetJson.urlError("缺少参数", null);
+		}
+
+		if(userService.cancelOrder(userToken, id, reason)) {
+			return RetJson.success("取消订单成功");
+		}
+		return RetJson.unknowError("取消订单失败", null);
+	}
+	
+	/**
+	 * 所有租赁订单
+	 */
+	@RequestMapping(value = "/usercenter/rentorder", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  allRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<Order> orderList = userService.getAllOrder(userToken);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+//	/**
+//	 * 租赁订单详情
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/particulars", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	/**
+//	 * 待付款租赁订单列表
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	
+//	/**
+//	 * 已付款订单列表
+//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	/**
+//	 * 待发货订单列表
+//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	/**
+//	 * 待收货订单列表
+//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	/**
+//	 * 待评价订单列表
+//	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	
+//	/**
+//	 * 查看取消订单
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/getcancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//	
+//	/**
+//	 * 取消订单
+//	 */
+//	@RequestMapping(value = "/usercenter/rentorder/cancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	
+//			
+//			
+//			
+//			
+//	
+//			
+			
+
 	
 	
 	/**
@@ -548,8 +741,8 @@ public class UserController {
 	@RequestMapping(value = "/usercenter/shopcar/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson removeShopCar(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getString());
-		if(userToken == null || id == 0) {
+		String id = param.getString();
+		if(userToken == null || id == null) {
 			return RetJson.urlError("remove shopcar error", null);
 		}
 		if(userService.removeShopCar(userToken, id)) {
@@ -573,6 +766,25 @@ public class UserController {
 		}
 		return RetJson.unknowError("false", null);
 	}
+	
+	/**
+	 * 购物车结算
+	 */
+	@RequestMapping(value = "/usercenter/shopcar/settle", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson settleShopCar(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		if(userToken == null || id == null) {
+			return RetJson.urlError("remove shopcar error", null);
+		}
+		List<Order> list = userService.settleShopCar(userToken, id);
+		if(list == null) {
+			RetJson.unknowError("settle error", null);
+		}
+		
+		return RetJson.success("success",list);
+	}
+	
 	
 	/**
 	 * 收藏夹列表
@@ -612,8 +824,8 @@ public class UserController {
 	@RequestMapping(value = "/usercenter/collect/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson removeCollect(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getString());
-		if(userToken == null || id == 0) {
+		String id = param.getString();
+		if(userToken == null || id == null) {
 			return RetJson.urlError("remove collect error", null);
 		}
 		if(userService.removeCollect(userToken, id)) {
@@ -786,7 +998,5 @@ public class UserController {
 		}
 		return RetJson.success("success",address);
 	}
-	
-	
-	
+
 }
