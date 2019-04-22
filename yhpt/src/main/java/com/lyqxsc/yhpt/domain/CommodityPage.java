@@ -2,21 +2,20 @@ package com.lyqxsc.yhpt.domain;
 
 import java.util.List;
 
-public class NewCommodity {
+public class CommodityPage {
 	String[] pic;
-	List<Commodity> commodity;
-
-
+	List<CommodityBak> commodity;
+	
 	public String[] getPic() {
 		return pic;
 	}
 	public void setPic(String[] pic) {
 		this.pic = pic;
 	}
-	public List<Commodity> getCommodity() {
+	public List<CommodityBak> getCommodity() {
 		return commodity;
 	}
-	public void setCommodity(List<Commodity> commodity) {
+	public void setCommodity(List<CommodityBak> commodity) {
 		this.commodity = commodity;
 	}
 }

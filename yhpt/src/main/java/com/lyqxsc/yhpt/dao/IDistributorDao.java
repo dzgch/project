@@ -65,4 +65,13 @@ public interface IDistributorDao {
 	@Update("update distributor set distributorName=#{distributorName},password=#{password},realname=#{realname},sex=#{sex},phone=#{phone},province=#{province},city=#{city},address=#{address},grade=#{grade},grandParent=#{grandParent},parent=#{parent},authority=#{authority}"
 			+ "where id=#{id}")
 	int updateDistributor(Distributor param);
+	
+	//购买订单数自增
+	@Update("update distributor set orderNum=orderNum+#{num} where id=#{id}")
+	int addOrderNum(@Param("num") int num, @Param("id") long id);
+	
+	//购买订单数自增
+	@Update("update distributor set rentOrderNum=rentOrderNum+#{num} where id=#{id}")
+	int addRentOrderNum(@Param("num") int num, @Param("id") long id);
+	
 }

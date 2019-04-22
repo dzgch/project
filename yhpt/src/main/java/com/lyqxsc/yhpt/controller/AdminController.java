@@ -716,20 +716,21 @@ public class AdminController {
 	 * 商品发货
 	 */
 	@RequestMapping(value = "/admin/order/send", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson sendCommodify(@RequestBody UserTokenOne param) {
+	public RetJson sendCommodify(@RequestBody UserTokenTwo param) {
 		String userToken = param.getUserToken();
-		String id = param.getString();
-		if(userToken == null || id == null) {
+		String id = param.getOne();
+		String count = param.getTwo();
+		if(userToken == null || id == null || count == null) {
 			return RetJson.urlError("error, please give me userToken", null);
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.sendOrder(userToken, id)) {
+			if(adminService.sendOrder(userToken, id, count)) {
 				return RetJson.success("success");
 			}
 		}
 		else{
-			if(distributorService.sendOrder(userToken, id)) {
+			if(distributorService.sendOrder(userToken, id, count)) {
 				return RetJson.success("success");
 			}
 		}

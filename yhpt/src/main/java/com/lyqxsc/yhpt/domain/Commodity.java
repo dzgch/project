@@ -26,7 +26,7 @@ public class Commodity {
 	float price5;
 	//价格6
 	float price6;
-	//押金
+	//租金
 	float rentPrice;
 	float rentPrice1;
 	float rentPrice2;
@@ -56,7 +56,6 @@ public class Commodity {
 	@JsonIgnore
 	long distributor;
 	//种类
-	@JsonIgnore
 	int classId;
 	//种类
 	String classStr;

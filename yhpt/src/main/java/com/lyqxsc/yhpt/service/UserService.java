@@ -1,6 +1,7 @@
 package com.lyqxsc.yhpt.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.lyqxsc.yhpt.controller.WechartController;
@@ -29,9 +31,12 @@ import com.lyqxsc.yhpt.domain.Address;
 import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityBak;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
+import com.lyqxsc.yhpt.domain.CommodityPage;
 import com.lyqxsc.yhpt.domain.Distributor;
 import com.lyqxsc.yhpt.domain.WxHomePage;
+import com.lyqxsc.yhpt.urlclass.ClassifyList;
 import com.lyqxsc.yhpt.domain.HotCommodity;
 import com.lyqxsc.yhpt.domain.InvitationCode;
 import com.lyqxsc.yhpt.domain.NewCommodity;
@@ -80,6 +85,24 @@ public class UserService {
 	@Autowired
 	ICommodityClassifyDao commodityClassifyDao;
 	
+	@Value("${RentCommodityPic}")
+	String rentCommodityPic;
+	
+	@Value("${CommodityPic}")
+	String commodityPic;
+	
+	@Value("${HotPagePic}")
+	String hotPagePic;
+	
+	@Value("${NewPagePic}")
+	String newPagePic;
+	
+	@Value("{ShopPic}")
+	String shopPic;
+	
+	@Value("{HomePic}")
+	String homePic;
+	
 	static int NEWSHOPCOUNT = 10;
 	
 	// 在线用户集合<id,用户信息>
@@ -127,22 +150,16 @@ public class UserService {
 //		user.setRealName(String realName);
 //		user.setEmail(String email);
 //		user.setPhone(String phone);
-		user.setSex((String)wxUserInfo.get("sex"));
+		user.setSex((int)wxUserInfo.get("sex")+"");
 		user.setProvince((String)wxUserInfo.get("province"));
 		user.setCity((String)wxUserInfo.get("city"));
 		user.setHeadImgUrl((String)wxUserInfo.get("headimgurl"));
 //		user.setAddress(String address);
 		user.setWallet(0);
+		user.setAuthority(1);
 
-		//TODO 添加分销商（0为总部，记得修改）
-		user.setDistributor(0);
 		user.setAddTime(System.currentTimeMillis());
 
-		System.out.println("------------------------");
-		System.out.println((String)wxUserInfo.get("openid"));
-		System.out.println(user.getOpenID());
-		System.out.println("------------------------");
-		//TODO
 		if(userDao.addUser(user) < 0) {
 			return null;
 		}
@@ -157,9 +174,6 @@ public class UserService {
 	 */
 	public User login(JSONObject wxUserInfo, String ip) {
 		String openID = (String)wxUserInfo.get("openid");
-		System.out.println("------------------------");
-		System.out.println((String)wxUserInfo.get("openid"));
-		System.out.println("------------------------");
 		User user = userDao.selectUserByOpenID(openID);
 		if(user == null) {
 			user = signup(wxUserInfo);
@@ -168,6 +182,7 @@ public class UserService {
 				return null;
 			}
 		}
+		
 		/*向数据库更新时间和本次登录的IP*/
 		long now = Calendar.getInstance().getTime().getTime();
 		userDao.updateLoginState(now, ip, openID);
@@ -188,8 +203,9 @@ public class UserService {
 		}
 		
 		String userToken = id + "O" + now;
-		onlineMap.put(userToken, userInfo);
-		
+		if(user.getAuthority() == 1) {
+			onlineMap.put(userToken, userInfo);
+		}
 		/*更新返回前端的user IP*/
 		user.setUserToken(userToken);
 		user.setThisLoginIP(ip);
@@ -285,11 +301,7 @@ public class UserService {
 		}
 		
 		WxHomePage homePage = new WxHomePage();
-		String[] pic = new String[3];
-		pic[0] = "./pic1";
-		pic[1] = "./pic2";
-		pic[2] = "./pic3";
-		homePage.setPic(pic);
+		homePage.setPic(homePic.split(";"));
 		
 		Long userID = Long.parseLong(userToken.split("O")[0]);
 		long distributorID = userDao.selectDistributor(userID);
@@ -324,11 +336,8 @@ public class UserService {
 		}
 		
 		WxHomePage homePage = new WxHomePage();
-		String[] pic = new String[3];
-		pic[0] = "./pic1";
-		pic[1] = "./pic2";
-		pic[2] = "./pic3";
-		homePage.setPic(pic);
+		
+		homePage.setPic(shopPic.split(";"));
 		
 		Long userID = Long.parseLong(userToken.split("O")[0]);
 		long distributorID = userDao.selectDistributor(userID);
@@ -341,13 +350,15 @@ public class UserService {
 	/**
 	 * 分类列表
 	 */
-	public List<CommodityClassify> classList(String userToken,int type){
+	public ClassifyList classList(String userToken,int type){
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		List<CommodityClassify> list = commodityClassifyDao.selectClass(type);
-		return list;
+		ClassifyList classifyList = new ClassifyList();
+		classifyList.setAgentia(commodityClassifyDao.selectClass(1));
+		classifyList.setMechanical(commodityClassifyDao.selectClass(2));
+		return classifyList;
 	}
 	
 	/**
@@ -398,11 +409,8 @@ public class UserService {
 		long commodityMaxID = commodityDao.getMaxID();
 		
 		NewCommodity commodity = new NewCommodity();
-		List<String> pic = new ArrayList<String>();
 		List<Commodity> commodityList = new ArrayList<Commodity>();
 		
-		//TODO  添加图片，后期改为读取配置文件
-		pic.add("");
 		while(commodityList.size() < 10) {
 			Commodity temp =  commodityDao.selectNewCommodityByDistributor(distributorID,commodityMaxID);
 			commodityList.add(temp);
@@ -412,7 +420,7 @@ public class UserService {
 			}
 		}
 		commodity.setCommodity(commodityList);
-		commodity.setPic(pic);
+		commodity.setPic(newPagePic.split(";"));
 		return commodity;
 	}
 	
@@ -430,11 +438,8 @@ public class UserService {
 		Integer maxNum = commodityDao.getMaxOrdernum();
 		
 		HotCommodity commodity = new HotCommodity();
-		List<String> pic = new ArrayList<String>();
 		List<Commodity> commodityList = new ArrayList<Commodity>();
 		
-		//TODO  添加图片，后期改为读取配置文件
-		pic.add("");
 		while(commodityList.size() < 10) {
 			Commodity temp =  commodityDao.selectHotCommodityByDistributor(distributorID,maxNum);
 			commodityList.add(temp);
@@ -444,52 +449,75 @@ public class UserService {
 			}
 		}
 		commodity.setCommodity(commodityList);
-		commodity.setPic(pic);
+		commodity.setPic(homePic.split(";"));
 		return commodity;
 	}
 	
 	/**
 	 *  查看可出售商品
 	 */
-	public List<Commodity> selectCommodity(String userToken) {
+	public CommodityPage selectCommodity(String userToken) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributor = userDao.selectDistributor(userInfo.getId());
-		commodityList = commodityDao.selectCommodityForUser(distributor);
-		return commodityList;
+		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		
+		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		int grade = distributor.getGrade();
+		List<CommodityBak> commodityListTemp = commodityDao.selectCommodityBakForUser(distributorId);
+		List<CommodityBak> commodity = hidePriceList(commodityListTemp, grade);
+		
+		CommodityPage commodityPage = new CommodityPage();
+		commodityPage.setCommodity(commodity);
+		commodityPage.setPic(commodityPic.split(";"));
+		return commodityPage;
 	}
 	
 	
 	/**
 	 *  查看可租赁商品
 	 */
-	public List<Commodity> selectRentCommodity(String userToken) {
+	public CommodityPage selectRentCommodity(String userToken) {
 		//判断用户是否在线
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributor = userDao.selectDistributor(userInfo.getId());
-		commodityList = commodityDao.selectRentCommodityForUser(distributor);
-		return commodityList;
+		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		
+		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		int grade = distributor.getGrade();
+		List<CommodityBak> commodityListTemp = commodityDao.selectRentCommodityBakForUser(distributorId);
+		List<CommodityBak> commodity = hidePriceList(commodityListTemp, grade);
+		
+		CommodityPage commodityPage = new CommodityPage();
+		commodityPage.setCommodity(commodity);
+		commodityPage.setPic(rentCommodityPic.split(";"));
+		return commodityPage;
 	}
 	
-	public List<Commodity> selectCommodityByID(String userToken,String idbuf) {
+	/**
+	 * 根据商品id查询商品，多个物品用！隔开
+	 */
+	public List<CommodityBak> selectCommodityByID(String userToken,String idbuf) {
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributor = userDao.selectDistributor(userInfo.getId());
+		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		int grade = distributor.getGrade();
+		
 		String[] idStr = idbuf.split("!");
-		List<Commodity> commodityList = new ArrayList<Commodity>();
+		List<CommodityBak> commodityList = new ArrayList<CommodityBak>();
 		for(String id:idStr) {
-			Commodity commodity = commodityDao.selectCommodityByIDForUser(Long.parseLong(id),distributor);
+			CommodityBak commodity = commodityDao.selectCommodityBakByIDForUser(Long.parseLong(id),distributorId);
 			commodityList.add(commodity);
 		}
-		return commodityList;
+		List<CommodityBak> commodity = hidePriceList(commodityList, grade);
+		return commodity;
 	}
 	
 	/**
@@ -556,11 +584,17 @@ public class UserService {
 		if(userInfo == null) {
 			return false;
 		}
+		User user = userDao.selectUserByID(userInfo.getId());
+		Distributor distributor = distributorDao.selectDistributorByID(user.getDistributor());
+		int num = 0;
 		for(Order order:orderList) {
 			if(orderDao.addOrderList(order) != 1) {
 				return false;
 			}
+			num++;
 		}
+		userDao.addOrderNum(num,userInfo.getId());
+		distributorDao.addOrderNum(num, distributor.getId());
 		return true;
 	}
 	
@@ -637,11 +671,19 @@ public class UserService {
 			return false;
 		}
 		
+		
+		
+		User user = userDao.selectUserByID(userInfo.getId());
+		Distributor distributor = distributorDao.selectDistributorByID(user.getDistributor());
+		int num = 0;
 		for(RentOrder order:rentOrderList) {
 			if(rentOrderDao.addRentOrderList(order) != 1) {
 				return false;
 			}
+			num++;
 		}
+		userDao.addRentOrderNum(num,userInfo.getId());
+		distributorDao.addRentOrderNum(num, distributor.getId());
 		return true;
 	}
 	
@@ -728,7 +770,7 @@ public class UserService {
 	
 	
 	/**
-	 * 取消购买订单
+	 * 取消租赁订单
 	 */
 	public boolean cancelRentOrder(String userToken,String id,String reason) {
 		UserInfo userInfo = onlineMap.get(userToken);
@@ -739,6 +781,20 @@ public class UserService {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * 返回待付款/已付款订单
+	 */
+	public List<RentOrder> getTypeRentOrder(String userToken, int type){
+		//判断用户是否在线
+		UserInfo userInfo = onlineMap.get(userToken);
+		if(userInfo == null) {
+			return null;
+		}
+		Long id = userInfo.getId();
+		List<RentOrder> orderList = rentOrderDao.getTypeRentOrderByID(id,type);
+		return orderList;
 	}
 	
 	
@@ -1058,6 +1114,61 @@ public class UserService {
 			}
 		}
 		return ret;
+	}
+	/**
+	 * 伪造列表价格，1出售，2租赁
+	 */
+	private List<CommodityBak> hidePriceList(List<CommodityBak> commodityListTemp,int grade){
+		List<CommodityBak> commodity = new ArrayList<CommodityBak>();
+		for(CommodityBak commodityBak:commodityListTemp) {
+			switch (grade) {
+			case 1:
+				commodityBak.setPrice(commodityBak.getPrice1());
+				break;
+			case 2:
+				commodityBak.setPrice(commodityBak.getPrice2());
+				break;
+			case 3:
+				commodityBak.setPrice(commodityBak.getPrice3());
+				break;
+			case 4:
+				commodityBak.setPrice(commodityBak.getPrice4());
+				break;
+			case 5:
+				commodityBak.setPrice(commodityBak.getPrice5());
+				break;
+			default:
+				break;
+			}
+			commodity.add(commodityBak);
+		}
+		return commodity;
+	}
+	
+	/**
+	 * 伪造价格
+	 */
+	private CommodityBak hidePrice(CommodityBak commodity, int grade){
+		switch (grade) {
+		case 1:
+			commodity.setPrice(commodity.getPrice1());
+			break;
+		case 2:
+			commodity.setPrice(commodity.getPrice2());
+			break;
+		case 3:
+			commodity.setPrice(commodity.getPrice3());
+			break;
+		case 4:
+			commodity.setPrice(commodity.getPrice4());
+			break;
+		case 5:
+			commodity.setPrice(commodity.getPrice5());
+			break;
+		default:
+			break;
+		}
+		return commodity;
 	}
 
 //	@Override

@@ -17,7 +17,9 @@ import com.lyqxsc.yhpt.domain.Address;
 import com.lyqxsc.yhpt.domain.Appraise;
 import com.lyqxsc.yhpt.domain.Collect;
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityBak;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
+import com.lyqxsc.yhpt.domain.CommodityPage;
 import com.lyqxsc.yhpt.domain.WxHomePage;
 import com.lyqxsc.yhpt.domain.HotCommodity;
 import com.lyqxsc.yhpt.domain.NewCommodity;
@@ -32,6 +34,7 @@ import com.lyqxsc.yhpt.urlclass.CollectInfo;
 import com.lyqxsc.yhpt.urlclass.OrderBatchInfo;
 import com.lyqxsc.yhpt.urlclass.ShopCarInfo;
 import com.lyqxsc.yhpt.urlclass.BuyCommodity;
+import com.lyqxsc.yhpt.urlclass.ClassifyList;
 import com.lyqxsc.yhpt.urlclass.UserToken;
 import com.lyqxsc.yhpt.urlclass.OrderInfo;
 import com.lyqxsc.yhpt.urlclass.RentOrderBatchInfo;
@@ -223,7 +226,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		List<CommodityClassify> list = userService.classList(userToken,Integer.parseInt(type));
+		ClassifyList list = userService.classList(userToken,Integer.parseInt(type));
 		if(list == null) {
 			return RetJson.unknowError("class list error", null);
 		}
@@ -270,7 +273,7 @@ public class UserController {
 	}
 	
 	/**
-	 * 根据商品id查询商品
+	 * 根据商品id查询商品，多个物品用！隔开
 	 */
 	@RequestMapping(value = "/shop/selectcommoditybyid", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson selectCommodityByID(@RequestBody UserTokenOne param) {
@@ -280,7 +283,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		List<Commodity> commodity = userService.selectCommodityByID(userToken,id);
+		List<CommodityBak> commodity = userService.selectCommodityByID(userToken,id);
 		if(commodity == null) {
 			return RetJson.unknowError("没有该商品", null);
 		}
@@ -332,11 +335,11 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		List<Commodity> commodityList = userService.selectCommodity(userToken);
-		if(commodityList == null) {
+		CommodityPage commodityPage = userService.selectCommodity(userToken);
+		if(commodityPage == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
-		return RetJson.success("success", commodityList);
+		return RetJson.success("success", commodityPage);
 	}
 	
 	/**
@@ -348,11 +351,11 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		List<Commodity> rentCommodityList = userService.selectRentCommodity(userToken);
-		if(rentCommodityList == null) {
+		CommodityPage rentCommodityPage = userService.selectRentCommodity(userToken);
+		if(rentCommodityPage == null) {
 			return RetJson.unknowError("用户不在线", null);
 		}
-		return RetJson.success("success", rentCommodityList);
+		return RetJson.success("success", rentCommodityPage);
 	}
 	
 	
@@ -364,8 +367,8 @@ public class UserController {
 //	public RetJson buyCommodity(@RequestBody UserTokenOne param) {
 //		String userToken = param.getUserToken();
 //		String commodityID = param.getString();
-//		if((userToken == null) || (commodityID == 0)) {
-//			return RetJson.urlError("buy commodity error", null);
+//		if((userToken == null) || (commodityID == null)) {
+//			return RetJson.urlError("参数错误", null);
 //		}
 //		Commodity commodity = userService.makeCommodityOrder(userToken,commodityID,count,ip);
 //		if(order == null) {
@@ -639,68 +642,156 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getAllOrder(userToken);
+		List<RentOrder> orderList = userService.getAllRentOrder(userToken);
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 租赁订单详情
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/particulars", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson rentOrderParticulars(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		
+		if(userToken == null || id == null) {
+			return RetJson.urlError("logout error, please give me userToken", null);
+		}
+		RentOrder order = userService.getRentOrder(userToken,id);
+		return RetJson.success("success", order);
+	}
+	
+	/**
+	 * 待付款租赁订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  noPayRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 1);
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 已付款订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  isPayRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 2);
 		if(orderList == null) {
 			return RetJson.unknowError("false", null);
 		}
 		return RetJson.success("success", orderList);
 	}
 	
-//	/**
-//	 * 租赁订单详情
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/particulars", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	/**
-//	 * 待付款租赁订单列表
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/nopay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	
-//	/**
-//	 * 已付款订单列表
-//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/pay", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	/**
-//	 * 待发货订单列表
-//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	/**
-//	 * 待收货订单列表
-//	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	/**
-//	 * 待评价订单列表
-//	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	
-//	/**
-//	 * 查看取消订单
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/getcancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//	
-//	/**
-//	 * 取消订单
-//	 */
-//	@RequestMapping(value = "/usercenter/rentorder/cancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	
-//			
-//			
-//			
-//			
-//	
-//			
-			
+	/**
+	 * 待发货订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/nosend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  noSendRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 3);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 待收货订单列表
+	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/issend", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  isSendRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 4);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 待评价订单列表
+	 * 订单状态 1待支付, 2已支付, 3待发货, 4待收货，5待评价, 6交易完成, 0交易已取消
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/appraise", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  appraiseRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 5);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 租赁交易完成
+	 */
+	public RetJson  endRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 6);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 查看取消订单
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/getcancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  getCancelRentOrder(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("present order error", null);
+		}
+		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 0);
+		if(orderList == null) {
+			return RetJson.unknowError("false", null);
+		}
+		return RetJson.success("success", orderList);
+	}
+	
+	/**
+	 * 取消订单
+	 */
+	@RequestMapping(value = "/usercenter/rentorder/cancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson  cancelRentOrder(@RequestBody UserTokenTwo param) {
+		String userToken = param.getUserToken();
+		String id = param.getOne();
+		String reason = param.getTwo();
+		
+		if(userToken == null || id == null || reason == null) {
+			return RetJson.urlError("缺少参数", null);
+		}
 
+		if(userService.cancelRentOrder(userToken, id, reason)) {
+			return RetJson.success("取消订单成功");
+		}
+		return RetJson.unknowError("取消订单失败", null);
+	}
 	
 	
 	/**

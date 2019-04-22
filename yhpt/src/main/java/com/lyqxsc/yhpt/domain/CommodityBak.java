@@ -29,8 +29,21 @@ public class CommodityBak {
 	//价格6
 	@JsonIgnore
 	float price6;
-	//分类 1:租赁  2:出售  3:租赁+出售
+	//租金
+	float rentPrice;
 	@JsonIgnore
+	float rentPrice1;
+	@JsonIgnore
+	float rentPrice2;
+	@JsonIgnore
+	float rentPrice3;
+	@JsonIgnore
+	float rentPrice4;
+	@JsonIgnore
+	float rentPrice5;
+	@JsonIgnore
+	float rentPrice6;
+	//分类 1:租赁  2:出售  3:租赁+出售
 	String type;
 	//库存
 	int inventory;
@@ -48,7 +61,6 @@ public class CommodityBak {
 	@JsonIgnore
 	long distributor;
 	//种类
-	@JsonIgnore
 	int classId;
 	//种类
 	String classStr;
@@ -179,5 +191,47 @@ public class CommodityBak {
 	}
 	public void setOnline(int online) {
 		this.online = online;
+	}
+	public float getRentPrice() {
+		return rentPrice;
+	}
+	public void setRentPrice(float rentPrice) {
+		this.rentPrice = rentPrice;
+	}
+	public float getRentPrice1() {
+		return rentPrice1;
+	}
+	public void setRentPrice1(float rentPrice1) {
+		this.rentPrice1 = rentPrice1;
+	}
+	public float getRentPrice2() {
+		return rentPrice2;
+	}
+	public void setRentPrice2(float rentPrice2) {
+		this.rentPrice2 = rentPrice2;
+	}
+	public float getRentPrice3() {
+		return rentPrice3;
+	}
+	public void setRentPrice3(float rentPrice3) {
+		this.rentPrice3 = rentPrice3;
+	}
+	public float getRentPrice4() {
+		return rentPrice4;
+	}
+	public void setRentPrice4(float rentPrice4) {
+		this.rentPrice4 = rentPrice4;
+	}
+	public float getRentPrice5() {
+		return rentPrice5;
+	}
+	public void setRentPrice5(float rentPrice5) {
+		this.rentPrice5 = rentPrice5;
+	}
+	public float getRentPrice6() {
+		return rentPrice6;
+	}
+	public void setRentPrice6(float rentPrice6) {
+		this.rentPrice6 = rentPrice6;
 	}
 }

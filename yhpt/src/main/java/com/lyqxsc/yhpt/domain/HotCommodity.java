@@ -3,12 +3,13 @@ package com.lyqxsc.yhpt.domain;
 import java.util.List;
 
 public class HotCommodity {
-	List<String> pic;
+	String[] pic;
 	List<Commodity> commodity;
-	public List<String> getPic() {
+
+	public String[] getPic() {
 		return pic;
 	}
-	public void setPic(List<String> pic) {
+	public void setPic(String[] pic) {
 		this.pic = pic;
 	}
 	public List<Commodity> getCommodity() {

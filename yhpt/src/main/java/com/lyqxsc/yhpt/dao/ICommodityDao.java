@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import com.lyqxsc.yhpt.domain.Commodity;
+import com.lyqxsc.yhpt.domain.CommodityBak;
 
 
 /**
@@ -53,18 +54,29 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where distributor=#{distributor}")
 	List<Commodity> selectAllByDistributor(@Param("distributor") long distributor);
 	
-	//获取分销商的商品
+	//获取分销商的商品 1租赁 2出售 3租赁出售
 	@Select("select * from commoditylist where (type=2 or type=3) and (distributor=#{distributor} or distributor=0)")
 	List<Commodity> selectCommodityForUser(@Param("distributor") long distributor);
+	
+	@Select("select * from commoditylist where (type=2 or type=3) and (distributor=#{distributor} or distributor=0)")
+	List<CommodityBak> selectCommodityBakForUser(@Param("distributor") long distributor);
 	
 	@Select("select * from commoditylist where (type=1 or type=3) and (distributor=#{distributor} or distributor=0)")
 	List<Commodity> selectRentCommodityForUser(@Param("distributor") long distributor);
 	
+	@Select("select * from commoditylist where (type=1 or type=3) and (distributor=#{distributor} or distributor=0)")
+	List<CommodityBak> selectRentCommodityBakForUser(@Param("distributor") long distributor);
+	
 	@Select("select * from commoditylist where distributor=#{distributor} or distributor=0")
 	List<Commodity> selectAllCommodityForUser(@Param("distributor") long distributor);
 	
+	//根据物品id查询分销商的商品
 	@Select("select * from commoditylist where id=#{id} and (distributor=#{distributor} or distributor=0)")
 	Commodity selectCommodityByIDForUser(@Param("id")long id, @Param("distributor") long distributor);
+	
+	//根据物品id查询分销商的商品
+	@Select("select * from commoditylist where id=#{id} and (distributor=#{distributor} or distributor=0)")
+	CommodityBak selectCommodityBakByIDForUser(@Param("id")long id, @Param("distributor") long distributor);
 	
 	@Select("select * from commoditylist where distributor=#{distributor} and id=#{id}")
 	Commodity selectNewCommodityByDistributor(@Param("distributor") long distributor,@Param("id") long id);
@@ -78,9 +90,12 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where distributor=#{distributor} and name=#{name}")
 	List<Commodity> selectCommodityByName(@Param("distributor") long distributor, @Param("name") String name);
 
-	@Select("select * from commoditylist where inventory<#{inventory} and distributor=#{distributor}")
+	//告警商品,管理员
+	@Select("select * from commoditylist where inventory<=#{inventory} and distributor=#{distributor}")
 	List<Commodity> inventoryWarning(@Param("inventory") int num,@Param("id") long id);
-	
+	//不告警商品,管理员
+	@Select("select * from commoditylist where inventory>#{inventory} and distributor=#{distributor}")
+	List<Commodity> inventoryNoWarning(@Param("inventory") int num,@Param("id") long id);
 	
 	@Delete("delete from commoditylist where id=#{id}")
 	int removeCommodity(@Param("id") long id);
@@ -104,8 +119,8 @@ public interface ICommodityDao {
 	int updateOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumMouth") int ordernumMouth,@Param("id") long id);
 	
 	//设置商品数量
-	@Update("update commoditylist set inventory=#{inventory} where distributor=#{distributor}")
-	int setCommodityCount(@Param("distributor")long id, @Param("inventory") int inventory);
+	@Update("update commoditylist set inventory=inventory+#{count} where id=#{id}")
+	int setCommodityCount(@Param("id")long id, @Param("count") int count);
 	
 	
 }

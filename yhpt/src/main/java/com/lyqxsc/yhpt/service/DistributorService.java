@@ -277,11 +277,8 @@ public class DistributorService {
 		if(adminInfo == null) {
 			return false;
 		}
-		Commodity commodity = commodityDao.selectCommodityByID(commodityID);
-		int raw = commodity.getInventory();
-		
-		raw = raw + count;
-		if(commodityDao.setCommodityCount(commodityID, raw) != 1) {
+
+		if(commodityDao.setCommodityCount(commodityID, count) != 1) {
 			return false;
 		}
 		return true;
@@ -433,9 +430,13 @@ public class DistributorService {
 	/**
 	 * 商品发货
 	 */
-	public boolean sendOrder(String userToken, String id) {
+	public boolean sendOrder(String userToken, String id, String count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
+			return false;
+		}
+		
+		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
 			return false;
 		}
 		if(orderDao.updateOrderList(3,id, null) != 1) {
@@ -500,15 +501,15 @@ public class DistributorService {
 	/**
 	 * 租赁商品发货
 	 */
-//	public boolean sendRentOrder(String userToken, String id) {
-//		UserInfo adminInfo = onlineMap.get(userToken);
-//		if(adminInfo == null) {
-//			return false;
-//		}
-//		if(rentOrderDao.updateRentOrderList(3,id) != 1) {
-//			return false;
-//		}
-//		return true;
-//	}
+	public boolean sendRentOrder(String userToken, String id) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		if(rentOrderDao.updateRentOrderList(3,id,null) != 1) {
+			return false;
+		}
+		return true;
+	}
 	
 }

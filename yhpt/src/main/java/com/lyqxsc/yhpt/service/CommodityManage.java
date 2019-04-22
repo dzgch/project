@@ -46,22 +46,22 @@ public class CommodityManage {
 	};
 	
 	public CommodityManage() {
-//		Calendar timeDay = Calendar.getInstance();
-//		timeDay.set(Calendar.HOUR_OF_DAY, 23);
-//		timeDay.set(Calendar.MINUTE,59);
-//		timeDay.set(Calendar.SECOND,59);
-//		timeDay.add(Calendar.SECOND, 1);
-//		Timer timerDay = new Timer("Commodity order day");
-//		timerDay.scheduleAtFixedRate(taskDay, timeDay.getTime(), 24*60*60*1000);
-//		
-//		Calendar timeMonth = Calendar.getInstance();
-//		timeMonth.set(Calendar.DAY_OF_MONTH, 0);
-//		timeMonth.set(Calendar.HOUR_OF_DAY, 0);
-//		timeMonth.set(Calendar.MINUTE, 20);
-//		timeMonth.set(Calendar.SECOND, 0);
-//		timeMonth.add(Calendar.MONTH, 1);
-//		timeMonth.add(Calendar.DAY_OF_MONTH, 1);
-//		Timer timerMonth = new Timer("Commodity order month");
-//		timerMonth.scheduleAtFixedRate(taskMonth, timeMonth.getTime(), 30*24*60*60*1000);
+		Calendar timeDay = Calendar.getInstance();
+		timeDay.set(Calendar.HOUR_OF_DAY, 23);
+		timeDay.set(Calendar.MINUTE,59);
+		timeDay.set(Calendar.SECOND,59);
+		timeDay.add(Calendar.SECOND, 1);
+		Timer timerDay = new Timer("Commodity order day");
+		timerDay.scheduleAtFixedRate(taskDay, timeDay.getTime(), 24*60*60*1000);
+		
+		Calendar timeMonth = Calendar.getInstance();
+		timeMonth.set(Calendar.DAY_OF_MONTH, 0);
+		timeMonth.set(Calendar.HOUR_OF_DAY, 0);
+		timeMonth.set(Calendar.MINUTE, 20);
+		timeMonth.set(Calendar.SECOND, 0);
+		timeMonth.add(Calendar.MONTH, 1);
+		timeMonth.add(Calendar.DAY_OF_MONTH, 1);
+		Timer timerMonth = new Timer("Commodity order month");
+		timerMonth.scheduleAtFixedRate(taskMonth, timeMonth.getTime(), 24*60*60*30437l);
 	}
 }
