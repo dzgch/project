@@ -12,6 +12,8 @@ public class UserInfo {
 	String ip;
 	//本次登录的时间
 	long loginTime;
+	//分销商id
+	long distributor;
 	public long getId() {
 		return id;
 	}
@@ -36,5 +38,10 @@ public class UserInfo {
 	public void setLoginTime(long loginTime) {
 		this.loginTime = loginTime;
 	}
-	
+	public long getDistributor() {
+		return distributor;
+	}
+	public void setDistributor(long distributor) {
+		this.distributor = distributor;
+	}
 }

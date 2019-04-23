@@ -23,7 +23,7 @@ public interface IDistributorDao {
 	Distributor selectDistributorByUsername(@Param("username") String username);
 	
 	@Select("select * from distributor where id=#{id}")
-	Distributor selectDistributorByID(@Param("username") long id);
+	Distributor selectDistributorByID(@Param("id") long id);
 
 	@Select("select * from distributor where username=#{username} and password=#{password}")
 	Distributor selectDistributor(@Param("username") String username,@Param("password") String password);
@@ -65,6 +65,10 @@ public interface IDistributorDao {
 	@Update("update distributor set distributorName=#{distributorName},password=#{password},realname=#{realname},sex=#{sex},phone=#{phone},province=#{province},city=#{city},address=#{address},grade=#{grade},grandParent=#{grandParent},parent=#{parent},authority=#{authority}"
 			+ "where id=#{id}")
 	int updateDistributor(Distributor param);
+	
+	//分销商的用户数+1
+	@Update("update distributor set userNum=userNum+1 where id=#{id}")
+	int updateUserNum(@Param("id") long id);
 	
 	//购买订单数自增
 	@Update("update distributor set orderNum=orderNum+#{num} where id=#{id}")

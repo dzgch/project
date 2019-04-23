@@ -16,8 +16,8 @@ public interface IInvitationCodeDao {
 	@Select("select * from invitationcode where code=#{code}")
 	InvitationCode selectInvitationCodeByCode(@Param("code") String code);
 	
-	@Update("update invitationcode set isBind=1 where code=#{code}")
-	int bindInvitationCode(@Param("code")String code);
+	@Update("update invitationcode set isBind=0,userID=#{userID} where code=#{code}")
+	int bindInvitationCode(@Param("userID") long userID, @Param("code")String code);
 	
 	
 	@Select("select * from invitationcode where distributorID=#{id}")

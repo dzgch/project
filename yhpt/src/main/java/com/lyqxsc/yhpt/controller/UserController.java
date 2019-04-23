@@ -219,14 +219,13 @@ public class UserController {
 	 * 查询分类列表
 	 */
 	@RequestMapping(value = "/shop/classlist", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson classList(@RequestBody UserTokenOne param) {
+	public RetJson classList(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
-		String type = param.getString();
-		if(userToken == null || type == null) {
+		if(userToken == null) {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		ClassifyList list = userService.classList(userToken,Integer.parseInt(type));
+		ClassifyList list = userService.classList(userToken);
 		if(list == null) {
 			return RetJson.unknowError("class list error", null);
 		}
@@ -245,7 +244,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		List<Commodity> list = userService.selectCommodityByClass(userToken,Integer.parseInt(classId));
+		List<CommodityBak> list = userService.selectCommodityByClass(userToken,classId);
 		if(list == null) {
 			return RetJson.unknowError("class list error", null);
 		}
@@ -264,7 +263,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		List<Commodity> list = userService.selectCommodityByName(userToken,name);
+		List<CommodityBak> list = userService.selectCommodityByName(userToken,name);
 		if(list == null) {
 			return RetJson.unknowError("class list error", null);
 		}

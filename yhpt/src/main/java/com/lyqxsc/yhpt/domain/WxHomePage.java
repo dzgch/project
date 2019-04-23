@@ -8,7 +8,7 @@ public class WxHomePage {
 	String[] pic;
 
 	//商品列表
-	List<Commodity> commodityList;
+	List<CommodityBak> commodityList;
 
 	public String[] getPic() {
 		return pic;
@@ -18,11 +18,11 @@ public class WxHomePage {
 		this.pic = pic;
 	}
 
-	public List<Commodity> getCommodityList() {
+	public List<CommodityBak> getCommodityList() {
 		return commodityList;
 	}
 
-	public void setCommodityList(List<Commodity> commodityList) {
+	public void setCommodityList(List<CommodityBak> commodityList) {
 		this.commodityList = commodityList;
 	}
 }

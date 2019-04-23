@@ -97,10 +97,10 @@ public class UserService {
 	@Value("${NewPagePic}")
 	String newPagePic;
 	
-	@Value("{ShopPic}")
+	@Value("${ShopPic}")
 	String shopPic;
 	
-	@Value("{HomePic}")
+	@Value("${HomePic}")
 	String homePic;
 	
 	static int NEWSHOPCOUNT = 10;
@@ -124,6 +124,7 @@ public class UserService {
 		userInfo.setUsername(user.getOpenID());
 		userInfo.setIp(user.getLastLoginIP());
 		userInfo.setLoginTime(now);
+		userInfo.setDistributor(user.getDistributor());
 		
 		String userToken = user.getId() + "O" + now;
 		System.out.println(userToken);
@@ -194,6 +195,7 @@ public class UserService {
 		userInfo.setUsername(openID);
 		userInfo.setIp(ip);
 		userInfo.setLoginTime(now);
+		userInfo.setDistributor(user.getDistributor());
 		
 		/*如果用户在线，更新集合，如果不在线，添加集合*/
 		for(String userToken:onlineMap.keySet()) {
@@ -242,18 +244,25 @@ public class UserService {
 			return false;
 		}
 		long userID = userInfo.getId();
+		if(userInfo.getDistributor() != 0) {
+			return false;
+		}
 		InvitationCode invitationCode = invitationCodeDao.selectInvitationCodeByCode(code);
 		if(invitationCode == null) {
 			return false;
 		}
 		long distributorID = invitationCode.getDistributorID();
-		
 		if(1 != userDao.bindDistributor(userID, distributorID)) {
 			return false;
 		}
-		if(1 != invitationCodeDao.bindInvitationCode(code)) {
+		if(1 != distributorDao.updateUserNum(distributorID)) {
 			return false;
 		}
+		if(1 != invitationCodeDao.bindInvitationCode(userID, code)) {
+			return false;
+		}
+		userInfo.setDistributor(distributorID);
+		onlineMap.replace(userToken, userInfo);
 		return true;
 	}
 	
@@ -270,6 +279,9 @@ public class UserService {
 		if(user == null) {
 			return false;
 		}
+		if(user.getDistributor() != 0) {
+			return true;
+		}
 		String province = user.getProvince();
 		String city = user.getCity();
 		List<Distributor> distributorList = distributorDao.getDistributorByCity(city);
@@ -281,10 +293,17 @@ public class UserService {
 		}
 		
 		Distributor distributor = distributorList.get(0);
+		long distributorId = distributor.getId();
+		if(1 != distributorDao.updateUserNum(distributorId)) {
+			log.info("分销商添加用户失败");
+			return false;
+		}
 		long distributorID = distributor.getId();
 		if(1 != userDao.bindDistributor(userID, distributorID)) {
 			return false;
 		}
+		userInfo.setDistributor(distributorID);
+		onlineMap.replace(userToken, userInfo);
 		return true;
 	}
 	
@@ -303,10 +322,10 @@ public class UserService {
 		WxHomePage homePage = new WxHomePage();
 		homePage.setPic(homePic.split(";"));
 		
-		Long userID = Long.parseLong(userToken.split("O")[0]);
-		long distributorID = userDao.selectDistributor(userID);
-		List<Commodity> commodity = commodityDao.selectAllCommodityForUser(distributorID);
-		
+		long distributorID = userInfo.getDistributor();
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		List<CommodityBak> commodityList = commodityDao.selectAllCommodityForUser(distributorID);
+		List<CommodityBak> commodity = hidePriceList(commodityList,distributor.getGrade());
 		homePage.setCommodityList(commodity);
 		return homePage;
 	}
@@ -339,10 +358,10 @@ public class UserService {
 		
 		homePage.setPic(shopPic.split(";"));
 		
-		Long userID = Long.parseLong(userToken.split("O")[0]);
-		long distributorID = userDao.selectDistributor(userID);
-		List<Commodity> commodity = commodityDao.selectAllCommodityForUser(distributorID);
-		
+		long distributorID = userInfo.getDistributor();
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		List<CommodityBak> commodityList = commodityDao.selectAllCommodityForUser(distributorID);
+		List<CommodityBak> commodity = hidePriceList(commodityList,distributor.getGrade());
 		homePage.setCommodityList(commodity);
 		return homePage;
 	}
@@ -350,7 +369,7 @@ public class UserService {
 	/**
 	 * 分类列表
 	 */
-	public ClassifyList classList(String userToken,int type){
+	public ClassifyList classList(String userToken){
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
@@ -364,33 +383,42 @@ public class UserService {
 	/**
 	 * 查询一类物品集合
 	 */
-	public List<Commodity> selectCommodityByClass(String userToken,int classId){
+	public List<CommodityBak> selectCommodityByClass(String userToken,String classId){
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		long distributor = userDao.selectDistributor(userInfo.getId());
-		if(distributor == 0) {
+		long distributorID = userInfo.getDistributor();
+		if(distributorID == 0) {
 			return null;
 		}
-		List<Commodity> list = commodityDao.selectCommodityByClass(distributor,classId);
-		return list;
+		List<CommodityBak> commodityList = new ArrayList<CommodityBak>();
+		String[] classIdBuf = classId.split("!");
+		for(String listTemp:classIdBuf) {
+			List<CommodityBak> list = commodityDao.selectCommodityBakByClass(distributorID,Integer.parseInt(listTemp));
+			commodityList.addAll(list);
+		}
+		
+		return commodityList;
 	}
 	
 	/**
 	 * 按名称查询
 	 */
 	//TODO 后期添加模糊查询
-	public List<Commodity> selectCommodityByName(String userToken,String name){
+	public List<CommodityBak> selectCommodityByName(String userToken,String name){
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return null;
 		}
-		long distributor = userDao.selectDistributor(userInfo.getId());
-		if(distributor == 0) {
+		long distributorID = userInfo.getDistributor();
+		if(distributorID == 0) {
 			return null;
 		}
-		List<Commodity> list = commodityDao.selectCommodityByName(distributor,name);
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		int grade = distributor.getGrade();
+		List<CommodityBak> listTemp = commodityDao.selectCommodityBakByName(distributorID,name);
+		List<CommodityBak> list = hidePriceList(listTemp, grade);
 		return list;
 	}
 	
@@ -404,8 +432,7 @@ public class UserService {
 		if(userInfo == null) {
 			return null;
 		}
-		long userID = userInfo.getId();
-		long distributorID = userDao.selectDistributor(userID);
+		long distributorID = userInfo.getDistributor();
 		long commodityMaxID = commodityDao.getMaxID();
 		
 		NewCommodity commodity = new NewCommodity();
@@ -433,8 +460,7 @@ public class UserService {
 		if(userInfo == null) {
 			return null;
 		}
-		long userID = userInfo.getId();
-		long distributorID = userDao.selectDistributor(userID);
+		long distributorID = userInfo.getDistributor();
 		Integer maxNum = commodityDao.getMaxOrdernum();
 		
 		HotCommodity commodity = new HotCommodity();
@@ -462,11 +488,11 @@ public class UserService {
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		long distributorID = userInfo.getDistributor();
 		
-		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
 		int grade = distributor.getGrade();
-		List<CommodityBak> commodityListTemp = commodityDao.selectCommodityBakForUser(distributorId);
+		List<CommodityBak> commodityListTemp = commodityDao.selectCommodityBakForUser(distributorID);
 		List<CommodityBak> commodity = hidePriceList(commodityListTemp, grade);
 		
 		CommodityPage commodityPage = new CommodityPage();
@@ -485,7 +511,7 @@ public class UserService {
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		long distributorId = userInfo.getDistributor();
 		
 		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
 		int grade = distributor.getGrade();
@@ -506,7 +532,7 @@ public class UserService {
 		if(userInfo == null) {
 			return null;
 		}
-		Long distributorId = userDao.selectDistributor(userInfo.getId());
+		long distributorId = userInfo.getDistributor();
 		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
 		int grade = distributor.getGrade();
 		
@@ -584,8 +610,8 @@ public class UserService {
 		if(userInfo == null) {
 			return false;
 		}
-		User user = userDao.selectUserByID(userInfo.getId());
-		Distributor distributor = distributorDao.selectDistributorByID(user.getDistributor());
+		long distributorID = userInfo.getDistributor();
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
 		int num = 0;
 		for(Order order:orderList) {
 			if(orderDao.addOrderList(order) != 1) {
@@ -670,11 +696,8 @@ public class UserService {
 		if(userInfo == null) {
 			return false;
 		}
-		
-		
-		
-		User user = userDao.selectUserByID(userInfo.getId());
-		Distributor distributor = distributorDao.selectDistributorByID(user.getDistributor());
+		long distributorID = userInfo.getDistributor();
+		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
 		int num = 0;
 		for(RentOrder order:rentOrderList) {
 			if(rentOrderDao.addRentOrderList(order) != 1) {
@@ -1116,7 +1139,7 @@ public class UserService {
 		return ret;
 	}
 	/**
-	 * 伪造列表价格，1出售，2租赁
+	 * 伪造列表价格
 	 */
 	private List<CommodityBak> hidePriceList(List<CommodityBak> commodityListTemp,int grade){
 		List<CommodityBak> commodity = new ArrayList<CommodityBak>();
@@ -1124,18 +1147,26 @@ public class UserService {
 			switch (grade) {
 			case 1:
 				commodityBak.setPrice(commodityBak.getPrice1());
+				commodityBak.setRentPrice(commodityBak.getRentPrice1());
 				break;
 			case 2:
 				commodityBak.setPrice(commodityBak.getPrice2());
+				commodityBak.setRentPrice(commodityBak.getRentPrice2());
 				break;
 			case 3:
 				commodityBak.setPrice(commodityBak.getPrice3());
+				commodityBak.setRentPrice(commodityBak.getRentPrice3());
 				break;
 			case 4:
 				commodityBak.setPrice(commodityBak.getPrice4());
+				commodityBak.setRentPrice(commodityBak.getRentPrice4());
 				break;
 			case 5:
 				commodityBak.setPrice(commodityBak.getPrice5());
+				commodityBak.setRentPrice(commodityBak.getRentPrice5());
+			case 6:
+				commodityBak.setPrice(commodityBak.getPrice6());
+				commodityBak.setRentPrice(commodityBak.getRentPrice6());
 				break;
 			default:
 				break;

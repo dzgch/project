@@ -68,7 +68,7 @@ public interface ICommodityDao {
 	List<CommodityBak> selectRentCommodityBakForUser(@Param("distributor") long distributor);
 	
 	@Select("select * from commoditylist where distributor=#{distributor} or distributor=0")
-	List<Commodity> selectAllCommodityForUser(@Param("distributor") long distributor);
+	List<CommodityBak> selectAllCommodityForUser(@Param("distributor") long distributor);
 	
 	//根据物品id查询分销商的商品
 	@Select("select * from commoditylist where id=#{id} and (distributor=#{distributor} or distributor=0)")
@@ -87,9 +87,18 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId}")
 	List<Commodity> selectCommodityByClass(@Param("distributor") long distributor, @Param("classId") int classId);
 	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId}")
+	List<CommodityBak> selectCommodityBakByClass(@Param("distributor") long distributor, @Param("classId") int classId);
+	
+	
 	@Select("select * from commoditylist where distributor=#{distributor} and name=#{name}")
 	List<Commodity> selectCommodityByName(@Param("distributor") long distributor, @Param("name") String name);
 
+	//用户按名称查询物品
+	@Select("select * from commoditylist where distributor=#{distributor} and name=#{name}")
+	List<CommodityBak> selectCommodityBakByName(@Param("distributor") long distributor, @Param("name") String name);
+
+	
 	//告警商品,管理员
 	@Select("select * from commoditylist where inventory<=#{inventory} and distributor=#{distributor}")
 	List<Commodity> inventoryWarning(@Param("inventory") int num,@Param("id") long id);

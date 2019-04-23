@@ -188,4 +188,52 @@ public class Commodity {
 	public void setPrice6(float price6) {
 		this.price6 = price6;
 	}
+	public float getRentPrice() {
+		return rentPrice;
+	}
+	public void setRentPrice(float rentPrice) {
+		this.rentPrice = rentPrice;
+	}
+	public float getRentPrice1() {
+		return rentPrice1;
+	}
+	public void setRentPrice1(float rentPrice1) {
+		this.rentPrice1 = rentPrice1;
+	}
+	public float getRentPrice2() {
+		return rentPrice2;
+	}
+	public void setRentPrice2(float rentPrice2) {
+		this.rentPrice2 = rentPrice2;
+	}
+	public float getRentPrice3() {
+		return rentPrice3;
+	}
+	public void setRentPrice3(float rentPrice3) {
+		this.rentPrice3 = rentPrice3;
+	}
+	public float getRentPrice4() {
+		return rentPrice4;
+	}
+	public void setRentPrice4(float rentPrice4) {
+		this.rentPrice4 = rentPrice4;
+	}
+	public float getRentPrice5() {
+		return rentPrice5;
+	}
+	public void setRentPrice5(float rentPrice5) {
+		this.rentPrice5 = rentPrice5;
+	}
+	public float getRentPrice6() {
+		return rentPrice6;
+	}
+	public void setRentPrice6(float rentPrice6) {
+		this.rentPrice6 = rentPrice6;
+	}
+	public int getOrdernumTotal() {
+		return ordernumTotal;
+	}
+	public void setOrdernumTotal(int ordernumTotal) {
+		this.ordernumTotal = ordernumTotal;
+	}
 }
