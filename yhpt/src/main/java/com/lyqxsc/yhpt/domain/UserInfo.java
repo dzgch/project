@@ -14,6 +14,8 @@ public class UserInfo {
 	long loginTime;
 	//分销商id
 	long distributor;
+	//分销商等级
+	int grade;
 	public long getId() {
 		return id;
 	}
@@ -43,5 +45,11 @@ public class UserInfo {
 	}
 	public void setDistributor(long distributor) {
 		this.distributor = distributor;
+	}
+	public int getGrade() {
+		return grade;
+	}
+	public void setGrade(int grade) {
+		this.grade = grade;
 	}
 }

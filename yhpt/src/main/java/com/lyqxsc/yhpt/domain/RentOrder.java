@@ -7,6 +7,8 @@ public class RentOrder {
 	long owner;
 	//租赁者姓名
 	String ownerName;
+	//店家ID
+	long distributorID;
 	//商品ID
 	long rentCommodityID;
 	//商品名称
@@ -14,11 +16,13 @@ public class RentOrder {
 	//商品图片
 	String url;
 	//商品单价
-	float price;
+	float rentPrice;
 	//押金
 	float deposit;
 	//租赁数量
 	int count;
+	//运费
+	float freight;
 	//总押金
 	float totalDeposit;
 	//总金额
@@ -39,8 +43,12 @@ public class RentOrder {
 	String payIP;
 	//上一个交易状态 0待支付, 1已支付, 5交易完成, 6交易已取消
 	int lastPayStatus;
+	//收货地址ID
+	long addrId;
 	//收货地址
 	String addr;
+	//取消订单原因
+	String reason;
 	public String getOrderNumber() {
 		return orderNumber;
 	}
@@ -71,11 +79,11 @@ public class RentOrder {
 	public void setRentCommodityName(String rentCommodityName) {
 		this.rentCommodityName = rentCommodityName;
 	}
-	public float getPrice() {
-		return price;
+	public float getRentPrice() {
+		return rentPrice;
 	}
-	public void setPrice(float price) {
-		this.price = price;
+	public void setRentPrice(float rentPrice) {
+		this.rentPrice = rentPrice;
 	}
 	public float getDeposit() {
 		return deposit;
@@ -161,5 +169,28 @@ public class RentOrder {
 	public void setLastPayStatus(int lastPayStatus) {
 		this.lastPayStatus = lastPayStatus;
 	}
-	
+	public long getDistributorID() {
+		return distributorID;
+	}
+	public void setDistributorID(long distributorID) {
+		this.distributorID = distributorID;
+	}
+	public float getFreight() {
+		return freight;
+	}
+	public void setFreight(float freight) {
+		this.freight = freight;
+	}
+	public long getAddrId() {
+		return addrId;
+	}
+	public void setAddrId(long addrId) {
+		this.addrId = addrId;
+	}
+	public String getReason() {
+		return reason;
+	}
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 }

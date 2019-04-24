@@ -95,7 +95,7 @@ public class UserController {
 		
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("logout error, please give me userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		if(!userService.logout(userToken)) {
@@ -137,7 +137,7 @@ public class UserController {
 		String userToken = param.getUserToken();
 		String code = param.getString();
 		if(userToken == null || code == null) {
-			return RetJson.urlError("invitation code error", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		if(userService.addInvitationCode(userToken,code)) {
 			return RetJson.success("success");
@@ -152,7 +152,7 @@ public class UserController {
 	public RetJson noInvitationCode(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("error", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		if(userService.noInvitationCode(userToken)) {
 			return RetJson.success("success");
@@ -168,7 +168,7 @@ public class UserController {
 	public RetJson homePage(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("no userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		WxHomePage homePage = userService.homePage(userToken);
@@ -185,7 +185,7 @@ public class UserController {
 	public RetJson aboutUs(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("no userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		String msg = userService.aboutUs(userToken);
@@ -204,7 +204,7 @@ public class UserController {
 	public RetJson shop(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("no userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		WxHomePage homePage = userService.shop(userToken);
@@ -222,7 +222,7 @@ public class UserController {
 	public RetJson classList(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
-			return RetJson.urlError("no userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		ClassifyList list = userService.classList(userToken);
@@ -237,14 +237,15 @@ public class UserController {
 	 * 分类查询物品
 	 */
 	@RequestMapping(value = "/shop/classlist/select", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson selectCommodityByClass(@RequestBody UserTokenOne param) {
+	public RetJson selectCommodityByClass(@RequestBody UserTokenTwo param) {
 		String userToken = param.getUserToken();
-		String classId = param.getString();
-		if(userToken == null || classId == null) {
-			return RetJson.urlError("no userToken", null);
+		String classId = param.getOne();
+		String price = param.getTwo();
+		if(userToken == null || classId == null || price == null) {
+			return RetJson.urlError("参数错误", null);
 		}
 		
-		List<CommodityBak> list = userService.selectCommodityByClass(userToken,classId);
+		List<CommodityBak> list = userService.selectCommodityByClass(userToken,classId,price);
 		if(list == null) {
 			return RetJson.unknowError("class list error", null);
 		}
@@ -255,12 +256,12 @@ public class UserController {
 	/**
 	 * 名称查询物品
 	 */
-	@RequestMapping(value = "/shop/classlist/selectByName", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@RequestMapping(value = "/shop/classlist/selectbyname", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson selectCommodityByName(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
 		String name = param.getString();
 		if(userToken == null || name == null) {
-			return RetJson.urlError("no userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		List<CommodityBak> list = userService.selectCommodityByName(userToken,name);

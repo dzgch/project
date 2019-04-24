@@ -31,6 +31,8 @@ import com.lyqxsc.yhpt.domain.UserSignature;
 import com.lyqxsc.yhpt.service.UserService;
 import com.lyqxsc.yhpt.urlclass.UserLogin;
 import com.lyqxsc.yhpt.utils.HttpRequestor;
+import com.lyqxsc.yhpt.utils.RetJson;
+
 import net.sf.json.JSONObject;
 
 @RestController
@@ -43,7 +45,7 @@ public class WechartController {
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);  
 
 	@RequestMapping(value = "/wxuserinfo", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public UserSignature doPost(@RequestBody UserLogin request) throws ServletException, IOException {
+	public RetJson doPost(@RequestBody UserLogin request) throws ServletException, IOException {
 		String code = request.getCode();
 		String ip = request.getIp();
 		
@@ -89,7 +91,7 @@ public class WechartController {
 		UserSignature ret = new UserSignature();
 		ret.setSignature(signature);
 		ret.setUser(user);
-		return ret;
+		return RetJson.success("成功", ret);
 	}
 	
     // 网页授权接口

@@ -49,6 +49,8 @@ public class CommodityBak {
 	int inventory;
 	//销量
 	int sales;
+	//订单总数
+	int ordernumTotal;
 	//订单数量日
 	int ordernumDay;
 	//订单数量月
@@ -233,5 +235,11 @@ public class CommodityBak {
 	}
 	public void setRentPrice6(float rentPrice6) {
 		this.rentPrice6 = rentPrice6;
+	}
+	public int getOrdernumTotal() {
+		return ordernumTotal;
+	}
+	public void setOrdernumTotal(int ordernumTotal) {
+		this.ordernumTotal = ordernumTotal;
 	}
 }

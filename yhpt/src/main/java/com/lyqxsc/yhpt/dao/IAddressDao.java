@@ -25,8 +25,8 @@ public interface IAddressDao {
 	@Select("select * from address where userId=#{userId}")
 	List<Address> selectAddressByUser(@Param("userId")long id);
 	
-	@Insert("insert into address(id,userId,addr,main)"
-			+ "values(#{id},#{userId},#{addr},#{main})")
+	@Insert("insert into address(id,userId,username,phone,addr,main)"
+			+ "values(#{id},#{userId},#{username},#{phone},#{addr},#{main})")
 	int addAddress(Address addr);
 	
 	@Delete("delete from address where userId=#{userId} and id=#{id}")

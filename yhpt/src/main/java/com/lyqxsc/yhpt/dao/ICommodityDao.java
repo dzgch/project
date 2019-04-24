@@ -27,7 +27,7 @@ public interface ICommodityDao {
 	@Select("select max(id) from commoditylist")
 	Long getMaxID();
 	
-	@Select("select max(ordernum) from commoditylist")
+	@Select("select max(ordernumTotal) from commoditylist")
 	Integer getMaxOrdernum();
 	
 	@Select("select * from commoditylist where id=#{id}")
@@ -78,18 +78,46 @@ public interface ICommodityDao {
 	@Select("select * from commoditylist where id=#{id} and (distributor=#{distributor} or distributor=0)")
 	CommodityBak selectCommodityBakByIDForUser(@Param("id")long id, @Param("distributor") long distributor);
 	
+	//根据分销商和物品ID查询物品
 	@Select("select * from commoditylist where distributor=#{distributor} and id=#{id}")
 	Commodity selectNewCommodityByDistributor(@Param("distributor") long distributor,@Param("id") long id);
 	
-	@Select("select * from commoditylist where distributor=#{distributor} and ordernum=#{ordernum}")
-	Commodity selectHotCommodityByDistributor(@Param("distributor") long distributor,@Param("ordernum") int ordernum);
+	//根据分销商和物品ID查询物品
+	@Select("select * from commoditylist where distributor=#{distributor} and id=#{id}")
+	CommodityBak selectNewCommodityBakByDistributor(@Param("distributor") long distributor,@Param("id") long id);
+	
+	//根据分销商和物品订单数查询物品
+	@Select("select * from commoditylist where distributor=#{distributor} and ordernumTotal=#{ordernumTotal}")
+	Commodity selectHotCommodityByDistributor(@Param("distributor") long distributor,@Param("ordernumTotal") int ordernum);
+	
+	//根据分销商和物品订单数查询物品
+	@Select("select * from commoditylist where distributor=#{distributor} and ordernumTotal=#{ordernumTotal}")
+	CommodityBak selectHotCommodityBakByDistributor(@Param("distributor") long distributor,@Param("ordernumTotal") int ordernum);
 
 	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId}")
 	List<Commodity> selectCommodityByClass(@Param("distributor") long distributor, @Param("classId") int classId);
 	
-	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId}")
-	List<CommodityBak> selectCommodityBakByClass(@Param("distributor") long distributor, @Param("classId") int classId);
+	//根据物品分类及价格区间查询物品
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
 	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price1 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass1(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
+	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price2 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass2(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
+	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price3 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass3(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
+	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price4 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass4(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
+	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price5 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass5(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
+	
+	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId} and price6 BETWEEN #{min} and #{max}")
+	List<CommodityBak> selectCommodityBakByClass6(@Param("distributor") long distributor, @Param("classId") int classId, @Param("min") float min, @Param("max") float max);
 	
 	@Select("select * from commoditylist where distributor=#{distributor} and name=#{name}")
 	List<Commodity> selectCommodityByName(@Param("distributor") long distributor, @Param("name") String name);
@@ -113,9 +141,9 @@ public interface ICommodityDao {
 	int removeCommodityByDistributor(@Param("id") long id, @Param("distributor")long distributor);
 	
 	
-	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note}"
-			+ "where id=#{id}")
-	int updateCommodity(Commodity commodity);
+//	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},type=#{type},inventory=#{inventory},ordernum=#{ordernum},deposit=#{deposit},note=#{note}"
+//			+ "where id=#{id}")
+//	int updateCommodity(Commodity commodity);
 	
 	//物品上架/下架
 	@Update("update commoditylist set online=#{online} where id=#{id}")
@@ -126,6 +154,10 @@ public interface ICommodityDao {
 	//更新商品日订单和月订单
 	@Update("update commoditylist set ordernumDay=#{ordernumDay},ordernumMouth=#{ordernumMouth} where id=#{id}")
 	int updateOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumMouth") int ordernumMouth,@Param("id") long id);
+	//更新商品日订单和总订单
+	@Update("update commoditylist set ordernumDay=#{ordernumDay},ordernumTotal=#{ordernumTotal} where id=#{id}")
+	int updatePayOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumTotal") int ordernumTotal,@Param("id") long id);
+	
 	
 	//设置商品数量
 	@Update("update commoditylist set inventory=inventory+#{count} where id=#{id}")

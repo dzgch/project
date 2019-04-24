@@ -37,6 +37,8 @@ public class Order {
 	String payIP;
 	//上一个交易状态 0待支付, 1已支付, 5交易完成, 6交易已取消
 	int lastPayStatus;
+	//收货地址id
+	long addrId;
 	//收货地址
 	String addr;
 	
@@ -131,12 +133,6 @@ public class Order {
 	public void setPayIP(String payIP) {
 		this.payIP = payIP;
 	}
-	public String getAddr() {
-		return addr;
-	}
-	public void setAddr(String addr) {
-		this.addr = addr;
-	}
 	public String getOwnerName() {
 		return ownerName;
 	}
@@ -155,5 +151,16 @@ public class Order {
 	public void setLastPayStatus(int lastPayStatus) {
 		this.lastPayStatus = lastPayStatus;
 	}
-	
+	public long getAddrId() {
+		return addrId;
+	}
+	public void setAddrId(long addrId) {
+		this.addrId = addrId;
+	}
+	public String getAddr() {
+		return addr;
+	}
+	public void setAddr(String addr) {
+		this.addr = addr;
+	}
 }
