@@ -49,14 +49,14 @@ public interface IOrderDao {
 	@Select("select count(*) from orderlist where distributorID=#{distributorID}")
 	Integer getOrderCount(@Param("distributorID") long distributorID);
 	
-	@Insert("insert into orderlist(orderNumber,owner,ownerName,distributorID,commodityID,url,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,lastPayStatus,addr)"
-			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{commodityID},#{url},#{commodityName},#{price},#{count},#{totalPrice},#{payMoney},#{orderPrice},#{completeTime},#{payOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addr})")
+	@Insert("insert into orderlist(orderNumber,owner,ownerName,distributorID,commodityID,url,commodityName,price,count,totalPrice,payMoney,orderPrice,completeTime,payOrdertime,status,payType,payIP,lastPayStatus,addrId,addr)"
+			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{commodityID},#{url},#{commodityName},#{price},#{count},#{totalPrice},#{payMoney},#{orderPrice},#{completeTime},#{payOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addrId},#{addr})")
 	int addOrderList(Order order);
 	
 	@Delete("delete from orderlist where orderNumber=#{orderNumber}")
 	int removeOrderList(@Param("orderNumber") String orderNumber);
 	
 	//更新订单状态
-	@Update("update orderlist set status=#{status} reason=#{reason} where orderNumber=#{orderNumber}")
+	@Update("update orderlist set status=#{status}, reason=#{reason} where orderNumber=#{orderNumber}")
 	int updateOrderList(@Param("status") int status, @Param("orderNumber") String orderNumber, @Param("reason") String reason);
 }

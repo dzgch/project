@@ -41,8 +41,8 @@ public class Order {
 	long addrId;
 	//收货地址
 	String addr;
-	
-	
+	//取消理由
+	String reason;
 	public long getDistributorID() {
 		return distributorID;
 	}
@@ -163,4 +163,11 @@ public class Order {
 	public void setAddr(String addr) {
 		this.addr = addr;
 	}
+	public String getReason() {
+		return reason;
+	}
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
+	
 }

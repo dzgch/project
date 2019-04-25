@@ -24,14 +24,13 @@ public interface IShopCarDao {
 	@Select("select max(id) from shopcarlist")
 	Long getMaxID();
 	
-	@Insert({"insert into shopcarlist(carid,userid,commodityid,name,picurl,price,count,note)"
-			+ "values(#{carid}, #{userid}, #{commodityid}, #{name}, #{picurl}, #{price}, #{count}, #{note})"})
+	@Insert({"insert into shopcarlist(userid,commodityid,name,picurl,price,count,inventory,note)"
+			+ "values(#{userid}, #{commodityid}, #{name}, #{picurl}, #{price}, #{count}, #{inventory}, #{note})"})
 	int addShopCar(ShopCar shopCar);
 	
-	@Delete("delete from shopcarlist where id=#{id}")
+	@Delete("delete from shopcarlist where carid=#{id}")
 	int removeShopCar(@Param("id") long id);
 	
-	@Update("update shopcarlist set count=#{count}"
-			+ "where carid=#{carid}")
+	@Update("update shopcarlist set count=#{count} where carid=#{carid}")
 	int updateShopCar(ShopCar shopCar);
 }

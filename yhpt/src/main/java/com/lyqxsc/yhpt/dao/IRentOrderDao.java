@@ -54,14 +54,14 @@ public interface IRentOrderDao {
 	@Select("select count(*) from rentorderlist where distributorID=#{distributorID}")
 	Integer getRentOrderCount(@Param("distributorID") long distributorID);
 	
-	@Insert("insert into rentorderlist(orderNumber,owner,ownerName,distributorID,rentCommodityID,rentCommodityName,url,price,deposit,count,totalDeposit,totalPrice,orderPrice,payMoney,completeTime,makeOrdertime,status,payType,payIP,lastPayStatus,addr)"
-			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{rentCommodityID},#{rentCommodityName},#{url},#{price},#{deposit},#{count},#{totalDeposit},#{totalPrice},#{orderPrice},#{payMoney},#{completeTime},#{makeOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addr})")
+	@Insert("insert into rentorderlist(orderNumber,owner,ownerName,distributorID,rentCommodityID,rentCommodityName,url,rentPrice,deposit,count,freight,totalDeposit,totalPrice,orderPrice,payMoney,completeTime,makeOrdertime,status,payType,payIP,lastPayStatus,addrId,addr,reason)"
+			+ "values(#{orderNumber},#{owner},#{ownerName},#{distributorID},#{rentCommodityID},#{rentCommodityName},#{url},#{rentPrice},#{deposit},#{count},#{freight},#{totalDeposit},#{totalPrice},#{orderPrice},#{payMoney},#{completeTime},#{makeOrdertime},#{status},#{payType},#{payIP},#{lastPayStatus},#{addrId},#{addr},#{reason})")
 	int addRentOrderList(RentOrder order);
 	
 	@Delete("delete from rentorderlist where orderNumber=#{orderNumber}")
 	int removeRentOrderList(@Param("orderNumber") String orderNumber);
 	
 	//更新订单状态
-	@Update("update rentorderlist set status=#{status} reason=#{reason} where orderNumber=#{orderNumber}")
+	@Update("update rentorderlist set status=#{status}, reason=#{reason} where orderNumber=#{orderNumber}")
 	int updateRentOrderList(@Param("status") int status, @Param("orderNumber") String orderNumber, @Param("reason") String reason);
 }

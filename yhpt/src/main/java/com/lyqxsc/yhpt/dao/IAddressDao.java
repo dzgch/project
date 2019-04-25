@@ -32,6 +32,6 @@ public interface IAddressDao {
 	@Delete("delete from address where userId=#{userId} and id=#{id}")
 	int removeAddress(@Param("userId")long userId,@Param("id")long id);
 	
-	@Update("update address set addr=#{addr},main=#{main} where id=#{id} and userId=#{userId}")
+	@Update("update address set username=#{username},phone=#{phone},addr=#{addr},main=#{main} where id=#{id} and userId=#{userId}")
 	int updateAddress(Address addr);
 }

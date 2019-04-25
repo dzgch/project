@@ -9,7 +9,7 @@ public class Appraise {
 	//评价用户ID
 	long userID;
 	//评价用户名
-	long username;
+	String username;
 	//商品ID
 	String thingID;
 	//评价内容
@@ -37,10 +37,10 @@ public class Appraise {
 	public void setUserID(long userID) {
 		this.userID = userID;
 	}
-	public long getUsername() {
+	public String getUsername() {
 		return username;
 	}
-	public void setUsername(long username) {
+	public void setUsername(String username) {
 		this.username = username;
 	}
 	public String getThingID() {
@@ -85,4 +85,5 @@ public class Appraise {
 	public void setService(int service) {
 		this.service = service;
 	}
+
 }

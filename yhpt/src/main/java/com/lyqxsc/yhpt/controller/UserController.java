@@ -491,7 +491,7 @@ public class UserController {
 		}
 		Order order = userService.getOrder(userToken,id);
 		if(order == null) {
-			return RetJson.unknowError("没有该商品", null);
+			return RetJson.unknowError("没有该订单", null);
 		}
 		return RetJson.success("success", order);
 	}
@@ -775,7 +775,7 @@ public class UserController {
 	}
 	
 	/**
-	 * 取消订单
+	 * 取消租赁订单
 	 */
 	@RequestMapping(value = "/usercenter/rentorder/cancel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson  cancelRentOrder(@RequestBody UserTokenTwo param) {
@@ -858,23 +858,23 @@ public class UserController {
 		return RetJson.unknowError("false", null);
 	}
 	
-	/**
-	 * 购物车结算
-	 */
-	@RequestMapping(value = "/usercenter/shopcar/settle", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson settleShopCar(@RequestBody UserTokenOne param) {
-		String userToken = param.getUserToken();
-		String id = param.getString();
-		if(userToken == null || id == null) {
-			return RetJson.urlError("remove shopcar error", null);
-		}
-		List<Order> list = userService.settleShopCar(userToken, id);
-		if(list == null) {
-			RetJson.unknowError("settle error", null);
-		}
-		
-		return RetJson.success("success",list);
-	}
+//	/**
+//	 * 购物车结算
+//	 */
+//	@RequestMapping(value = "/usercenter/shopcar/settle", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+//	public RetJson settleShopCar(@RequestBody UserTokenOne param) {
+//		String userToken = param.getUserToken();
+//		String id = param.getString();
+//		if(userToken == null || id == null) {
+//			return RetJson.urlError("remove shopcar error", null);
+//		}
+//		List<Order> list = userService.settleShopCar(userToken, id);
+//		if(list == null) {
+//			RetJson.unknowError("settle error", null);
+//		}
+//		
+//		return RetJson.success("success",list);
+//	}
 	
 	
 	/**
@@ -969,7 +969,7 @@ public class UserController {
 		if(userToken == null || appraise == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(userService.addAppraise(userToken, appraise)) {
+		if(!userService.addAppraise(userToken, appraise)) {
 			return RetJson.unknowError("false", null);
 		}
 		return RetJson.success("success",null);
@@ -985,7 +985,7 @@ public class UserController {
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(userService.removeAppraise(userToken, id)) {
+		if(!userService.removeAppraise(userToken, id)) {
 			return RetJson.unknowError("false", null);
 		}
 		return RetJson.success("success",null);
@@ -1002,9 +1002,9 @@ public class UserController {
 			return RetJson.urlError("list appraise error", null);
 		}
 		if(userService.addAddress(userToken, address)) {
-			return RetJson.unknowError("false", null);
+			return RetJson.success("success",null);
 		}
-		return RetJson.success("success",null);
+		return RetJson.unknowError("false", null);
 	}
 	
 	
@@ -1014,11 +1014,11 @@ public class UserController {
 	@RequestMapping(value = "/usercenter/address/remove", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson removeAddress(@RequestBody UserTokenOne param) {
 		String userToken = param.getUserToken();
-		long id = Long.parseLong(param.getString());
-		if(userToken == null || id == 0) {
+		String id = param.getString();
+		if(userToken == null || id == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(userService.removeAddress(userToken, id)) {
+		if(!userService.removeAddress(userToken, id)) {
 			return RetJson.unknowError("false", null);
 		}
 		return RetJson.success("success",null);
@@ -1051,9 +1051,6 @@ public class UserController {
 			return RetJson.urlError("list appraise error", null);
 		}
 		List<Address> address = userService.selectAddress(userToken);
-		if(address == null) {
-			return RetJson.unknowError("false", null);
-		}
 		return RetJson.success("success",address);
 	}
 	
@@ -1084,9 +1081,6 @@ public class UserController {
 			return RetJson.urlError("list appraise error", null);
 		}
 		Address address = userService.getMainAddr(userToken);
-		if(address == null) {
-			return RetJson.unknowError("false", null);
-		}
 		return RetJson.success("success",address);
 	}
 

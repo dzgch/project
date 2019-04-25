@@ -703,7 +703,7 @@ public class UserService {
 			order.setPayMoney(0);
 			order.setCompleteTime(0);
 			order.setPayOrdertime(now);
-			order.setStatus(0);
+			order.setStatus(1);
 			order.setPayType(0);
 			order.setPayIP("");
 			order.setLastPayStatus(0);
@@ -831,7 +831,7 @@ public class UserService {
 			order.setTotalDeposit(deposit*count);
 			order.setTotalPrice((rentPrice+deposit)*count);
 			order.setMakeOrdertime(now);
-			order.setStatus(0);
+			order.setStatus(1);
 			order.setPayType(0);
 			order.setLastPayStatus(0);
 			order.setAddr(address.getAddr());
@@ -982,13 +982,20 @@ public class UserService {
 			return false;
 		}
 		
-		Long maxID = shopCarDao.getMaxID();
-		if(maxID == null) {
-			return false;
-		}
-		shopCar.setCarid(maxID+1);
-		Commodity commodity = commodityDao.selectCommodityByID(shopCar.getCommodityid()); 
-		shopCar.setInventory(commodity.getInventory());
+		long userid = userInfo.getId();
+		Commodity commodity = commodityDao.selectCommodityByID(shopCar.getCommodityid());
+		
+		String name = commodity.getName();
+		String picurl = commodity.getPicurl();
+		int inventory = commodity.getInventory();
+		String note = commodity.getNote();
+		
+		shopCar.setUserid(userid);
+		shopCar.setName(name);
+		shopCar.setPicurl(picurl);
+		shopCar.setInventory(inventory);
+		shopCar.setNote(note);
+		
 		int ret = shopCarDao.addShopCar(shopCar);
 		if(ret == 1) {
 			return true;
@@ -1024,6 +1031,7 @@ public class UserService {
 		if(userInfo == null) {
 			return false;
 		}
+		
 		int ret = shopCarDao.updateShopCar(shopCar);
 		if(ret == 1) {
 			return true;
@@ -1031,22 +1039,22 @@ public class UserService {
 		return false;
 	}
 	
-	/**
-	 * 购物车结账
-	 */
-	public List<Order> settleShopCar(String userToken, String idbuf){
-		UserInfo userInfo = onlineMap.get(userToken);
-		if(userInfo == null) {
-			return null;
-		}
-		String[] idStr = idbuf.split("!");
-		List<Order> orderList = new ArrayList<Order>();
-		for(String id:idStr) {
-			ShopCar shopCar = shopCarDao.getShoppingByID(Long.parseLong(id));
-			orderList.add(makeCommodityOrder(userToken,shopCar.getCommodityid(),shopCar.getCount(),userInfo.getIp()));
-		}
-		return orderList;
-	}
+//	/**
+//	 * 购物车结账
+//	 */
+//	public List<Order> settleShopCar(String userToken, String idbuf){
+//		UserInfo userInfo = onlineMap.get(userToken);
+//		if(userInfo == null) {
+//			return null;
+//		}
+//		String[] idStr = idbuf.split("!");
+//		List<Order> orderList = new ArrayList<Order>();
+//		for(String id:idStr) {
+//			ShopCar shopCar = shopCarDao.getShoppingByID(Long.parseLong(id));
+//			orderList.add(makeCommodityOrder(userToken,shopCar.getCommodityid(),shopCar.getCount(),userInfo.getIp()));
+//		}
+//		return orderList;
+//	}
 	
 	/**
 	 * 收藏夹清单 
@@ -1070,12 +1078,15 @@ public class UserService {
 		if(userInfo == null) {
 			return false;
 		}
+		long userid = userInfo.getId();
+		Commodity commodity = commodityDao.selectCommodityByID(collect.getCommodityid());
 		
-		Long maxID = collectDao.getMaxID();
-		if(maxID == null) {
-			return false;
-		}
-		collect.setId(maxID+1);
+		String name = commodity.getName();
+		String picurl = commodity.getPicurl();
+		collect.setUserid(userid);
+		collect.setName(name);
+		collect.setPicurl(picurl);
+		
 		int ret = collectDao.addCollect(collect);
 		if(ret == 1) {
 			return true;
@@ -1095,7 +1106,7 @@ public class UserService {
 		String[] idbuf = idStr.split("!");
 		
 		for(String id:idbuf) {
-			int ret = shopCarDao.removeShopCar(Long.parseLong(id));
+			int ret = collectDao.removeCollect(Long.parseLong(id));
 			if(ret != 1) {
 				return false;
 			}
@@ -1132,6 +1143,8 @@ public class UserService {
 	
 	/**
 	 * 评价 增
+	 * 后端自填：id,userID,username,time
+	 * 前端必填：thingID，text，grade，time，describe，logistics，service
 	 */
 	public boolean addAppraise(String userToken, Appraise appraise) {
 		UserInfo userInfo = onlineMap.get(userToken);
@@ -1142,7 +1155,16 @@ public class UserService {
 		if(maxID == null) {
 			return false;
 		}
+		
+		long userID = userInfo.getId();
+		User user = userDao.selectUserByID(userID);
+		String username = user.getNikeName();
+		
 		appraise.setId(maxID+1);
+		appraise.setUserID(userID);
+		appraise.setUsername(username);
+		appraise.setTime(System.currentTimeMillis());
+		System.out.println(appraise.getDescribe());
 		int ret = appraiseDao.addAppraise(appraise);
 		if(ret == 1) {
 			return true;
@@ -1181,7 +1203,6 @@ public class UserService {
 		}
 		addr.setId(maxID + 1);
 		addr.setUserId(userInfo.getId());
-		addr.setMain(0);
 		int ret = addressDao.addAddress(addr);
 		System.out.println(ret);
 		if(ret == 1) {
@@ -1193,28 +1214,47 @@ public class UserService {
 	/**
 	 * 收货地址 删
 	 */
-	public boolean removeAddress(String userToken, long id) {
+	public boolean removeAddress(String userToken, String idStr) {
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return false;
 		}
 		long userId = userInfo.getId();
-		int ret = addressDao.removeAddress(userId, id);
-		if(ret == 1) {
-			return true;
+		String[] idBuf = idStr.split("!");
+		for(String id:idBuf) {
+			if(addressDao.removeAddress(userId, Long.parseLong(id)) != 1) {
+				return false;
+			}
 		}
-		return false;
+		return true;
 	}
 	
 	/**
 	 * 收货地址 改
 	 */
-	public boolean updateAddress(String userToken, Address addr) {
+	public boolean updateAddress(String userToken, Address addrTemp) {
 		UserInfo userInfo = onlineMap.get(userToken);
 		if(userInfo == null) {
 			return false;
 		}
-		int ret = addressDao.updateAddress(addr);
+		long id = addrTemp.getId();
+		Address address = addressDao.selectAddress(id);
+		
+		String username = addrTemp.getUsername();
+		String phone = addrTemp.getPhone();
+		String addr = addrTemp.getAddr();
+		int main = addrTemp.getMain();
+		
+		if(username != null) {
+			address.setUsername(username);
+		}
+		if(phone != null) {
+			address.setPhone(phone);
+		}
+		if(addr != null) {
+			address.setAddr(addr);
+		}
+		int ret = addressDao.updateAddress(address);
 		if(ret == 1) {
 			return true;
 		}
