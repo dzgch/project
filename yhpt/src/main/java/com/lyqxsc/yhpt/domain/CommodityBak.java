@@ -60,8 +60,10 @@ public class CommodityBak {
 	//商品描述
 	String note;
 	//分销商
-	@JsonIgnore
+//	@JsonIgnore
 	long distributor;
+	//大类;
+	int kind;
 	//种类
 	int classId;
 	//种类
@@ -241,5 +243,11 @@ public class CommodityBak {
 	}
 	public void setOrdernumTotal(int ordernumTotal) {
 		this.ordernumTotal = ordernumTotal;
+	}
+	public int getKind() {
+		return kind;
+	}
+	public void setKind(int kind) {
+		this.kind = kind;
 	}
 }

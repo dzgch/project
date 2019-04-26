@@ -20,6 +20,10 @@ public interface IDistributorDao {
 	@Select("select * from distributor")
 	List<DistributorBak> selectAllDistributor();
 	
+	//获取总分销商
+	@Select("select grandParent from distributor where parent=#{parent}")
+	Long getGrandParent(@Param("parent") long parent);
+	
 	@Select("select * from distributor where username=#{username}")
 	DistributorBak selectDistributorByUsername(@Param("username") String username);
 	
@@ -56,8 +60,8 @@ public interface IDistributorDao {
 	@Select("select max(id) from distributor")
 	Long getMaxID();
 	
-	@Insert("insert into distributor(id,username,password,realname,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime,authority)"
-			+ "values(#{id},#{username},#{password},#{realname},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime},#{authority})")
+	@Insert("insert into distributor(username,password,realname,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime,authority)"
+			+ "values(#{username},#{password},#{realname},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime},#{authority})")
 	int addDistributor(Distributor distributor);
 
 	@Delete("delete from distributor where id=#{id}")

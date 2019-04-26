@@ -299,6 +299,7 @@ public class DistributorService {
 		}
 		String classStr = classify.getClassStr();
 		commodity.setClassStr(classStr);
+		commodity.setKind(classify.getKind());
 		commodity.setPicurl(filename);
 		
 		int ret = commodityDao.addCommodity(commodity);

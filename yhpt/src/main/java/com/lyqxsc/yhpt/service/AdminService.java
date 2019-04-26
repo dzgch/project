@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,7 @@ import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
+import com.lyqxsc.yhpt.domain.SimpleDistributor;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.domain.UserInfo;
 import com.lyqxsc.yhpt.urlclass.ClassifyList;
@@ -259,7 +261,7 @@ public class AdminService {
 		}
 		
 		CommodityClassify classify = new CommodityClassify();
-		classify.setType(type);
+		classify.setKind(type);
 		classify.setClassStr(classStr);
 		if(1 != commodityClassifyDao.insert(classify)) {
 			return false;
@@ -382,6 +384,7 @@ public class AdminService {
 		}
 		String classStr = classify.getClassStr();
 		commodity.setClassStr(classStr);
+		commodity.setKind(classify.getKind());
 		commodity.setPicurl(filename);
 
 		int ret = commodityDao.addCommodity(commodity);
@@ -526,6 +529,14 @@ public class AdminService {
 			}
 			commodity.setPicurl(filename);
 		}
+		
+		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
+		if(classify == null) {
+			return false;
+		}
+		commodity.setClassStr(classify.getClassStr());
+		commodity.setKind(classify.getKind());
+		
 
 		int ret = commodityDao.updateCommodity(commodity);
 		if(ret != 1) {
@@ -777,6 +788,13 @@ public class AdminService {
 	
 	/**
 	 * 新增经销商
+	 * 后端填写
+	 * orderNum
+	 * rentOrderNum
+	 * addTime
+	 * grandParent
+	 * userNum
+	 * addId
 	 */
 	public int addDistributor(String userToken, Distributor distributor) {
 		UserInfo adminInfo = onlineMap.get(userToken);
@@ -787,8 +805,14 @@ public class AdminService {
 		if(distributorDao.selectDistributorByUsername(distributor.getUsername()) != null) {
 			return -2;
 		}
-		long maxID = distributorDao.getMaxID();
-		distributor.setId(maxID+1);
+		
+		distributor.setOrderNum(0);
+		distributor.setRentOrderNum(0);
+		distributor.setAddTime(System.currentTimeMillis());
+		long grandParent = distributorDao.getGrandParent(distributor.getParent());
+		distributor.setGrandParent(grandParent);
+		distributor.setUserNum(0);
+		distributor.setAddId(adminInfo.getId());
 		
 		if(distributorDao.addDistributor(distributor) != 1) {
 			return -3;
@@ -829,7 +853,7 @@ public class AdminService {
 	/**
 	 * 获取父分销商
 	 */
-	public List<DistributorBak> getParentDistributor(String userToken, int grade){
+	public List<SimpleDistributor> getParentDistributor(String userToken, int grade){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
@@ -840,7 +864,14 @@ public class AdminService {
 		}
 		
 		List<DistributorBak> list = distributorDao.getParentDistributor(grade-1);
-		return list;
+		List<SimpleDistributor> simpleList = new ArrayList<SimpleDistributor>();
+		for(DistributorBak obj:list) {
+			SimpleDistributor simple = new SimpleDistributor();
+			simple.setId(obj.getId());
+			simple.setName(obj.getDistributorName());
+			simpleList.add(simple);
+		}
+		return simpleList;
 	}
 	
 	/**

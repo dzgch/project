@@ -55,6 +55,8 @@ public class Commodity {
 	//分销商
 //	@JsonIgnore
 	long distributor;
+	//大类
+	int kind;
 	//种类
 	int classId;
 	//种类
@@ -235,5 +237,11 @@ public class Commodity {
 	}
 	public void setOrdernumTotal(int ordernumTotal) {
 		this.ordernumTotal = ordernumTotal;
+	}
+	public int getKind() {
+		return kind;
+	}
+	public void setKind(int kind) {
+		this.kind = kind;
 	}
 }

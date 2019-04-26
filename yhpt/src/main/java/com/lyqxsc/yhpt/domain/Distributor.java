@@ -39,6 +39,8 @@ public class Distributor {
 	long lastLoginTime;
 	//注册时间
 	long addTime;
+	//用户数
+	int userNum;
 	//等级1为1级分销商，以此类推
 	int grade;
 	//祖级id
@@ -189,4 +191,11 @@ public class Distributor {
 	public void setDistributorName(String distributorName) {
 		this.distributorName = distributorName;
 	}
+	public int getUserNum() {
+		return userNum;
+	}
+	public void setUserNum(int userNum) {
+		this.userNum = userNum;
+	}
+	
 }

@@ -31,6 +31,7 @@ import com.lyqxsc.yhpt.domain.DistributorHomePage;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
+import com.lyqxsc.yhpt.domain.SimpleDistributor;
 import com.lyqxsc.yhpt.domain.Test;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.service.AdminService;
@@ -1099,7 +1100,7 @@ public class AdminController {
 		if(!isAdmin(userToken)) {
 			return  RetJson.unknowError("unknow error", null);
 		}
-		List<DistributorBak> list = adminService.getParentDistributor(userToken, Integer.parseInt(grade));
+		List<SimpleDistributor> list = adminService.getParentDistributor(userToken, Integer.parseInt(grade));
 		return RetJson.success("success",list);
 	}
 	

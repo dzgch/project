@@ -44,11 +44,11 @@ public interface ICommodityDao {
 	List<Commodity> selectRentCommodity();
 	
 
-	@Insert({"insert into commoditylist(id,name,picurl,price,price1,price2,price3,price4,price5,price6,rentPrice,rentPrice1,rentPrice2,rentPrice3,rentPrice4,rentPrice5,rentPrice6,type,inventory,sales,ordernumDay,ordernumMouth,ordernumTotal,deposit,note,distributor,classId,classStr,online) "
-			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},#{ordernumTotal},#{deposit},#{note},#{distributor},#{classId},#{classStr},#{online})"})
+	@Insert({"insert into commoditylist(id,name,picurl,price,price1,price2,price3,price4,price5,price6,rentPrice,rentPrice1,rentPrice2,rentPrice3,rentPrice4,rentPrice5,rentPrice6,type,inventory,sales,ordernumDay,ordernumMouth,ordernumTotal,deposit,note,distributor,kind,classId,classStr,online) "
+			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},#{ordernumTotal},#{deposit},#{note},#{distributor},#{kind},#{classId},#{classStr},#{online})"})
 	int addCommodity(Commodity commodity);
 	
-	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},price1=#{price1},price2=#{price2},price3=#{price3},price4=#{price4},price5=#{price5},price6=#{price6},rentPrice=#{rentPrice},rentPrice1=#{rentPrice1},rentPrice2=#{rentPrice2},rentPrice3=#{rentPrice3},rentPrice4=#{rentPrice4},rentPrice5=#{rentPrice5},rentPrice6=#{rentPrice6},type=#{type},inventory=#{inventory},deposit=#{deposit},note=#{note},classId=#{classId},classStr=#{classStr},online=#{online}"
+	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},price1=#{price1},price2=#{price2},price3=#{price3},price4=#{price4},price5=#{price5},price6=#{price6},rentPrice=#{rentPrice},rentPrice1=#{rentPrice1},rentPrice2=#{rentPrice2},rentPrice3=#{rentPrice3},rentPrice4=#{rentPrice4},rentPrice5=#{rentPrice5},rentPrice6=#{rentPrice6},type=#{type},inventory=#{inventory},deposit=#{deposit},note=#{note},kind=#{kind},classId=#{classId},classStr=#{classStr},online=#{online}"
 			+ " where id=#{id}")
 	int updateCommodity(Commodity commodity);
 	/*

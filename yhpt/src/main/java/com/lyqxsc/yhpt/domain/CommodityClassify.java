@@ -2,17 +2,18 @@ package com.lyqxsc.yhpt.domain;
 
 public class CommodityClassify {
 	//类型 2大类 ： 1药剂 2器械
-	int type;
+	int kind;
 	//种类编号
 	int classId;
 	//种类值
 	String classStr;
 	
-	public int getType() {
-		return type;
+	
+	public int getKind() {
+		return kind;
 	}
-	public void setType(int type) {
-		this.type = type;
+	public void setKind(int kind) {
+		this.kind = kind;
 	}
 	public int getClassId() {
 		return classId;

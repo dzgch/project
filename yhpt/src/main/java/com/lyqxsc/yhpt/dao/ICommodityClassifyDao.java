@@ -15,8 +15,8 @@ import com.lyqxsc.yhpt.domain.CommodityClassify;
 @Component
 public interface ICommodityClassifyDao {
 	//添加分类
-	@Insert({"insert into commodityclass(type,classId,classStr) "
-			+ "values(#{type},#{classId},#{classStr})"})
+	@Insert({"insert into commodityclass(kind,classId,classStr) "
+			+ "values(#{kind},#{classId},#{classStr})"})
 	int insert(CommodityClassify commodityClassify);
 	
 	//删除分类
@@ -24,8 +24,8 @@ public interface ICommodityClassifyDao {
 	int delete(@Param("classId") int classId);
 	
 	//查询分类
-	@Select("select * from commodityclass where type=#{type}")
-	List<CommodityClassify> selectClass(@Param("type") int type);
+	@Select("select * from commodityclass where kind=#{kind}")
+	List<CommodityClassify> selectClass(@Param("kind") int kind);
 	
 	//ID查询分类
 	@Select("select * from commodityclass where classId=#{classId}")
