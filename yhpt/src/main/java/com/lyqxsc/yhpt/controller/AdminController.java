@@ -26,6 +26,7 @@ import com.lyqxsc.yhpt.domain.AdminHomePage;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.Coupon;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.DistributorHomePage;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
@@ -71,10 +72,13 @@ public class AdminController {
 		
 		int ret = adminService.signupAdmin(userToken,admin);
 		if(ret == -1) {
-			return RetJson.urlError("sigup error, username already exists ", null);
+			return RetJson.urlError("注册失败，用户名已存在", null);
 		}
 		else if(ret == -2) {
-			return RetJson.mysqlError("sigup error, atabase disconnected", null);
+			return RetJson.mysqlError("注册失败，数据库连接失败", null);
+		}
+		else if(ret == -3) {
+			return RetJson.mysqlError("管理员数量上限", null);
 		}
 		else {
 			return RetJson.success("sigup seccess");
@@ -96,7 +100,6 @@ public class AdminController {
 		}
 		
 		//TODO
-		
 		Admin admin = adminService.login(username, password, ip);
 		
 		if(admin == null) {
@@ -144,11 +147,11 @@ public class AdminController {
 		
 		if(isAdmin(userToken)) {
 			AdminHomePage home = adminService.homepage(userToken, 0);
-			return RetJson.success("logout success",home);
+			return RetJson.success("success",home);
 		}
 		else{
 			DistributorHomePage home = distributorService.homepage(userToken);
-			return RetJson.success("logout success",home);
+			return RetJson.success("success",home);
 		}
 	}
 	
@@ -329,23 +332,17 @@ public class AdminController {
 	@RequestMapping(value = "/admin/addcommodity", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson addCommodity(CommodityInfo param) {
 		String userToken = param.getUserToken();
-		System.out.println(userToken);
-//		Commodity commodity = param.getCommodity();
-		String name = param.getName();
-		MultipartFile pic = param.getPic();
-		Commodity commodity = new Commodity();
-		commodity.setName(name);
-		if(userToken == null || commodity == null || pic == null) {
+		if(userToken == null) {
 			return RetJson.urlError("参数错误", null);
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.addCommodity(userToken, commodity, pic)) {
+			if(adminService.addCommodity(userToken, param)) {
 				return RetJson.success("success");
 			}
 		}
 		else{
-			if(distributorService.addCommodity(userToken, commodity, pic)) {
+			if(distributorService.addCommodity(userToken, param)) {
 				return RetJson.success("success");
 			}
 		}
@@ -448,6 +445,32 @@ public class AdminController {
 		}
 		return RetJson.unknowError("downline commodity error", null);
 	}
+	
+	/**
+	 * 商品修改
+	 */
+	@RequestMapping(value = "/admin/commodity/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson updateCommodity(CommodityInfo param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		
+		if(isAdmin(userToken)) {
+			if(adminService.updateCommodity(userToken, param)) {
+				return RetJson.success("success");
+			}
+		}
+//		else{
+//			if(distributorService.updateCommodity(userToken, param)) {
+//				return RetJson.success("success");
+//			}
+//		}
+		return RetJson.unknowError("add commodity error", null);
+	}
+	
+	
+	
 	
 	
 	/**
@@ -691,26 +714,27 @@ public class AdminController {
 	/**
 	 * 租赁物品发货
 	 */
-//	@RequestMapping(value = "/admin/rentorder/send", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-//	public RetJson sendrent(@RequestBody UserTokenOne param) {
-//		String userToken = param.getUserToken();
-//		String id = param.getString();
-//		if(userToken == null || id == null) {
-//			return RetJson.urlError("error, please give me userToken", null);
-//		}
-//		
-//		if(isAdmin(userToken)) {
-//			if(adminService.sendRentOrder(userToken, id)) {
-//				return RetJson.success("success");
-//			}
-//		}
-//		else{
-//			if(distributorService.sendRentOrder(userToken, id)) {
-//				return RetJson.success("success");
-//			}
-//		}
-//		return RetJson.unknowError("set order status error",null);
-//	}
+	@RequestMapping(value = "/admin/rentorder/send", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson sendrent(@RequestBody UserTokenTwo param) {
+		String userToken = param.getUserToken();
+		String id = param.getOne();
+		String count = param.getTwo();
+		if(userToken == null || id == null || count == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		
+		if(isAdmin(userToken)) {
+			if(adminService.sendRentOrder(userToken, id, count)) {
+				return RetJson.success("success");
+			}
+		}
+		else{
+			if(distributorService.sendRentOrder(userToken, id, count)) {
+				return RetJson.success("success");
+			}
+		}
+		return RetJson.unknowError("set order status error",null);
+	}
 	
 	/**
 	 * 商品发货
@@ -721,7 +745,7 @@ public class AdminController {
 		String id = param.getOne();
 		String count = param.getTwo();
 		if(userToken == null || id == null || count == null) {
-			return RetJson.urlError("error, please give me userToken", null);
+			return RetJson.urlError("参数错误", null);
 		}
 		
 		if(isAdmin(userToken)) {
@@ -916,7 +940,7 @@ public class AdminController {
 			return  RetJson.unknowError("unknow error", null);
 		}
 		
-		List<Distributor> distributor = adminService.listAllDistributor(userToken);
+		List<DistributorBak> distributor = adminService.listAllDistributor(userToken);
 		return RetJson.success("success",distributor);
 	}
 	
@@ -935,7 +959,7 @@ public class AdminController {
 			return  RetJson.unknowError("unknow error", null);
 		}
 		
-		Distributor distributor = adminService.getDistributor(userToken, Long.parseLong(id));
+		DistributorBak distributor = adminService.getDistributor(userToken, Long.parseLong(id));
 		return RetJson.success("success",distributor);
 	}
 	
@@ -1045,7 +1069,39 @@ public class AdminController {
 		return RetJson.unknowError("error", null);
 	}
 	
+	/**
+	 * 子分销商 
+	 */
+	@RequestMapping(value = "/admin/distributor/getchild", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson getChildDistributor(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String distributorID = param.getString();
+		if(userToken == null || distributorID == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		if(!isAdmin(userToken)) {
+			return  RetJson.unknowError("unknow error", null);
+		}
+		List<DistributorBak> list = adminService.getChildDistributor(userToken, distributorID);
+		return RetJson.success("success",list);
+	}
 	
+	/**
+	 * 父级分销商
+	 */
+	@RequestMapping(value = "/admin/distributor/getparent", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson getParentDistributor(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String grade = param.getString();
+		if(userToken == null || grade == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		if(!isAdmin(userToken)) {
+			return  RetJson.unknowError("unknow error", null);
+		}
+		List<DistributorBak> list = adminService.getParentDistributor(userToken, Integer.parseInt(grade));
+		return RetJson.success("success",list);
+	}
 	
 	
 	private boolean isAdmin(String userToken){

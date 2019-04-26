@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,17 +25,20 @@ import com.lyqxsc.yhpt.dao.IDeputyCommodityDao;
 import com.lyqxsc.yhpt.dao.IRentOrderDao;
 import com.lyqxsc.yhpt.dao.IUserDao;
 import com.lyqxsc.yhpt.domain.Admin;
+import com.lyqxsc.yhpt.domain.AdminBak;
 import com.lyqxsc.yhpt.domain.AdminHomePage;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.Coupon;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
 import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.User;
 import com.lyqxsc.yhpt.domain.UserInfo;
 import com.lyqxsc.yhpt.urlclass.ClassifyList;
+import com.lyqxsc.yhpt.urlclass.CommodityInfo;
 import com.lyqxsc.yhpt.utils.RetJson;
 
 @Service
@@ -64,6 +68,9 @@ public class AdminService {
 	@Autowired
 	ICouponDao couponDao;
 	
+	@Value("${PicPath}")
+	String picPath;
+	
 	Map<String, UserInfo> onlineMap = new HashMap<String, UserInfo>();
 	
 	/**
@@ -71,6 +78,9 @@ public class AdminService {
 	 * @param Admin
 	 * @return -1 用户名已存在
 	 *         -2 注册失败
+	 *         后端必填字段
+	 *         addTime
+	 *         authority
 	 */
 	public int signupAdmin(String userToken, Admin param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
@@ -79,20 +89,19 @@ public class AdminService {
 		}
 		
 		//判断用户名是否存在
-		Admin admin = adminDao.adminIsExist(param.getUsername());
+		AdminBak admin = adminDao.adminIsExist(param.getUsername());
 		if(admin != null) {
 			return -1;
 		}
 		
 		Long maxID = adminDao.getMaxAdminID();
-		if(maxID == null || maxID >= 100) {
-			return -1;
+		if(maxID == null) {
+			return -2;
+		}
+		if(maxID >= 100) {
+			return -3;
 		}
 		param.setAddTime(Calendar.getInstance().getTime().getTime());
-		param.setId(maxID+1);
-		
-		param.setParent(0);
-		param.setGrade(0);
 		param.setAuthority(1);
 		
 		if(adminDao.addAdmin(param) < 0) {
@@ -112,12 +121,12 @@ public class AdminService {
 		}
 		
 		//判断用户名是否存在
-		Admin ret = adminDao.adminIsExist(param.getUsername());
+		AdminBak ret = adminDao.adminIsExist(param.getUsername());
 		if(ret != null) {
 			return -1;
 		}
 		
-		Admin admin = adminDao.selectAdminByID(adminInfo.getId());
+		AdminBak admin = adminDao.selectAdminByID(adminInfo.getId());
 		
 		Long maxID = adminDao.getMaxID();
 		if(maxID == null) {
@@ -249,9 +258,7 @@ public class AdminService {
 			return false;
 		}
 		
-		int id = commodityClassifyDao.getMaxID();
 		CommodityClassify classify = new CommodityClassify();
-		classify.setClassId(id+1);
 		classify.setType(type);
 		classify.setClassStr(classStr);
 		if(1 != commodityClassifyDao.insert(classify)) {
@@ -318,27 +325,65 @@ public class AdminService {
 	
 	/**
 	 * 添加商品
+	 * picurl
+	 * sales
+	 * ordernumDay
+	 * ordernumMouth
+	 * ordernumTotal
+	 * distributor
+	 * classStr
 	 */
-	public boolean addCommodity(String userToken, Commodity commodity, MultipartFile pic) {
+	public boolean addCommodity(String userToken, CommodityInfo param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
 		
-		String path = "D:\\test1\\";
+		MultipartFile pic = param.getPic();
+		
+		Commodity commodity = new Commodity();
+		commodity.setName(param.getName());
+		commodity.setPrice(param.getPrice());
+		commodity.setPrice1(param.getPrice1());
+		commodity.setPrice2(param.getPrice2());
+		commodity.setPrice3(param.getPrice3());
+		commodity.setPrice4(param.getPrice4());
+		commodity.setPrice5(param.getPrice5());
+		commodity.setPrice6(param.getPrice6());
+		commodity.setRentPrice(param.getRentPrice());
+		commodity.setRentPrice1(param.getRentPrice1());
+		commodity.setRentPrice2(param.getRentPrice2());
+		commodity.setRentPrice3(param.getRentPrice3());
+		commodity.setRentPrice4(param.getRentPrice4());
+		commodity.setRentPrice5(param.getRentPrice5());
+		commodity.setRentPrice6(param.getRentPrice6());
+		commodity.setType(param.getType());
+		commodity.setInventory(param.getInventory());
+		commodity.setDeposit(param.getDeposit());
+		commodity.setNote(param.getNote());
+		commodity.setClassId(param.getClassId());
+		commodity.setOnline(param.getOnline());
+		commodity.setSales(0);
+		commodity.setOrdernumDay(0);
+		commodity.setOrdernumMouth(0);
+		commodity.setOrdernumTotal(0);
+		commodity.setDistributor(0);
+
+		String path = picPath;
     	String name = System.currentTimeMillis() + ".png";
     	String filename = path+name;
 		if(!savePic(pic, filename)) {
 			return false;
 		}
 		
-		Long maxID = commodityDao.getMaxID();
-		if(maxID == null) {
+		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
+		if(classify == null) {
 			return false;
 		}
-		commodity.setId(maxID+1);
-		//总部分销商编号为0
-		commodity.setDistributor(0);
+		String classStr = classify.getClassStr();
+		commodity.setClassStr(classStr);
+		commodity.setPicurl(filename);
+
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
 			return false;
@@ -347,17 +392,160 @@ public class AdminService {
 	}
 	
 	/**
+	 * 商品修改
+	 * picurl
+	 * sales
+	 * ordernumDay
+	 * ordernumMouth
+	 * ordernumTotal
+	 * distributor
+	 * classStr
+	 */
+	public boolean updateCommodity(String userToken, CommodityInfo param) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		
+		
+		
+		Commodity commodity = new Commodity();
+		
+		String name = param.getName();
+		if(name != null) {
+			commodity.setName(name);
+		}
+		
+		float price = param.getPrice();
+		if(price != 0) {
+			commodity.setPrice(price);
+		}
+		
+		price = param.getPrice1();
+		if(price != 0) {
+			commodity.setPrice1(price);
+		}
+		
+		price = param.getPrice2();
+		if(price != 0) {
+			commodity.setPrice2(price);
+		}
+		
+		price = param.getPrice3();
+		if(price != 0) {
+			commodity.setPrice3(price);
+		}
+		
+		price = param.getPrice4();
+		if(price != 0) {
+			commodity.setPrice4(price);
+		}
+		
+		price = param.getPrice5();
+		if(price != 0) {
+			commodity.setPrice5(price);
+		}
+		
+		price = param.getPrice6();
+		if(price != 0) {
+			commodity.setPrice6(price);
+		}
+
+		price = param.getRentPrice();
+		if(price != 0) {
+			commodity.setRentPrice(price);
+		}
+		
+		price = param.getRentPrice1();
+		if(price != 0) {
+			commodity.setRentPrice1(price);
+		}
+		
+		price = param.getRentPrice2();
+		if(price != 0) {
+			commodity.setRentPrice2(price);
+		}
+		
+		price = param.getRentPrice3();
+		if(price != 0) {
+			commodity.setRentPrice3(price);
+		}
+		
+		price = param.getRentPrice4();
+		if(price != 0) {
+			commodity.setRentPrice4(price);
+		}
+		
+		price = param.getRentPrice5();
+		if(price != 0) {
+			commodity.setRentPrice5(price);
+		}
+		
+		price = param.getRentPrice6();
+		if(price != 0) {
+			commodity.setRentPrice6(price);
+		}
+		
+		String type = param.getType();
+		if(type != null) {
+			commodity.setType(type);
+		}
+		
+		int inventory = param.getInventory();
+		if(inventory != 0) {
+			commodity.setInventory(inventory);
+		}
+		
+		float deposit = param.getDeposit();
+		if(deposit != 0) {
+			commodity.setDeposit(deposit);
+		}
+		
+		String note = param.getNote();
+		if(note != null) {
+			commodity.setNote(note);
+		}
+		
+		int classId = param.getClassId();
+		if(classId != 0) {
+			commodity.setClassId(classId);
+		}
+		
+		int online = param.getOnline();
+		if(online != 0) {
+			commodity.setOnline(online);
+		}
+
+		MultipartFile pic = param.getPic();
+		if(pic != null) {
+			String path = picPath;
+	    	String fname = System.currentTimeMillis() + ".png";
+	    	String filename = path+fname;
+			if(!savePic(pic, filename)) {
+				return false;
+			}
+			commodity.setPicurl(filename);
+		}
+
+		int ret = commodityDao.updateCommodity(commodity);
+		if(ret != 1) {
+			return false;
+		}
+		return true;
+	}
+	
+	
+	/**
 	 * 添加商品时保存图片
 	 */
 	private boolean savePic(MultipartFile file, String filename) {
 		if (!file.isEmpty()) {
             try {
                 BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(new File(filename)));    
-                System.out.println(file.getName());
                 out.write(file.getBytes());    
                 out.flush();    
                 out.close();
-                System.out.println("save pic seccess");
+//                log.info("save pic seccess");
                 return true; 
             } catch (IOException e) {    
                 e.printStackTrace();    
@@ -445,7 +633,7 @@ public class AdminService {
 		}
 		
 		List<Commodity> commodityList = commodityDao.inventoryWarning(num,0);
-		List<Commodity> commodityList1 = commodityDao.inventoryWarning(num,0);
+		List<Commodity> commodityList1 = commodityDao.inventoryNoWarning(num,0);
 		commodityList.addAll(commodityList1);
 		return commodityList;
 	}
@@ -576,13 +764,13 @@ public class AdminService {
 	/**
 	 * 分销商列表
 	 */
-	public List<Distributor> listAllDistributor(String userToken){
+	public List<DistributorBak> listAllDistributor(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
 		}
 		
-		List<Distributor> distributorList = distributorDao.selectAllDistributor();
+		List<DistributorBak> distributorList = distributorDao.selectAllDistributor();
 		return distributorList;
 	}
 	
@@ -627,6 +815,35 @@ public class AdminService {
 	}
 	
 	/**
+	 * 获取子分销商
+	 */
+	public List<DistributorBak> getChildDistributor(String userToken, String distributorID){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		List<DistributorBak> list = distributorDao.getChildDistributor(Long.parseLong(distributorID));
+		return list;
+	}
+	
+	/**
+	 * 获取父分销商
+	 */
+	public List<DistributorBak> getParentDistributor(String userToken, int grade){
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return null;
+		}
+		int gradeTemp = distributorDao.getLowGrade();
+		if(grade > gradeTemp+1 || grade > 6) {
+			return null;
+		}
+		
+		List<DistributorBak> list = distributorDao.getParentDistributor(grade-1);
+		return list;
+	}
+	
+	/**
 	 * 删除经销商
 	 */
 	public boolean updateDistributor(String userToken, Distributor distributor) {
@@ -643,12 +860,12 @@ public class AdminService {
 	/**
 	 * 经销商详情
 	 */
-	public Distributor getDistributor(String userToken, long id){
+	public DistributorBak getDistributor(String userToken, long id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return null;
 		}
-		Distributor distributor = distributorDao.selectDistributorByID(id);
+		DistributorBak distributor = distributorDao.selectDistributorByID(id);
 		return distributor;
 	}
 	
@@ -737,16 +954,17 @@ public class AdminService {
 	/**
 	 * 商品发货
 	 */
-	public boolean sendOrder(String userToken, String id, String count) {
+	public boolean sendOrder(String userToken, String orderId, String count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
+		String id = orderId.split("O")[2];
 		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
 			return false;
 		}
 		
-		if(orderDao.updateOrderList(3,id,null) != 1) {
+		if(orderDao.updateOrderList(3,orderId,null) != 1) {
 			return false;
 		}
 		return true;
@@ -811,16 +1029,21 @@ public class AdminService {
 	/**
 	 * 租赁商品发货
 	 */
-//	public boolean sendRentOrder(String userToken, String id) {
-//		UserInfo adminInfo = onlineMap.get(userToken);
-//		if(adminInfo == null) {
-//			return false;
-//		}
-//		if(rentOrderDao.updateRentOrderList(3,id) != 1) {
-//			return false;
-//		}
-//		return true;
-//	}
+	public boolean sendRentOrder(String userToken, String orderId, String count) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return false;
+		}
+		String id = orderId.split("O")[2];
+		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
+			return false;
+		}
+		
+		if(rentOrderDao.updateRentOrderList(3,orderId,null) != 1) {
+			return false;
+		}
+		return true;
+	}
 	
 	
 	

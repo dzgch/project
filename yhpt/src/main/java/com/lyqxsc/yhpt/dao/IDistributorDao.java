@@ -11,35 +11,48 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 
 @Mapper
 @Component
 public interface IDistributorDao {
 
 	@Select("select * from distributor")
-	List<Distributor> selectAllDistributor();
+	List<DistributorBak> selectAllDistributor();
 	
 	@Select("select * from distributor where username=#{username}")
-	Distributor selectDistributorByUsername(@Param("username") String username);
+	DistributorBak selectDistributorByUsername(@Param("username") String username);
 	
 	@Select("select * from distributor where id=#{id}")
-	Distributor selectDistributorByID(@Param("id") long id);
+	DistributorBak selectDistributorByID(@Param("id") long id);
 
 	@Select("select * from distributor where username=#{username} and password=#{password}")
-	Distributor selectDistributor(@Param("username") String username,@Param("password") String password);
+	DistributorBak selectDistributor(@Param("username") String username,@Param("password") String password);
 	
 	//根据城市查询分销商
 	@Select("select * from distributor where city=#{city}")
-	List<Distributor> getDistributorByCity(@Param("city") String city);
+	List<DistributorBak> getDistributorByCity(@Param("city") String city);
 	
 	//根据省份查询分销商
 	@Select("select * from distributor where province=#{province}")
-	List<Distributor> getDistributorByProvince(@Param("province") String province);
+	List<DistributorBak> getDistributorByProvince(@Param("province") String province);
 	
 	//根据用户最多搜索分销商
 	@Select(" select * from distributor where userNum=(select max(userNum) from distributor);")
-	List<Distributor> getDistributorByUserNum();
+	List<DistributorBak> getDistributorByUserNum();
 	
+	//获取子级分销商
+	@Select(" select * from distributor where parent=#{id}")
+	List<DistributorBak> getChildDistributor(@Param("id") long distributorID);
+	
+	//获取最低分销商等级
+	@Select(" select max(grade) from distributor")
+	Integer getLowGrade();
+	
+	//根据等级获取上级分销商
+	@Select(" select * from distributor where grade=#{id}")
+	List<DistributorBak> getParentDistributor(@Param("id") int grade);
+
 	@Select("select max(id) from distributor")
 	Long getMaxID();
 	
@@ -49,6 +62,8 @@ public interface IDistributorDao {
 
 	@Delete("delete from distributor where id=#{id}")
 	int removeDistributor(@Param("id") long distributorID);
+	
+	
 
 	@Update("update distributor set authority=#{authority} where id=#{id}")
 	int authorizeDistributor(@Param("id") long distributorID, @Param("authority")int authority);

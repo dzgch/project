@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Component;
 
 import com.lyqxsc.yhpt.domain.Admin;
+import com.lyqxsc.yhpt.domain.AdminBak;
 
 @Mapper
 @Component
@@ -17,10 +18,10 @@ public interface IAdminDao {
 	Admin selectAdmin(@Param("username") String username, @Param("password") String password);
 	
 	@Select("select * from admin where username=#{username}")
-	Admin adminIsExist(@Param("username") String username);
+	AdminBak adminIsExist(@Param("username") String username);
 	
 	@Select("select * from admin where id=#{id}")
-	Admin selectAdminByID(@Param("id") long id);
+	AdminBak selectAdminByID(@Param("id") long id);
 	
 	@Select("select max(id) from admin where id<100")
 	Long getMaxAdminID();
@@ -38,8 +39,8 @@ public interface IAdminDao {
 			+ "where id=#{id}")
 	int updateAdmin(@Param("id") long id, Admin admin); 
 	
-	@Insert("insert into admin(id,userToken,username,password,realName,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime) "
-			+ "values(#{id},#{userToken},#{username},#{password},#{realName},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime})")
+	@Insert("insert into admin(username,password,realName,sex,phone,addTime,authority) "
+			+ "values(#{username},#{password},#{realName},#{sex},#{phone},#{addTime},#{authority})")
 	int addAdmin(Admin admin);
 	
 }

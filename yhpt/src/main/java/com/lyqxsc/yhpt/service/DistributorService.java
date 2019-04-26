@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,6 +25,7 @@ import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.DistributorHomePage;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.domain.RentCommodity;
@@ -31,6 +33,7 @@ import com.lyqxsc.yhpt.domain.RentOrder;
 import com.lyqxsc.yhpt.domain.RetProfit;
 import com.lyqxsc.yhpt.domain.UserInfo;
 import com.lyqxsc.yhpt.urlclass.ClassifyList;
+import com.lyqxsc.yhpt.urlclass.CommodityInfo;
 
 @Service
 public class DistributorService {
@@ -56,6 +59,9 @@ public class DistributorService {
 	@Autowired
 	ICommodityClassifyDao commodityClassifyDao;
 	
+	@Value("${PicPath}")
+	String picPath;
+	
 	Map<String, UserInfo> onlineMap = new HashMap<String, UserInfo>();
 	
 	/**
@@ -66,7 +72,7 @@ public class DistributorService {
 	 */
 	public int signup(Distributor param) {
 		//判断用户名是否存在
-		Distributor distributor = distributorDao.selectDistributorByUsername(param.getUsername());
+		DistributorBak distributor = distributorDao.selectDistributorByUsername(param.getUsername());
 		if(distributor != null) {
 			return -1;
 		}
@@ -91,8 +97,8 @@ public class DistributorService {
 	 * @param password 密码
 	 * @return
 	 */
-	public Distributor login(String username, String password, String ip) {
-		Distributor distributor = distributorDao.selectDistributor(username, password);
+	public DistributorBak login(String username, String password, String ip) {
+		DistributorBak distributor = distributorDao.selectDistributor(username, password);
 		if(distributor == null) {
 			return null;
 		}
@@ -224,23 +230,76 @@ public class DistributorService {
 	/**
 	 * 添加商品
 	 */
-	public boolean addCommodity(String userToken, Commodity commodity, MultipartFile pic) {
+	public boolean addCommodity(String userToken, CommodityInfo param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
 		
-		String path = "D:\\test1\\";
+		long id = adminInfo.getId();
+		DistributorBak distributor = distributorDao.selectDistributorByID(id);
+		if(distributor == null) {
+			return false;
+		}
+		int grade = distributor.getGrade();
+		
+		MultipartFile pic = param.getPic();
+		
+		Commodity commodity = new Commodity();
+		commodity.setName(param.getName());
+		switch (grade) {
+		case 1:
+			commodity.setPrice1(param.getPrice());
+			commodity.setRentPrice1(param.getRentPrice());
+			break;
+		case 2:
+			commodity.setPrice2(param.getPrice());
+			commodity.setRentPrice2(param.getRentPrice());
+			break;
+		case 3:
+			commodity.setPrice3(param.getPrice());
+			commodity.setRentPrice3(param.getRentPrice());
+			break;
+		case 4:
+			commodity.setPrice4(param.getPrice());
+			commodity.setRentPrice4(param.getRentPrice());
+			break;
+		case 5:
+			commodity.setPrice5(param.getPrice());
+			commodity.setRentPrice5(param.getRentPrice());
+			break;
+		case 6:
+			commodity.setPrice6(param.getPrice());
+			commodity.setRentPrice6(param.getRentPrice());
+			break;
+		default:
+			break;
+		}
+		commodity.setType(param.getType());
+		commodity.setInventory(param.getInventory());
+		commodity.setDeposit(param.getDeposit());
+		commodity.setNote(param.getNote());
+		commodity.setClassId(param.getClassId());
+		commodity.setOnline(param.getOnline());
+		commodity.setSales(0);
+		commodity.setOrdernumDay(0);
+		commodity.setOrdernumMouth(0);
+		commodity.setOrdernumTotal(0);
+		commodity.setDistributor(id);
+		
+		String path = picPath;
     	String name = System.currentTimeMillis() + ".png";
     	String filename = path+name;
 		if(!savePic(pic, filename)) {
 			return false;
 		}
-		Long maxID = commodityDao.getMaxID();
-		if(maxID == null) {
+		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
+		if(classify == null) {
 			return false;
 		}
-		commodity.setId(maxID+1);
+		String classStr = classify.getClassStr();
+		commodity.setClassStr(classStr);
+		commodity.setPicurl(filename);
 		
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
@@ -501,12 +560,17 @@ public class DistributorService {
 	/**
 	 * 租赁商品发货
 	 */
-	public boolean sendRentOrder(String userToken, String id) {
+	public boolean sendRentOrder(String userToken, String orderId, String count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
 			return false;
 		}
-		if(rentOrderDao.updateRentOrderList(3,id,null) != 1) {
+		String id = orderId.split("O")[2];
+		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
+			return false;
+		}
+		
+		if(rentOrderDao.updateRentOrderList(3,orderId,null) != 1) {
 			return false;
 		}
 		return true;

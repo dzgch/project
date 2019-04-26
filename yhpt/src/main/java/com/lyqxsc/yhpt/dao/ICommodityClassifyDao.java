@@ -27,6 +27,10 @@ public interface ICommodityClassifyDao {
 	@Select("select * from commodityclass where type=#{type}")
 	List<CommodityClassify> selectClass(@Param("type") int type);
 	
+	//ID查询分类
+	@Select("select * from commodityclass where classId=#{classId}")
+	CommodityClassify selectClassByID(@Param("classId") int classId);
+	
 	@Select("select max(classId) from commodityclass")
 	Integer getMaxID();
 }

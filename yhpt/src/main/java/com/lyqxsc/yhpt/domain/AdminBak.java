@@ -2,7 +2,7 @@ package com.lyqxsc.yhpt.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class Distributor {
+public class AdminBak {
 	//ID
 	long id;
 	//userToken
@@ -10,25 +10,17 @@ public class Distributor {
 	//用户名
 	String username;
 	//密码
+	@JsonIgnore
 	String password;
-	//分销商名称
-	String distributorName;
 	//真实姓名
-	String realname;
+	@JsonIgnore
+	String realName;
 	//性别
+	@JsonIgnore
 	String sex;
 	//电话
+	@JsonIgnore
 	String phone;
-	//省份
-	String province;
-	//城市
-	String city;
-	//地址
-	String address;
-	//商品订单数
-	int orderNum;
-	//租赁订单数
-	int rentOrderNum;
 	//这次登录IP
 	String thisLoginIP;
 	//这次登录时间
@@ -39,16 +31,12 @@ public class Distributor {
 	long lastLoginTime;
 	//注册时间
 	long addTime;
-	//等级1为1级分销商，以此类推
+	//等级等级0为管理员，1为1级分销商，以此类推
 	int grade;
-	//祖级id
-	long grandParent;
 	//父级id
 	long parent;
 	//权限1有权限，0无权限，由父级或管理员授权
 	int authority;
-	//添加者ID
-	long addId;
 	
 	public long getId() {
 		return id;
@@ -75,11 +63,11 @@ public class Distributor {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public String getRealname() {
-		return realname;
+	public String getRealName() {
+		return realName;
 	}
-	public void setRealname(String realname) {
-		this.realname = realname;
+	public void setRealName(String realName) {
+		this.realName = realName;
 	}
 	public String getSex() {
 		return sex;
@@ -140,53 +128,5 @@ public class Distributor {
 	}
 	public void setAuthority(int authority) {
 		this.authority = authority;
-	}
-	public long getGrandParent() {
-		return grandParent;
-	}
-	public void setGrandParent(long grandParent) {
-		this.grandParent = grandParent;
-	}
-	public String getProvince() {
-		return province;
-	}
-	public void setProvince(String province) {
-		this.province = province;
-	}
-	public String getCity() {
-		return city;
-	}
-	public void setCity(String city) {
-		this.city = city;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public int getOrderNum() {
-		return orderNum;
-	}
-	public void setOrderNum(int orderNum) {
-		this.orderNum = orderNum;
-	}
-	public int getRentOrderNum() {
-		return rentOrderNum;
-	}
-	public void setRentOrderNum(int rentOrderNum) {
-		this.rentOrderNum = rentOrderNum;
-	}
-	public long getAddId() {
-		return addId;
-	}
-	public void setAddId(long addId) {
-		this.addId = addId;
-	}
-	public String getDistributorName() {
-		return distributorName;
-	}
-	public void setDistributorName(String distributorName) {
-		this.distributorName = distributorName;
 	}
 }

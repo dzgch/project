@@ -13,16 +13,16 @@ public class Admin {
 	//用户名
 	String username;
 	//密码
-	@JsonIgnore
+//	@JsonIgnore
 	String password;
 	//真实姓名
-	@JsonIgnore
+//	@JsonIgnore
 	String realName;
 	//性别
-	@JsonIgnore
+//	@JsonIgnore
 	String sex;
 	//电话
-	@JsonIgnore
+//	@JsonIgnore
 	String phone;
 	//这次登录IP
 	String thisLoginIP;
@@ -132,4 +132,5 @@ public class Admin {
 	public void setAuthority(int authority) {
 		this.authority = authority;
 	}
+	
 }

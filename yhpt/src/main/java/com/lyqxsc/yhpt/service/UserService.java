@@ -35,6 +35,7 @@ import com.lyqxsc.yhpt.domain.CommodityBak;
 import com.lyqxsc.yhpt.domain.CommodityClassify;
 import com.lyqxsc.yhpt.domain.CommodityPage;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.WxHomePage;
 import com.lyqxsc.yhpt.urlclass.ClassifyList;
 import com.lyqxsc.yhpt.domain.HotCommodity;
@@ -193,7 +194,7 @@ public class UserService {
 		userDao.updateLoginState(now, ip, openID);
 		long id = user.getId();
 		long distributorID = user.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		
 		UserInfo userInfo = new UserInfo();
 		userInfo.setId(id);
@@ -290,7 +291,7 @@ public class UserService {
 		}
 		String province = user.getProvince();
 		String city = user.getCity();
-		List<Distributor> distributorList = distributorDao.getDistributorByCity(city);
+		List<DistributorBak> distributorList = distributorDao.getDistributorByCity(city);
 		if(distributorList == null) {
 			distributorList = distributorDao.getDistributorByProvince(province);
 			if(distributorList == null) {
@@ -298,7 +299,7 @@ public class UserService {
 			}
 		}
 		
-		Distributor distributor = distributorList.get(0);
+		DistributorBak distributor = distributorList.get(0);
 		long distributorId = distributor.getId();
 		if(1 != distributorDao.updateUserNum(distributorId)) {
 			log.info("分销商添加用户失败");
@@ -329,7 +330,7 @@ public class UserService {
 		homePage.setPic(homePic.split(";"));
 		
 		long distributorID = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		List<CommodityBak> commodityList = commodityDao.selectAllCommodityForUser(distributorID);
 		List<CommodityBak> commodity = hidePriceList(commodityList,distributor.getGrade());
 		homePage.setCommodityList(commodity);
@@ -365,7 +366,7 @@ public class UserService {
 		homePage.setPic(shopPic.split(";"));
 		
 		long distributorID = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		List<CommodityBak> commodityList = commodityDao.selectAllCommodityForUser(distributorID);
 		List<CommodityBak> commodity = hidePriceList(commodityList,distributor.getGrade());
 		homePage.setCommodityList(commodity);
@@ -395,7 +396,7 @@ public class UserService {
 			return null;
 		}
 		long distributorID = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		int grade = distributor.getGrade();
 		
 		if(distributorID == 0) {
@@ -466,7 +467,7 @@ public class UserService {
 		if(distributorID == 0) {
 			return null;
 		}
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		int grade = distributor.getGrade();
 		List<CommodityBak> listTemp = commodityDao.selectCommodityBakByName(distributorID,name);
 		List<CommodityBak> list = hidePriceList(listTemp, grade);
@@ -548,7 +549,7 @@ public class UserService {
 		}
 		long distributorID = userInfo.getDistributor();
 		
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		int grade = distributor.getGrade();
 		List<CommodityBak> commodityListTemp = commodityDao.selectCommodityBakForUser(distributorID);
 		List<CommodityBak> commodity = hidePriceList(commodityListTemp, grade);
@@ -571,7 +572,7 @@ public class UserService {
 		}
 		long distributorId = userInfo.getDistributor();
 		
-		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorId);
 		int grade = distributor.getGrade();
 		List<CommodityBak> commodityListTemp = commodityDao.selectRentCommodityBakForUser(distributorId);
 		List<CommodityBak> commodity = hidePriceList(commodityListTemp, grade);
@@ -591,7 +592,7 @@ public class UserService {
 			return null;
 		}
 		long distributorId = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorId);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorId);
 		int grade = distributor.getGrade();
 		
 		String[] idStr = idbuf.split("!");
@@ -679,7 +680,7 @@ public class UserService {
 		User user = userDao.selectUserByID(userId);
 		//读取分销商信息
 		long distributorID = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		
 		int num = 0;
 		for(Order order:orderList) {
@@ -803,7 +804,7 @@ public class UserService {
 		
 		//读取分销商信息
 		long distributorID = userInfo.getDistributor();
-		Distributor distributor = distributorDao.selectDistributorByID(distributorID);
+		DistributorBak distributor = distributorDao.selectDistributorByID(distributorID);
 		
 		int num = 0;
 		for(RentOrder order:rentOrderList) {

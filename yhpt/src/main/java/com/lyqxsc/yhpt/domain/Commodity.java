@@ -53,7 +53,7 @@ public class Commodity {
 	//商品描述
 	String note;
 	//分销商
-	@JsonIgnore
+//	@JsonIgnore
 	long distributor;
 	//种类
 	int classId;

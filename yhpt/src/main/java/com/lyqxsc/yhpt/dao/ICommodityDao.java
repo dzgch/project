@@ -48,6 +48,9 @@ public interface ICommodityDao {
 			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},#{ordernumTotal},#{deposit},#{note},#{distributor},#{classId},#{classStr},#{online})"})
 	int addCommodity(Commodity commodity);
 	
+	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},price1=#{price1},price2=#{price2},price3=#{price3},price4=#{price4},price5=#{price5},price6=#{price6},rentPrice=#{rentPrice},rentPrice1=#{rentPrice1},rentPrice2=#{rentPrice2},rentPrice3=#{rentPrice3},rentPrice4=#{rentPrice4},rentPrice5=#{rentPrice5},rentPrice6=#{rentPrice6},type=#{type},inventory=#{inventory},deposit=#{deposit},note=#{note},classId=#{classId},classStr=#{classStr},online=#{online}"
+			+ " where id=#{id}")
+	int updateCommodity(Commodity commodity);
 	/*
 	 * 分销商三连
 	 */
@@ -128,10 +131,10 @@ public interface ICommodityDao {
 
 	
 	//告警商品,管理员
-	@Select("select * from commoditylist where inventory<=#{inventory} and distributor=#{distributor}")
+	@Select("select * from commoditylist where inventory<=#{inventory} and distributor=#{id}")
 	List<Commodity> inventoryWarning(@Param("inventory") int num,@Param("id") long id);
 	//不告警商品,管理员
-	@Select("select * from commoditylist where inventory>#{inventory} and distributor=#{distributor}")
+	@Select("select * from commoditylist where inventory>#{inventory} and distributor=#{id}")
 	List<Commodity> inventoryNoWarning(@Param("inventory") int num,@Param("id") long id);
 	
 	@Delete("delete from commoditylist where id=#{id}")

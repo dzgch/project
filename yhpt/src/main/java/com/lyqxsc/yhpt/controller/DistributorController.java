@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.Commodity;
 import com.lyqxsc.yhpt.domain.Distributor;
+import com.lyqxsc.yhpt.domain.DistributorBak;
 import com.lyqxsc.yhpt.domain.Order;
 import com.lyqxsc.yhpt.service.DistributorService;
 import com.lyqxsc.yhpt.urlclass.AdminInfo;
@@ -68,7 +69,7 @@ public class DistributorController {
 			return RetJson.urlError("login error", null);
 		}
 		
-		Distributor distributor = distributorService.login(username, password, ip);
+		DistributorBak distributor = distributorService.login(username, password, ip);
 		
 		if(distributor == null) {
 			return RetJson.urlError("login error", null);
