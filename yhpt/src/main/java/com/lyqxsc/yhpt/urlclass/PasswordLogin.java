@@ -4,6 +4,7 @@ public class PasswordLogin {
 	String username;
 	String password;
 	String ip;
+	Integer isAdmin;
 	public String getUsername() {
 		return username;
 	}
@@ -21,5 +22,11 @@ public class PasswordLogin {
 	}
 	public void setIp(String ip) {
 		this.ip = ip;
+	}
+	public Integer getIsAdmin() {
+		return isAdmin;
+	}
+	public void setIsAdmin(Integer isAdmin) {
+		this.isAdmin = isAdmin;
 	}
 }

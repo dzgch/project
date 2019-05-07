@@ -62,7 +62,11 @@ public class Commodity {
 	//种类
 	String classStr;
 	//是否上架  1 上架  0 下架
-	int online;
+	Integer online;
+	//上架时间
+	long onlineTime;
+	//添加时间
+	long addTime;
 	
 	public long getId() {
 		return id;
@@ -243,5 +247,17 @@ public class Commodity {
 	}
 	public void setKind(int kind) {
 		this.kind = kind;
+	}
+	public long getOnlineTime() {
+		return onlineTime;
+	}
+	public void setOnlineTime(long onlineTime) {
+		this.onlineTime = onlineTime;
+	}
+	public long getAddTime() {
+		return addTime;
+	}
+	public void setAddTime(long addTime) {
+		this.addTime = addTime;
 	}
 }

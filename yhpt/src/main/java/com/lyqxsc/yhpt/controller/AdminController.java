@@ -96,18 +96,27 @@ public class AdminController {
 		String username = param.getUsername();
 		String password = param.getPassword();
 		String ip = param.getIp();
-		if((username == null)||(password == null)||(ip == null)) {
+		Integer isAdmin = param.getIsAdmin();
+		if((username == null)||(password == null)||(ip == null)||(isAdmin == null)) {
 			return RetJson.urlError("login error", null);
 		}
 		
-		//TODO
-		Admin admin = adminService.login(username, password, ip);
-		
-		if(admin == null) {
-			return RetJson.urlError("login error", null);
+		if(isAdmin == 1) {
+			Admin admin = adminService.login(username, password, ip);
+			if(admin == null) {
+				return RetJson.urlError("login error", null);
+			}
+			return RetJson.success("success",admin);
 		}
-		System.out.println(admin.getUserToken());
-		return RetJson.success("success",admin);
+		else if(isAdmin == 2) {
+			DistributorBak distributor = distributorService.login(username, password, ip);
+			if(distributor == null) {
+				return RetJson.urlError("login error", null);
+			}
+			return RetJson.success("success",distributor);
+		}
+		else
+			return RetJson.urlError("login error", null);
 	}
 
 	
@@ -980,8 +989,12 @@ public class AdminController {
 			return  RetJson.unknowError("unknow error", null);
 		}
 		
-		if(adminService.addDistributor(userToken, distributor) == 0) {
+		int ret = adminService.addDistributor(userToken, distributor);
+		if(ret == 0) {
 			return RetJson.success("success");
+		}
+		else if(ret == -1) {
+			return RetJson.overdueError("凭证过期", null);
 		}
 		return RetJson.unknowError("add distributor error", null);
 	}
@@ -1101,6 +1114,9 @@ public class AdminController {
 			return  RetJson.unknowError("unknow error", null);
 		}
 		List<SimpleDistributor> list = adminService.getParentDistributor(userToken, Integer.parseInt(grade));
+		if(list == null) {
+			return  RetJson.overdueError("凭证过期", null);
+		}
 		return RetJson.success("success",list);
 	}
 	

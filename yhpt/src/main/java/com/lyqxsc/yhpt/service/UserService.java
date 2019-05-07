@@ -292,9 +292,9 @@ public class UserService {
 		String province = user.getProvince();
 		String city = user.getCity();
 		List<DistributorBak> distributorList = distributorDao.getDistributorByCity(city);
-		if(distributorList == null) {
+		if(distributorList.isEmpty()) {
 			distributorList = distributorDao.getDistributorByProvince(province);
-			if(distributorList == null) {
+			if(distributorList.isEmpty()) {
 				distributorList = distributorDao.getDistributorByUserNum();
 			}
 		}

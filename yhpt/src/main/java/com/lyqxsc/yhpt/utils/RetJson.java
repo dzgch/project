@@ -10,6 +10,7 @@ public class RetJson {
 	public static int CODE_ERROR_URL = -1;
 	public static int CODE_ERROR_CON = -2;
 	public static int CODE_ERROR_UNK = -3;
+	public static int CODE_ERROR_OVER = -4;
 	
 	public RetJson(int code, String msg,Object data) {
 		this.code = code;
@@ -35,6 +36,10 @@ public class RetJson {
 
 	public static RetJson unknowError(String msg,Object data) {
 		return new RetJson(CODE_ERROR_UNK, msg, data);
+	}
+	
+	public static RetJson overdueError(String msg,Object data) {
+		return new RetJson(CODE_ERROR_OVER, msg, data);
 	}
 	
 	public int getCode() {

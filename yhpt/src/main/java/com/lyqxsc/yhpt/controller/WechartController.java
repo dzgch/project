@@ -19,6 +19,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,6 +43,9 @@ public class WechartController {
 	@Autowired
 	UserService userService;
 	
+	@Value("${wechatMpAuthorize}")
+	String wxurl;
+	
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);  
 
 	@RequestMapping(value = "/wxuserinfo", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
@@ -63,6 +67,7 @@ public class WechartController {
 		/*第二次请求，获取用户信息*/
 		JSONObject oppidObj = JSONObject.fromObject(oppid);
 		String access_token = (String) oppidObj.get("access_token");
+		
 		String openid = (String) oppidObj.get("openid");
 		String requestUrl2 = "https://api.weixin.qq.com/sns/userinfo?access_token="+access_token+"&openid="+openid+"&lang=zh_CN";
 		String userInfoStr = null;
@@ -85,7 +90,9 @@ public class WechartController {
 		
 		String accessToken = getAccessToken();
 		String ticket = JsapiTicket(accessToken);
+		
 		Map<String,String> signature = getSignature(ticket);
+		
 		User user = userService.login(wxUserInfo, ip);
 		
 		UserSignature ret = new UserSignature();
@@ -119,6 +126,9 @@ public class WechartController {
     }
     
     public final static String GetPageAccessTokenUrl2 = "https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=ACCESS_TOKEN&type=jsapi";
+    
+    
+    //2、使用access_token获取jsapi_ticket
     public static String JsapiTicket(String accessToken) {
         String requestUrl = GetPageAccessTokenUrl2.replace("ACCESS_TOKEN", accessToken);
         HttpClient client = null;
@@ -148,10 +158,11 @@ public class WechartController {
 
     public Map<String,String> getSignature(String ticket) {
 //    	String ticket = "HoagFKDcsGMVCIY2vOjf9rtVef1QX5qnYjUiQyLkNvp_vtDrphqMpAKoBdCpgG08A7fYUQDYmV9Q36epimVfKA";
+
     	String noncestr = UUID.randomUUID().toString();
     	String timestamp = String.valueOf(System.currentTimeMillis() / 1000);//时间戳
     	//4获取url
-    	String url = "http://txweixin.free.idcfengye.com";
+    	String url = wxurl;
     	//5、将参数排序并拼接字符串
     	String str = "jsapi_ticket="+ticket+"&noncestr="+noncestr+"&timestamp="+timestamp+"&url="+url;
     	String signature = SHA1(str);
@@ -160,16 +171,17 @@ public class WechartController {
         System.out.println("signature=" + signature);
         Map<String, String> map = new HashMap<String, String>();
         map.put("appId", "wx9a9482746bdbe374");
-        map.put("timestamp", timestamp);
-        map.put("nonceStr", noncestr);
-        map.put("signature", signature);
+        map.put("timestamp",timestamp);
+        map.put("ticket",ticket);
+        map.put("noncestr",noncestr);
+        map.put("signature",signature);
         return map;
     }
     
     public static String SHA1(String str) {
         try {
             MessageDigest digest = java.security.MessageDigest
-                    .getInstance("SHA-1"); //如果是SHA加密只需要将"SHA-1"改成"SHA"即可
+                    .getInstance("SHA"); //如果是SHA加密只需要将"SHA-1"改成"SHA"即可
             digest.update(str.getBytes());
             byte messageDigest[] = digest.digest();
             // Create Hex String

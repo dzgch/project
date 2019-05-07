@@ -60,8 +60,8 @@ public interface IDistributorDao {
 	@Select("select max(id) from distributor")
 	Long getMaxID();
 	
-	@Insert("insert into distributor(username,password,realname,sex,phone,thisLoginIP,thisLoginTime,lastLoginIP,lastLoginTime,addTime,authority)"
-			+ "values(#{username},#{password},#{realname},#{sex},#{phone},#{thisLoginIP},#{thisLoginTime},#{lastLoginIP},#{lastLoginTime},#{addTime},#{authority})")
+	@Insert("insert into distributor(username,password,distributorName,realname,sex,phone,province,city,address,orderNum,rentOrderNum,addTime,grade,grandParent,parent,authority,userNum,addId)"
+			+ "values(#{username},#{password},#{distributorName},#{realname},#{sex},#{phone},#{province},#{city},#{address},#{orderNum},#{rentOrderNum},#{addTime},#{grade},#{grandParent},#{parent},#{authority},#{userNum},#{addId})")
 	int addDistributor(Distributor distributor);
 
 	@Delete("delete from distributor where id=#{id}")

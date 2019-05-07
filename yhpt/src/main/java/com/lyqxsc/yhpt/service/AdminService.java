@@ -73,6 +73,9 @@ public class AdminService {
 	@Value("${PicPath}")
 	String picPath;
 	
+	@Value("${SavePicPath}")
+	String savePicPath;
+	
 	Map<String, UserInfo> onlineMap = new HashMap<String, UserInfo>();
 	
 	/**
@@ -364,12 +367,17 @@ public class AdminService {
 		commodity.setDeposit(param.getDeposit());
 		commodity.setNote(param.getNote());
 		commodity.setClassId(param.getClassId());
-		commodity.setOnline(param.getOnline());
+		int online = param.getOnline();
+		if(online == 1) {
+			commodity.setOnlineTime(System.currentTimeMillis());
+		}
+		commodity.setOnline(online);
 		commodity.setSales(0);
 		commodity.setOrdernumDay(0);
 		commodity.setOrdernumMouth(0);
 		commodity.setOrdernumTotal(0);
 		commodity.setDistributor(0);
+		commodity.setAddTime(System.currentTimeMillis());
 
 		String path = picPath;
     	String name = System.currentTimeMillis() + ".png";
@@ -385,7 +393,7 @@ public class AdminService {
 		String classStr = classify.getClassStr();
 		commodity.setClassStr(classStr);
 		commodity.setKind(classify.getKind());
-		commodity.setPicurl(filename);
+		commodity.setPicurl(savePicPath + name);
 
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
@@ -409,9 +417,7 @@ public class AdminService {
 		if(adminInfo == null) {
 			return false;
 		}
-		
-		
-		
+
 		Commodity commodity = new Commodity();
 		
 		String name = param.getName();
@@ -527,7 +533,7 @@ public class AdminService {
 			if(!savePic(pic, filename)) {
 				return false;
 			}
-			commodity.setPicurl(filename);
+			commodity.setPicurl(savePicPath + name);
 		}
 		
 		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
@@ -806,11 +812,18 @@ public class AdminService {
 			return -2;
 		}
 		
+		long maxID = distributorDao.getMaxID();
+		distributor.setId(maxID+1);
 		distributor.setOrderNum(0);
 		distributor.setRentOrderNum(0);
 		distributor.setAddTime(System.currentTimeMillis());
-		long grandParent = distributorDao.getGrandParent(distributor.getParent());
-		distributor.setGrandParent(grandParent);
+		if(distributor.getGrade() == 1) {
+			distributor.setGrandParent(distributor.getId());
+		}
+		else {
+			distributor.setGrandParent(maxID+1);
+		}
+		
 		distributor.setUserNum(0);
 		distributor.setAddId(adminInfo.getId());
 		
@@ -858,13 +871,23 @@ public class AdminService {
 		if(adminInfo == null) {
 			return null;
 		}
+		
+		List<SimpleDistributor> simpleList = new ArrayList<SimpleDistributor>();
+		if(grade == 1) {
+			SimpleDistributor simple = new SimpleDistributor();
+			simple.setId(0l);
+			simple.setName("总部");
+			simpleList.add(simple);
+			return simpleList;
+		}
+		
 		int gradeTemp = distributorDao.getLowGrade();
-		if(grade > gradeTemp+1 || grade > 6) {
-			return null;
+		if(grade < 1 || grade > 6 || grade > gradeTemp+1) {
+			return simpleList;
 		}
 		
 		List<DistributorBak> list = distributorDao.getParentDistributor(grade-1);
-		List<SimpleDistributor> simpleList = new ArrayList<SimpleDistributor>();
+		
 		for(DistributorBak obj:list) {
 			SimpleDistributor simple = new SimpleDistributor();
 			simple.setId(obj.getId());

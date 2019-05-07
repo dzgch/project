@@ -62,6 +62,9 @@ public class DistributorService {
 	@Value("${PicPath}")
 	String picPath;
 	
+	@Value("${SavePicPath}")
+	String savePicPath;
+	
 	Map<String, UserInfo> onlineMap = new HashMap<String, UserInfo>();
 	
 	/**
@@ -300,7 +303,7 @@ public class DistributorService {
 		String classStr = classify.getClassStr();
 		commodity.setClassStr(classStr);
 		commodity.setKind(classify.getKind());
-		commodity.setPicurl(filename);
+		commodity.setPicurl(savePicPath + name);
 		
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
