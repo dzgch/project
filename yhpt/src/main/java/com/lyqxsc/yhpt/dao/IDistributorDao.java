@@ -33,6 +33,10 @@ public interface IDistributorDao {
 	@Select("select * from distributor where username=#{username} and password=#{password}")
 	DistributorBak selectDistributor(@Param("username") String username,@Param("password") String password);
 	
+	//通过id获取分销商等级
+	@Select("select grade from distributor where id=#{id}")
+	Integer getGrade(@Param("id") long id);
+	
 	//根据城市查询分销商
 	@Select("select * from distributor where city=#{city}")
 	List<DistributorBak> getDistributorByCity(@Param("city") String city);
@@ -93,8 +97,9 @@ public interface IDistributorDao {
 	@Update("update distributor set orderNum=orderNum+#{num} where id=#{id}")
 	int addOrderNum(@Param("num") int num, @Param("id") long id);
 	
-	//购买订单数自增
+	//租赁订单数自增
 	@Update("update distributor set rentOrderNum=rentOrderNum+#{num} where id=#{id}")
 	int addRentOrderNum(@Param("num") int num, @Param("id") long id);
 	
+
 }

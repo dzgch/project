@@ -15,11 +15,14 @@ import com.lyqxsc.yhpt.domain.ShopCar;
 @Mapper
 @Component
 public interface IShopCarDao {
-	@Select("select * from shopcarlist where userid=#{id}")
-	List<ShopCar> getShoppingByUserID(@Param("id") long id);
+	@Select("select * from shopcarlist where userid=#{userid}")
+	List<ShopCar> getShoppingByUserID(@Param("userid") long id);
 	
 	@Select("select * from shopcarlist where carid=#{id}")
 	ShopCar getShoppingByID(@Param("id") long id);
+	
+	@Select("select * from shopcarlist where userid=#{userid} and commodityid=#{commodityid}")
+	ShopCar isExist(@Param("userid") long userid, @Param("commodityid") long commodityid);
 	
 	@Select("select max(id) from shopcarlist")
 	Long getMaxID();

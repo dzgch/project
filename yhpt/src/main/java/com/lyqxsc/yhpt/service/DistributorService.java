@@ -288,6 +288,20 @@ public class DistributorService {
 		commodity.setOrdernumDay(0);
 		commodity.setOrdernumMouth(0);
 		commodity.setOrdernumTotal(0);
+		commodity.setSalesVolumeDay(0);
+		commodity.setSalesVolumeMouth(0);
+		commodity.setSalesPriceDay(0);
+		commodity.setSalesPriceMouth(0);
+		commodity.setSalesPriceTotal(0);
+		commodity.setRentOrdernumDay(0);
+		commodity.setRentOrdernumMouth(0);
+		commodity.setRentOrdernumTotal(0);
+		commodity.setRentVolumeDay(0);
+		commodity.setRentVolumeMouth(0);
+		commodity.setRentVolumeTotal(0);
+		commodity.setRentPriceDay(0);
+		commodity.setRentPriceMouth(0);
+		commodity.setRentPriceTotal(0);
 		commodity.setDistributor(id);
 		
 		String path = picPath;

@@ -48,12 +48,41 @@ public class Commodity {
 	int ordernumMouth;
 	//订单总数
 	int ordernumTotal;
+	//日销量
+	int salesVolumeDay;
+	//月销量
+	int salesVolumeMouth;
+	//日销售额
+	float salesPriceDay;
+	//月销售额
+	float salesPriceMouth;
+	//总销售额
+	float salesPriceTotal;
+	//租赁订单数量日
+	int	rentOrdernumDay;
+	//租赁订单数量月
+	int	rentOrdernumMouth;
+	//租赁订单总数
+	int	rentOrdernumTotal;
+	//租赁日
+	int	rentVolumeDay;
+	//租赁月
+	int	rentVolumeMouth;
+	//总租赁量
+	int	rentVolumeTotal;
+	//租赁金额日
+	float	rentPriceDay;
+	//租赁金额月
+	float	rentPriceMouth;
+	//租赁金额总
+	float	rentPriceTotal;
+
 	//押金
 	float deposit;
 	//商品描述
 	String note;
 	//分销商
-//	@JsonIgnore
+	//@JsonIgnore
 	long distributor;
 	//大类
 	int kind;
@@ -259,5 +288,92 @@ public class Commodity {
 	}
 	public void setAddTime(long addTime) {
 		this.addTime = addTime;
+	}
+	public int getSalesVolumeDay() {
+		return salesVolumeDay;
+	}
+	public void setSalesVolumeDay(int salesVolumeDay) {
+		this.salesVolumeDay = salesVolumeDay;
+	}
+	public int getSalesVolumeMouth() {
+		return salesVolumeMouth;
+	}
+	public void setSalesVolumeMouth(int salesVolumeMouth) {
+		this.salesVolumeMouth = salesVolumeMouth;
+	}
+	public float getSalesPriceDay() {
+		return salesPriceDay;
+	}
+	public void setSalesPriceDay(float salesPriceDay) {
+		this.salesPriceDay = salesPriceDay;
+	}
+	public float getSalesPriceMouth() {
+		return salesPriceMouth;
+	}
+	public void setSalesPriceMouth(float salesPriceMouth) {
+		this.salesPriceMouth = salesPriceMouth;
+	}
+	public float getSalesPriceTotal() {
+		return salesPriceTotal;
+	}
+	public void setSalesPriceTotal(float salesPriceTotal) {
+		this.salesPriceTotal = salesPriceTotal;
+	}
+	public void setOnline(Integer online) {
+		this.online = online;
+	}
+	public int getRentOrdernumDay() {
+		return rentOrdernumDay;
+	}
+	public void setRentOrdernumDay(int rentOrdernumDay) {
+		this.rentOrdernumDay = rentOrdernumDay;
+	}
+	public int getRentOrdernumMouth() {
+		return rentOrdernumMouth;
+	}
+	public void setRentOrdernumMouth(int rentOrdernumMouth) {
+		this.rentOrdernumMouth = rentOrdernumMouth;
+	}
+	public int getRentOrdernumTotal() {
+		return rentOrdernumTotal;
+	}
+	public void setRentOrdernumTotal(int rentOrdernumTotal) {
+		this.rentOrdernumTotal = rentOrdernumTotal;
+	}
+	public int getRentVolumeDay() {
+		return rentVolumeDay;
+	}
+	public void setRentVolumeDay(int rentVolumeDay) {
+		this.rentVolumeDay = rentVolumeDay;
+	}
+	public int getRentVolumeMouth() {
+		return rentVolumeMouth;
+	}
+	public void setRentVolumeMouth(int rentVolumeMouth) {
+		this.rentVolumeMouth = rentVolumeMouth;
+	}
+	public int getRentVolumeTotal() {
+		return rentVolumeTotal;
+	}
+	public void setRentVolumeTotal(int rentVolumeTotal) {
+		this.rentVolumeTotal = rentVolumeTotal;
+	}
+	public float getRentPriceDay() {
+		return rentPriceDay;
+	}
+	public void setRentPriceDay(float rentPriceDay) {
+		this.rentPriceDay = rentPriceDay;
+	}
+	public float getRentPriceMouth() {
+		return rentPriceMouth;
+	}
+	public void setRentPriceMouth(float rentPriceMouth) {
+		this.rentPriceMouth = rentPriceMouth;
+	}
+	public float getRentPriceTotal() {
+		return rentPriceTotal;
+	}
+	public void setRentPriceTotal(float rentPriceTotal) {
+		this.rentPriceTotal = rentPriceTotal;
 	}
 }

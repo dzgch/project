@@ -44,8 +44,10 @@ public interface ICommodityDao {
 	List<Commodity> selectRentCommodity();
 	
 
-	@Insert({"insert into commoditylist(id,name,picurl,price,price1,price2,price3,price4,price5,price6,rentPrice,rentPrice1,rentPrice2,rentPrice3,rentPrice4,rentPrice5,rentPrice6,type,inventory,sales,ordernumDay,ordernumMouth,ordernumTotal,deposit,note,distributor,kind,classId,classStr,online,onlineTime,addTime) "
-			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},#{ordernumTotal},#{deposit},#{note},#{distributor},#{kind},#{classId},#{classStr},#{online},#{onlineTime},#{addTime})"})
+	@Insert({"insert into commoditylist(id,name,picurl,price,price1,price2,price3,price4,price5,price6,rentPrice,rentPrice1,rentPrice2,rentPrice3,rentPrice4,rentPrice5,rentPrice6,type,inventory,sales,ordernumDay,ordernumMouth,ordernumTotal,salesVolumeDay,salesVolumeMouth,"
+			+ "salesPriceDay,salesPriceMouth,salesPriceTotal,rentOrdernumDay,rentOrdernumMouth,rentOrdernumTotal,rentVolumeDay,rentVolumeMouth,rentVolumeTotal,rentPriceDay,rentPriceMouth,rentPriceTotal,deposit,note,distributor,kind,classId,classStr,online,onlineTime,addTime) "
+			+ "values(#{id},#{name},#{picurl},#{price},#{price1},#{price2},#{price3},#{price4},#{price5},#{price6},#{rentPrice},#{rentPrice1},#{rentPrice2},#{rentPrice3},#{rentPrice4},#{rentPrice5},#{rentPrice6},#{type},#{inventory},#{sales},#{ordernumDay},#{ordernumMouth},"
+			+ "#{ordernumTotal},#{salesVolumeDay},#{salesVolumeMouth},#{salesPriceDay},#{salesPriceMouth},#{salesPriceTotal},#{rentOrdernumDay},#{rentOrdernumMouth},#{rentOrdernumTotal},#{rentVolumeDay},#{rentVolumeMouth},#{rentVolumeTotal},#{rentPriceDay},#{rentPriceMouth},#{rentPriceTotal},#{deposit},#{note},#{distributor},#{kind},#{classId},#{classStr},#{online},#{onlineTime},#{addTime})"})
 	int addCommodity(Commodity commodity);
 	
 	@Update("update commoditylist set name=#{name},picurl=#{picurl},price=#{price},price1=#{price1},price2=#{price2},price3=#{price3},price4=#{price4},price5=#{price5},price6=#{price6},rentPrice=#{rentPrice},rentPrice1=#{rentPrice1},rentPrice2=#{rentPrice2},rentPrice3=#{rentPrice3},rentPrice4=#{rentPrice4},rentPrice5=#{rentPrice5},rentPrice6=#{rentPrice6},type=#{type},inventory=#{inventory},deposit=#{deposit},note=#{note},kind=#{kind},classId=#{classId},classStr=#{classStr},online=#{online}"
@@ -95,7 +97,7 @@ public interface ICommodityDao {
 	
 	//根据分销商和物品订单数查询物品
 	@Select("select * from commoditylist where distributor=#{distributor} and ordernumTotal=#{ordernumTotal}")
-	CommodityBak selectHotCommodityBakByDistributor(@Param("distributor") long distributor,@Param("ordernumTotal") int ordernum);
+	List<CommodityBak> selectHotCommodityBakByDistributor(@Param("distributor") long distributor,@Param("ordernumTotal") int ordernum);
 
 	@Select("select * from commoditylist where distributor=#{distributor} and classId=#{classId}")
 	List<Commodity> selectCommodityByClass(@Param("distributor") long distributor, @Param("classId") int classId);
@@ -151,20 +153,76 @@ public interface ICommodityDao {
 	//物品上架/下架
 	@Update("update commoditylist set online=#{online} where id=#{id}")
 	int updateOnline(@Param("id") long id,@Param("online") int option);
+		
+	//更新商品订单数
+	@Update("update commoditylist set "
+			+ "ordernumDay=ordernumDay+1,"
+			+ "ordernumMouth=ordernumMouth+1,"
+			+ "ordernumTotal=ordernumTotal+1 "
+			+ "where id=#{id}")
+	int updatePayOrderNum(@Param("id") long id);
+	
+	//更新商品销量
+	@Update("update commoditylist set "
+			+ "salesVolumeDay=salesVolumeDay+#{salesVolume},"
+			+ "salesVolumeMouth=salesVolumeMouth+#{salesVolume},"
+			+ "sales=sales+#{salesVolume},"
+			+ "salesPriceDay=salesPriceDay+#{salesPrice},"
+			+ "salesPriceMouth=salesPriceMouth+#{salesPrice},"
+			+ "salesPriceTotal=salesPriceTotal+#{salesPrice} "
+			+ "where id=#{id}")
+	int updateSalesVolume(@Param("salesVolume") int salesVolume,@Param("salesPrice") float salesPrice, @Param("id") long id);
+	
+	//日销量,订单数清0
+	@Update("update commoditylist set salesVolumeDay=0,salesPriceDay=0,ordernumDay=0 where id=#{id}")
+	int clearSalesVolumeDay(@Param("id") long id);
+	
+	//月销量，订单数清0
+	@Update("update commoditylist set salesVolumeMouth=0,salesPriceMouth=0,ordernumMouth where id=#{id}")
+	int clearSalesVolumeMouth(@Param("id") long id);
 	
 	
+	//更新商品租赁订单数
+	@Update("update commoditylist set "
+			+ "rentOrdernumDay=rentOrdernumDay+1,"
+			+ "rentOrdernumMouth=rentOrdernumMouth+1,"
+			+ "rentOrdernumTotal=rentOrdernumTotal+1 "
+			+ "where id=#{id}")
+	int updateRentOrderNum(@Param("id") long id);
 	
-	//更新商品日订单和月订单
-	@Update("update commoditylist set ordernumDay=#{ordernumDay},ordernumMouth=#{ordernumMouth} where id=#{id}")
-	int updateOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumMouth") int ordernumMouth,@Param("id") long id);
-	//更新商品日订单和总订单
-	@Update("update commoditylist set ordernumDay=#{ordernumDay},ordernumTotal=#{ordernumTotal} where id=#{id}")
-	int updatePayOrderNum(@Param("ordernumDay") int ordernumDay,@Param("ordernumTotal") int ordernumTotal,@Param("id") long id);
+	//更新商品销量
+	@Update("update commoditylist set "
+			+ "rentVolumeDay=rentVolumeDay+#{rentVolume},"
+			+ "rentVolumeMouth=rentVolumeMouth+#{rentVolume},"
+			+ "rentVolumeTotal=rentVolumeTotal+#{rentVolume},"
+			+ "rentPriceDay=rentPriceDay+#{rentPrice},"
+			+ "rentPriceMouth=rentPriceMouth+#{rentPrice},"
+			+ "rentPriceTotal=rentPriceTotal+#{rentPrice} "
+			+ "where id=#{id}")
+	int updateRentVolume(@Param("rentVolume") int rentVolume,@Param("rentPrice") float rentPrice, @Param("id") long id);
+	
+	//日销量,租赁订单数清0
+	@Update("update commoditylist set rentVolumeDay=0,rentPriceDay=0,rentOrdernumDay=0 where id=#{id}")
+	int clearRentVolumeDay(@Param("id") long id);
+	
+	//月销量，租赁订单数清0
+	@Update("update commoditylist set rentVolumeMouth=0,rentPriceMouth=0,rentOrdernumMouth where id=#{id}")
+	int clearRentVolumeMouth(@Param("id") long id);
+
+
 	
 	
 	//设置商品数量
 	@Update("update commoditylist set inventory=inventory+#{count} where id=#{id}")
 	int setCommodityCount(@Param("id")long id, @Param("count") int count);
+	
+	//获取商品销量
+	@Select("select "
+			+ "id,name,picurl,price,rentPrice,type,salesVolumeDay,salesVolumeMouth,sales,salesPriceDay,"
+			+ "salesPriceMouth,salesPriceTotal,rentVolumeDay,rentVolumeMouth,rentVolumeTotal,rentPriceDay,"
+			+ "rentPriceMouth,rentPriceTotal from commoditylist")
+	List<SalesTabel> getSalesTabel();
+	
 	
 	
 }

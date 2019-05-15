@@ -25,6 +25,7 @@ import com.lyqxsc.yhpt.dao.IOrderDao;
 import com.lyqxsc.yhpt.dao.IDeputyCommodityDao;
 import com.lyqxsc.yhpt.dao.IRentOrderDao;
 import com.lyqxsc.yhpt.dao.IUserDao;
+import com.lyqxsc.yhpt.dao.SalesTabel;
 import com.lyqxsc.yhpt.domain.Admin;
 import com.lyqxsc.yhpt.domain.AdminBak;
 import com.lyqxsc.yhpt.domain.AdminHomePage;
@@ -87,55 +88,55 @@ public class AdminService {
 	 *         addTime
 	 *         authority
 	 */
-	public int signupAdmin(String userToken, Admin param) {
+	public RetJson signupAdmin(String userToken, Admin param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return -1;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		//判断用户名是否存在
 		AdminBak admin = adminDao.adminIsExist(param.getUsername());
 		if(admin != null) {
-			return -1;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		Long maxID = adminDao.getMaxAdminID();
 		if(maxID == null) {
-			return -2;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		if(maxID >= 100) {
-			return -3;
+			return RetJson.unknowError("未知错误", null);
 		}
 		param.setAddTime(Calendar.getInstance().getTime().getTime());
 		param.setAuthority(1);
 		
 		if(adminDao.addAdmin(param) < 0) {
-			return -2;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return 0;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 注册分销商
 	 */
-	public int signupDistributor(String userToken, Admin param) {
+	public RetJson signupDistributor(String userToken, Admin param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		//root id = 0
 		if(adminInfo == null) {
-			return -1;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		//判断用户名是否存在
 		AdminBak ret = adminDao.adminIsExist(param.getUsername());
 		if(ret != null) {
-			return -1;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		AdminBak admin = adminDao.selectAdminByID(adminInfo.getId());
 		
 		Long maxID = adminDao.getMaxID();
 		if(maxID == null) {
-			return -1;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		if(maxID < 100) {
@@ -149,9 +150,9 @@ public class AdminService {
 		param.setAuthority(1);
 		
 		if(adminDao.addAdmin(param) < 0) {
-			return -2;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return 0;
+		return RetJson.success("成功");
 	}
 	
 	
@@ -161,10 +162,10 @@ public class AdminService {
 	 * @param password 密码
 	 * @return
 	 */
-	public Admin login(String username, String password, String ip) {
+	public RetJson login(String username, String password, String ip) {
 		Admin admin = adminDao.selectAdmin(username, password);
 		if(admin == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		/*向数据库更新时间和本次登录的IP*/
@@ -190,7 +191,7 @@ public class AdminService {
 		admin.setUserToken(userToken);
 		admin.setThisLoginIP(ip);
 		admin.setThisLoginTime(now);
-		return admin;
+		return RetJson.success("成功", admin);
 	}
 	
 	/**
@@ -198,32 +199,31 @@ public class AdminService {
 	 * @param id
 	 * @return
 	 */
-	public boolean logout(String userToken) {
+	public RetJson logout(String userToken) {
 		//确定用户是否在线
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		//更新退出时间
 		adminDao.updateLogoutState(adminInfo.getLoginTime(), adminInfo.getIp(), adminInfo.getId());
 		
 		onlineMap.remove(userToken);
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 修改信息
 	 */
 	//TODO需要判断字段是否为空
-	public boolean updateAdmin(String userToken, Admin param) {
+	public RetJson updateAdmin(String userToken, Admin param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		adminDao.updateAdmin(adminInfo.getId(), param);
-		
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
@@ -232,10 +232,10 @@ public class AdminService {
 	 */
 	//后期改为定时统计，由前端直接取数据
 	//TODO  完善
-	public AdminHomePage homepage(String userToken, int classId) {
+	public RetJson homepage(String userToken, int classId) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		int totalSales = commodityDao.getTotalSales();
 		int totalOrder = orderDao.getTotalOrder()+rentOrderDao.getTotalOrder();
@@ -251,81 +251,81 @@ public class AdminService {
 		home.setSalesDay(salesDay);
 		home.setSalesHot(salesHot);
 		
-		return home;
+		return RetJson.success("成功",home);
 	}
 	
 	/**
 	 * 添加物品分类
 	 */
-	public boolean addClassify(String userToken, int type, String classStr) {
+	public RetJson addClassify(String userToken, int type, String classStr) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		CommodityClassify classify = new CommodityClassify();
 		classify.setKind(type);
 		classify.setClassStr(classStr);
 		if(1 != commodityClassifyDao.insert(classify)) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 删除分类
 	 */
-	public boolean removeClassify(String userToken, int id) {
+	public RetJson removeClassify(String userToken, int id) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 
 		if(1 != commodityClassifyDao.delete(id)) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 查询分类
 	 */
-	public ClassifyList selectClassify(String userToken) {
+	public RetJson selectClassify(String userToken) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		ClassifyList list = new ClassifyList();
 		List<CommodityClassify> mechanical = commodityClassifyDao.selectClass(2);
 		List<CommodityClassify> agentia = commodityClassifyDao.selectClass(1);
 		list.setAgentia(agentia);
 		list.setMechanical(mechanical);
-		return list;
+		return RetJson.success("成功", list);
 	}
 	
 	/**
 	 * 商品列表
 	 */
-	public List<Commodity> listCommodity(String userToken){
+	public RetJson listCommodity(String userToken){
 		//确定用户是否在线
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<Commodity> commodityList = commodityDao.selectAll();
-		return commodityList;
+		return RetJson.success("成功", commodityList);
 	}
 	
 	/**
 	 * 商品详情
 	 */
-	public Commodity getCommodityInfo(String userToken, long id) {
+	public RetJson getCommodityInfo(String userToken, long id) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		Commodity commodity = commodityDao.selectCommodityByID(id);
-		return commodity;
+		return RetJson.success("成功", commodity);
 	}
 	
 	/**
@@ -338,10 +338,10 @@ public class AdminService {
 	 * distributor
 	 * classStr
 	 */
-	public boolean addCommodity(String userToken, CommodityInfo param) {
+	public RetJson addCommodity(String userToken, CommodityInfo param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		MultipartFile pic = param.getPic();
@@ -378,17 +378,31 @@ public class AdminService {
 		commodity.setOrdernumTotal(0);
 		commodity.setDistributor(0);
 		commodity.setAddTime(System.currentTimeMillis());
+		commodity.setSalesVolumeDay(0);
+		commodity.setSalesVolumeMouth(0);
+		commodity.setSalesPriceDay(0);
+		commodity.setSalesPriceMouth(0);
+		commodity.setSalesPriceTotal(0);
+		commodity.setRentOrdernumDay(0);
+		commodity.setRentOrdernumMouth(0);
+		commodity.setRentOrdernumTotal(0);
+		commodity.setRentVolumeDay(0);
+		commodity.setRentVolumeMouth(0);
+		commodity.setRentVolumeTotal(0);
+		commodity.setRentPriceDay(0);
+		commodity.setRentPriceMouth(0);
+		commodity.setRentPriceTotal(0);
 
 		String path = picPath;
     	String name = System.currentTimeMillis() + ".png";
     	String filename = path+name;
 		if(!savePic(pic, filename)) {
-			return false;
+			return RetJson.unknowError("保存图片错误", null);
 		}
 		
 		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
 		if(classify == null) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		String classStr = classify.getClassStr();
 		commodity.setClassStr(classStr);
@@ -397,9 +411,9 @@ public class AdminService {
 
 		int ret = commodityDao.addCommodity(commodity);
 		if(ret != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
@@ -412,10 +426,10 @@ public class AdminService {
 	 * distributor
 	 * classStr
 	 */
-	public boolean updateCommodity(String userToken, CommodityInfo param) {
+	public RetJson updateCommodity(String userToken, CommodityInfo param) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 
 		Commodity commodity = new Commodity();
@@ -531,14 +545,14 @@ public class AdminService {
 	    	String fname = System.currentTimeMillis() + ".png";
 	    	String filename = path+fname;
 			if(!savePic(pic, filename)) {
-				return false;
+				return RetJson.unknowError("保存图片错误", null);
 			}
 			commodity.setPicurl(savePicPath + name);
 		}
 		
 		CommodityClassify classify = commodityClassifyDao.selectClassByID(param.getClassId());
 		if(classify == null) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		commodity.setClassStr(classify.getClassStr());
 		commodity.setKind(classify.getKind());
@@ -546,9 +560,9 @@ public class AdminService {
 
 		int ret = commodityDao.updateCommodity(commodity);
 		if(ret != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
@@ -577,46 +591,46 @@ public class AdminService {
 	/**
 	 * 添加商品数量
 	 */
-	public boolean addCommodityCount(String userToken, long commodityID, int count) {
+	public RetJson addCommodityCount(String userToken, long commodityID, int count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(commodityDao.setCommodityCount(commodityID, count) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 商品删除
 	 */
-	public boolean removeCommodity(String userToken, long commodityID) {
+	public RetJson removeCommodity(String userToken, long commodityID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		int ret = commodityDao.removeCommodity(commodityID);
 		if(ret != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
 	/**
 	 * 商品租赁列表
 	 */
-	public List<Commodity> listRentCommodity(String userToken){
+	public RetJson listRentCommodity(String userToken){
 		//确定用户是否在线
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<Commodity> rentCommodityList = commodityDao.selectRentCommodity();
-		return rentCommodityList;
+		return RetJson.success("成功",rentCommodityList);
 	}
 	
 	/**
@@ -627,32 +641,44 @@ public class AdminService {
 	 *               0 下架
 	 * @return
 	 */
-	public boolean onlineCommodity(String userToken, long id, int option){
+	public RetJson onlineCommodity(String userToken, long id, int option){
 		//确定用户是否在线
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(commodityDao.updateOnline(id,option) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
+	}
+	
+	/**
+	 * 商品销售情况
+	 */
+	public RetJson getSalesTabel(String userToken) {
+		UserInfo adminInfo = onlineMap.get(userToken);
+		if(adminInfo == null) {
+			return RetJson.overdueError("凭证失效", null);
+		}
+		List<SalesTabel> salesTabelList = commodityDao.getSalesTabel();
+		return RetJson.success("成功", salesTabelList);
 	}
 	
 	/**
 	 * 商品库存管理
 	 */
-	public List<Commodity> inventoryWarning(String userToken,int num){
+	public RetJson inventoryWarning(String userToken,int num){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<Commodity> commodityList = commodityDao.inventoryWarning(num,0);
 		List<Commodity> commodityList1 = commodityDao.inventoryNoWarning(num,0);
 		commodityList.addAll(commodityList1);
-		return commodityList;
+		return RetJson.success("成功",commodityList);
 	}
 	
 //	/**
@@ -695,64 +721,64 @@ public class AdminService {
 	/**
 	 * 用户列表
 	 */
-	public List<User> listAllUser(String userToken){
+	public RetJson listAllUser(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<User> userList = userDao.selectAllUser();
-		return userList;
+		return RetJson.success("成功", userList);
 	}
 	
 	/**
 	 * 用户详情
 	 */
-	public User getUser(String userToken, long id){
+	public RetJson getUser(String userToken, long id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		User user = userDao.selectUserByID(id);
-		return user;
+		return RetJson.success("成功", user);
 	}
 	
 	
 	/**
 	 * 新增用户
 	 */
-	public int addUser(String userToken, User user) {
+	public RetJson addUser(String userToken, User user) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return -1;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(userDao.selectUserByOpenID(user.getOpenID()) != null) {
-			return -2;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		long maxID = userDao.getMaxID();
 		user.setId(maxID+1);
 		
 		if(userDao.addUser(user) != 1) {
-			return -3;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return 0;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 删除用户
 	 */
-	public boolean removeUser(String userToken, long id) {
+	public RetJson removeUser(String userToken, long id) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		int ret = userDao.removeUser(id);
 		if(ret != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
@@ -760,10 +786,10 @@ public class AdminService {
 	 * 修改用户
 	 * 启用1/禁用2/删除4/拉黑3
 	 */
-	public boolean updateUser(String userToken, long userId, int code) {
+	public RetJson updateUser(String userToken, long userId, int code) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		int ret;
 		if(code == 4) {
@@ -773,22 +799,22 @@ public class AdminService {
 			ret = userDao.updateUserAuthority(userId, code);
 		}
 		if(ret != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 分销商列表
 	 */
-	public List<DistributorBak> listAllDistributor(String userToken){
+	public RetJson listAllDistributor(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<DistributorBak> distributorList = distributorDao.selectAllDistributor();
-		return distributorList;
+		return RetJson.success("成功",distributorList);
 	}
 	
 	
@@ -802,14 +828,15 @@ public class AdminService {
 	 * userNum
 	 * addId
 	 */
-	public int addDistributor(String userToken, Distributor distributor) {
+	//TODO添加邀请码
+	public RetJson addDistributor(String userToken, Distributor distributor) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return -1;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(distributorDao.selectDistributorByUsername(distributor.getUsername()) != null) {
-			return -2;
+			return RetJson.unknowError("已存在分销商", null);
 		}
 		
 		long maxID = distributorDao.getMaxID();
@@ -828,48 +855,48 @@ public class AdminService {
 		distributor.setAddId(adminInfo.getId());
 		
 		if(distributorDao.addDistributor(distributor) != 1) {
-			return -3;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
-		return 0; 
+		return RetJson.success("成功");
 	}
 	
 	
 	/**
 	 * 删除经销商
 	 */
-	public boolean removeDistributor(String userToken, long distributorID) {
+	public RetJson removeDistributor(String userToken, long distributorID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(distributorDao.removeDistributor(distributorID) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
-		return true; 
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 获取子分销商
 	 */
-	public List<DistributorBak> getChildDistributor(String userToken, String distributorID){
+	public RetJson getChildDistributor(String userToken, String distributorID){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<DistributorBak> list = distributorDao.getChildDistributor(Long.parseLong(distributorID));
-		return list;
+		return RetJson.success("成功", list);
 	}
 	
 	/**
 	 * 获取父分销商
 	 */
-	public List<SimpleDistributor> getParentDistributor(String userToken, int grade){
+	public RetJson getParentDistributor(String userToken, int grade){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<SimpleDistributor> simpleList = new ArrayList<SimpleDistributor>();
@@ -878,12 +905,12 @@ public class AdminService {
 			simple.setId(0l);
 			simple.setName("总部");
 			simpleList.add(simple);
-			return simpleList;
+			return RetJson.success("成功", simpleList);
 		}
 		
 		int gradeTemp = distributorDao.getLowGrade();
 		if(grade < 1 || grade > 6 || grade > gradeTemp+1) {
-			return simpleList;
+			return RetJson.success("分销商等级错误", null);
 		}
 		
 		List<DistributorBak> list = distributorDao.getParentDistributor(grade-1);
@@ -894,134 +921,134 @@ public class AdminService {
 			simple.setName(obj.getDistributorName());
 			simpleList.add(simple);
 		}
-		return simpleList;
+		return RetJson.success("成功", simpleList);
 	}
 	
 	/**
 	 * 删除经销商
 	 */
-	public boolean updateDistributor(String userToken, Distributor distributor) {
+	public RetJson updateDistributor(String userToken, Distributor distributor) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		if(distributorDao.updateDistributor(distributor) == 1) {
-			return true;
+			return RetJson.success("成功");
 		}
-		return false;
+		return RetJson.mysqlError("数据库连接异常", null);
 	}
 	
 	/**
 	 * 经销商详情
 	 */
-	public DistributorBak getDistributor(String userToken, long id){
+	public RetJson getDistributor(String userToken, long id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		DistributorBak distributor = distributorDao.selectDistributorByID(id);
-		return distributor;
+		return RetJson.success("成功", distributor);
 	}
 	
 	
 	/**
 	 * 允许经销商开设店铺
 	 */
-	public boolean authorizeDistributor(String userToken, long distributorID) {
+	public RetJson authorizeDistributor(String userToken, long distributorID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(distributorDao.authorizeDistributor(distributorID,1) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
 	 * 取消分销商资格
 	 */
-	public boolean unAuthorizeDistributor(String userToken, long distributorID) {
+	public RetJson unAuthorizeDistributor(String userToken, long distributorID) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(distributorDao.authorizeDistributor(distributorID,0) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
 	/**
 	 * 商品订单列表
 	 */
-	public List<Order> listAllOrder(String userToken){
+	public RetJson listAllOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<Order> orderList = orderDao.selectAllOrderList();
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 		
 	/**
 	 * 查看已处理订单
 	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
-	public List<Order> listDoOrder(String userToken){
+	public RetJson listDoOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<Order> orderList = orderDao.getOrderListByStatus(3);
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 	
 	/**
 	 * 查看未处理订单
 	 */
-	public List<Order> listUndoOrder(String userToken){
+	public RetJson listUndoOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<Order> orderList = orderDao.getOrderListByStatus(1);
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 	
 	/**
 	 * 查看订单详情
 	 */
-	public Order getOrder(String userToken, String id){
+	public RetJson getOrder(String userToken, String id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		Order order = orderDao.getOrderByID(id);
-		return order;
+		return RetJson.success("成功", order);
 	}
 	
 	/**
 	 * 商品发货
 	 */
-	public boolean sendOrder(String userToken, String orderId, String count) {
+	public RetJson sendOrder(String userToken, String orderId, String count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		String id = orderId.split("O")[2];
 		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		if(orderDao.updateOrderList(3,orderId,null) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	/**
@@ -1032,71 +1059,71 @@ public class AdminService {
 	/**
 	 * 租赁订单列表
 	 */
-	public List<RentOrder> listAllRentOrder(String userToken){
+	public RetJson listAllRentOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		List<RentOrder> orderList = rentOrderDao.selectAllRentOrderList();
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 	
 	/**
 	 * 查看已处理租赁订单
 	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
-	public List<RentOrder> listDoRentOrder(String userToken){
+	public RetJson listDoRentOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<RentOrder> orderList = rentOrderDao.getRentOrderListByStatus(3);
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 	
 	/**
 	 * 查看为处理租赁订单
 	 * 订单状态 0待支付, 1已支付, 2待发货, 3待收货，4待评价, 5交易完成, 6交易已取消
 	 */
-	public List<RentOrder> listUndoRentOrder(String userToken){
+	public RetJson listUndoRentOrder(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<RentOrder> orderList = rentOrderDao.getRentOrderListByStatus(1);
-		return orderList;
+		return RetJson.success("成功", orderList);
 	}
 	
 	/**
 	 * 查看租赁订单详情
 	 */
-	public RentOrder listOneRentOrder(String userToken, String id){
+	public RetJson listOneRentOrder(String userToken, String id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		RentOrder order = rentOrderDao.listOneRentOrder(id);
-		return order;
+		return RetJson.success("成功", order);
 	}
 	
 	/**
 	 * 租赁商品发货
 	 */
-	public boolean sendRentOrder(String userToken, String orderId, String count) {
+	public RetJson sendRentOrder(String userToken, String orderId, String count) {
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		String id = orderId.split("O")[2];
 		if(commodityDao.setCommodityCount(Long.parseLong(id),(-1)*Integer.parseInt(count)) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
 		
 		if(rentOrderDao.updateRentOrderList(3,orderId,null) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
@@ -1110,22 +1137,22 @@ public class AdminService {
 	/**
 	 * 优惠券列表
 	 */
-	public List<Coupon> listCoupon(String userToken){
+	public RetJson listCoupon(String userToken){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return null;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		List<Coupon> list = couponDao.selectCouponrList();
-		return list;
+		return RetJson.success("成功", list);
 	}
 	
 	/**
 	 * 添加优惠券
 	 */
-	public boolean addCoupon(String userToken, Coupon coupon){
+	public RetJson addCoupon(String userToken, Coupon coupon){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		long id = couponDao.selectMaxId();
@@ -1136,25 +1163,24 @@ public class AdminService {
 		coupon.setAddPerson(addPerson);
 		
 		if(couponDao.addCoupon(coupon) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
 	
 	
 	/**
 	 * 删除优惠券
 	 */
-	public boolean removeCoupon(String userToken, long id){
+	public RetJson removeCoupon(String userToken, long id){
 		UserInfo adminInfo = onlineMap.get(userToken);
 		if(adminInfo == null) {
-			return false;
+			return RetJson.overdueError("凭证失效", null);
 		}
 		
 		if(couponDao.removeCoupon(id) != 1) {
-			return false;
+			return RetJson.mysqlError("数据库连接异常", null);
 		}
-		return true;
+		return RetJson.success("成功");
 	}
-	
 }

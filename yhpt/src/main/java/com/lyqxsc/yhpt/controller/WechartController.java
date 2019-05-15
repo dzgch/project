@@ -43,8 +43,14 @@ public class WechartController {
 	@Autowired
 	UserService userService;
 	
-	@Value("${wechatMpAuthorize}")
-	String wxurl;
+//	@Value("${wechatMpAuthorize}")
+//	String wxurl;
+	
+	@Value("${appid}")
+	String wxAppid;
+	
+	@Value("${secret}")
+	String wxSecret;
 	
 	static final Logger log = LoggerFactory.getLogger(WechartController.class);  
 
@@ -52,9 +58,9 @@ public class WechartController {
 	public RetJson doPost(@RequestBody UserLogin request) throws ServletException, IOException {
 		String code = request.getCode();
 		String ip = request.getIp();
-		
-		String appid = "wx9a9482746bdbe374";
-		String secret = "5372dd7662412839f5f4bb6ee4c40edf";
+		String url = request.getUrl();
+		String appid = wxAppid;
+		String secret = wxSecret;
 		String requestUrl = "https://api.weixin.qq.com/sns/oauth2/access_token?appid="+appid+"&secret="+secret+"&code="+code+"&grant_type=authorization_code";
 		/*第一次请求 获取access_token 和 openid*/
 		String oppid = null;
@@ -73,8 +79,8 @@ public class WechartController {
 		String userInfoStr = null;
 		try {
 			userInfoStr = new HttpRequestor().doGet(requestUrl2);
+			log.info(userInfoStr);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		/*用户信息*/
@@ -82,7 +88,7 @@ public class WechartController {
 		JSONObject wxUserInfo = JSONObject.fromObject(userInfoStr); 
 		log.info((String)wxUserInfo.get("openid"));
 		log.info((String)wxUserInfo.get("nickname"));
-		log.info((int)wxUserInfo.get("sex")+"");
+//		log.info((String)wxUserInfo.get("sex"));
 		log.info((String)wxUserInfo.get("city"));
 		log.info((String)wxUserInfo.get("province"));
 		log.info((String)wxUserInfo.get("country"));
@@ -91,21 +97,22 @@ public class WechartController {
 		String accessToken = getAccessToken();
 		String ticket = JsapiTicket(accessToken);
 		
-		Map<String,String> signature = getSignature(ticket);
+		Map<String,String> signature = getSignature(ticket, url);
 		
 		User user = userService.login(wxUserInfo, ip);
-		
+		String invitationCode = userService.getInvitationCode(user.getDistributor());
 		UserSignature ret = new UserSignature();
 		ret.setSignature(signature);
 		ret.setUser(user);
+		ret.setCode(invitationCode);
 		return RetJson.success("成功", ret);
 	}
 	
     // 网页授权接口
     public final static String GetPageAccessTokenUrl = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=SECRET";
-    public static String getAccessToken() {
-    	String appid = "wx9a9482746bdbe374";
-    	String appsecret = "5372dd7662412839f5f4bb6ee4c40edf";
+    public String getAccessToken() {
+    	String appid = wxAppid;
+    	String appsecret = wxSecret;
         String requestUrl = GetPageAccessTokenUrl.replace("APPID", appid).replace("SECRET", appsecret);
         HttpClient client = null;
         String accessToken = null;
@@ -156,7 +163,7 @@ public class WechartController {
         return ticket;
     }
 
-    public Map<String,String> getSignature(String ticket) {
+    public Map<String,String> getSignature(String ticket, String wxurl) {
 //    	String ticket = "HoagFKDcsGMVCIY2vOjf9rtVef1QX5qnYjUiQyLkNvp_vtDrphqMpAKoBdCpgG08A7fYUQDYmV9Q36epimVfKA";
 
     	String noncestr = UUID.randomUUID().toString();
@@ -170,7 +177,7 @@ public class WechartController {
         System.out.println("timestamp=" + timestamp);
         System.out.println("signature=" + signature);
         Map<String, String> map = new HashMap<String, String>();
-        map.put("appId", "wx9a9482746bdbe374");
+        map.put("appId", wxAppid);
         map.put("timestamp",timestamp);
         map.put("ticket",ticket);
         map.put("noncestr",noncestr);
@@ -181,7 +188,7 @@ public class WechartController {
     public static String SHA1(String str) {
         try {
             MessageDigest digest = java.security.MessageDigest
-                    .getInstance("SHA"); //如果是SHA加密只需要将"SHA-1"改成"SHA"即可
+                    .getInstance("SHA-1"); //如果是SHA加密只需要将"SHA-1"改成"SHA"即可
             digest.update(str.getBytes());
             byte messageDigest[] = digest.digest();
             // Create Hex String

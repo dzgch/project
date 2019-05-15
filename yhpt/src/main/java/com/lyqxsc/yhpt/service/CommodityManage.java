@@ -27,10 +27,8 @@ public class CommodityManage {
 		public void run() {
 			List<Commodity> commodityList = commodityDao.selectAll();
 			for(Commodity commodity:commodityList) {
-				int countDay = commodity.getOrdernumDay();
-				int countMouth = commodity.getOrdernumMouth();
-				countMouth += countDay;
-				commodityDao.updateOrderNum(0,countMouth,commodity.getId());
+				commodityDao.clearSalesVolumeDay(commodity.getId());
+				commodityDao.clearRentVolumeDay(commodity.getId());
 			}
 		}
 	};
@@ -40,12 +38,14 @@ public class CommodityManage {
 		public void run() {
 			List<Commodity> commodityList = commodityDao.selectAll();
 			for(Commodity commodity:commodityList) {
-				commodityDao.updateOrderNum(0,0,commodity.getId());
+				commodityDao.clearSalesVolumeMouth(commodity.getId());
+				commodityDao.clearRentVolumeMouth(commodity.getId());
 			}
 		}
 	};
 	
 	public CommodityManage() {
+		//将天销售累加到月销售
 		Calendar timeDay = Calendar.getInstance();
 		timeDay.set(Calendar.HOUR_OF_DAY, 23);
 		timeDay.set(Calendar.MINUTE,59);
@@ -54,6 +54,7 @@ public class CommodityManage {
 		Timer timerDay = new Timer("Commodity order day");
 		timerDay.scheduleAtFixedRate(taskDay, timeDay.getTime(), 24*60*60*1000);
 		
+		//清空月订单
 		Calendar timeMonth = Calendar.getInstance();
 		timeMonth.set(Calendar.DAY_OF_MONTH, 0);
 		timeMonth.set(Calendar.HOUR_OF_DAY, 0);
@@ -64,4 +65,6 @@ public class CommodityManage {
 		Timer timerMonth = new Timer("Commodity order month");
 		timerMonth.scheduleAtFixedRate(taskMonth, timeMonth.getTime(), 24*60*60*30437l);
 	}
+	
+	//
 }

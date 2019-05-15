@@ -71,19 +71,7 @@ public class AdminController {
 			RetJson.urlError("sigup error", null);
 		}
 		
-		int ret = adminService.signupAdmin(userToken,admin);
-		if(ret == -1) {
-			return RetJson.urlError("注册失败，用户名已存在", null);
-		}
-		else if(ret == -2) {
-			return RetJson.mysqlError("注册失败，数据库连接失败", null);
-		}
-		else if(ret == -3) {
-			return RetJson.mysqlError("管理员数量上限", null);
-		}
-		else {
-			return RetJson.success("sigup seccess");
-		}
+		return adminService.signupAdmin(userToken,admin);
 	}
 	
 	/**
@@ -102,11 +90,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin == 1) {
-			Admin admin = adminService.login(username, password, ip);
-			if(admin == null) {
-				return RetJson.urlError("login error", null);
-			}
-			return RetJson.success("success",admin);
+			return adminService.login(username, password, ip);
 		}
 		else if(isAdmin == 2) {
 			DistributorBak distributor = distributorService.login(username, password, ip);
@@ -133,9 +117,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(!adminService.logout(userToken)) {
-				return RetJson.urlError("logout error", null);
-			}
+			return adminService.logout(userToken);
 		}
 		else{
 			if(!distributorService.logout(userToken)) {
@@ -156,8 +138,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			AdminHomePage home = adminService.homepage(userToken, 0);
-			return RetJson.success("success",home);
+			return adminService.homepage(userToken, 0);
 		}
 		else{
 			DistributorHomePage home = distributorService.homepage(userToken);
@@ -178,9 +159,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(!adminService.updateAdmin(userToken, admin)) {
-				return RetJson.urlError("update error", null);
-			}
+			return adminService.updateAdmin(userToken, admin);
 		}
 		else{
 			if(!distributorService.updateDistributor(userToken, distributor)) {
@@ -205,9 +184,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.addClassify(userToken,Integer.parseInt(type),string)) {
-				return RetJson.success("success");
-			}
+			return adminService.addClassify(userToken,Integer.parseInt(type),string);
 		}
 		return RetJson.unknowError("error", null);
 	}
@@ -225,9 +202,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.removeClassify(userToken, Integer.parseInt(id))) {
-				return RetJson.success("success");
-			}
+			return adminService.removeClassify(userToken, Integer.parseInt(id));
 		}
 		return RetJson.unknowError("error", null);
 	}
@@ -243,11 +218,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			ClassifyList classList = adminService.selectClassify(userToken);
-			if(classList == null) {
-				return RetJson.unknowError("查询失败", null);
-			}
-			return RetJson.success("成功",classList);
+			return adminService.selectClassify(userToken);
 		}
 		else {
 			ClassifyList classList = distributorService.selectClassify(userToken);
@@ -305,7 +276,7 @@ public class AdminController {
 		}
 		List<Commodity> commodityList = null;
 		if(isAdmin(userToken)) {
-			commodityList = adminService.listCommodity(userToken);
+			return adminService.listCommodity(userToken);
 		}
 		else{
 			commodityList = distributorService.listCommodity(userToken);
@@ -326,7 +297,7 @@ public class AdminController {
 		}
 		Commodity commodity = null;
 		if(isAdmin(userToken)) {
-			commodity = adminService.getCommodityInfo(userToken,Long.parseLong(id));
+			return adminService.getCommodityInfo(userToken,Long.parseLong(id));
 		}
 		else{
 			commodity = distributorService.getCommodityInfo(userToken,Long.parseLong(id));
@@ -347,9 +318,7 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.addCommodity(userToken, param)) {
-				return RetJson.success("success");
-			}
+			return adminService.addCommodity(userToken, param);
 		}
 		else{
 			if(distributorService.addCommodity(userToken, param)) {
@@ -372,9 +341,7 @@ public class AdminController {
 		int count = Integer.parseInt(two);
 		
 		if(isAdmin(userToken)) {
-			if(adminService.addCommodityCount(userToken, commodityID, count)) {
-				return RetJson.success("success");
-			}
+			return adminService.addCommodityCount(userToken, commodityID, count);
 		}
 		else{
 			if(distributorService.addCommodityCount(userToken, commodityID, count)) {
@@ -467,21 +434,11 @@ public class AdminController {
 		}
 		
 		if(isAdmin(userToken)) {
-			if(adminService.updateCommodity(userToken, param)) {
-				return RetJson.success("success");
-			}
+			return adminService.updateCommodity(userToken, param);
 		}
-//		else{
-//			if(distributorService.updateCommodity(userToken, param)) {
-//				return RetJson.success("success");
-//			}
-//		}
+
 		return RetJson.unknowError("add commodity error", null);
 	}
-	
-	
-	
-	
 	
 	/**
 	 * 商品租赁列表
@@ -538,6 +495,21 @@ public class AdminController {
 //		}
 //		return RetJson.unknowError("add commodity error", null);
 //	}
+	
+	/**
+	 * 商品销售情况
+	 */
+	@RequestMapping(value = "/admin/commodity/getSalesTabel", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson getSalesTabel(@RequestBody UserToken param) {
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		if(!isAdmin(userToken)) {
+			return RetJson.urlError("无权限", null);
+		}
+		return adminService.getSalesTabel(userToken);
+	}
 	
 	/**
 	 * 库存管理

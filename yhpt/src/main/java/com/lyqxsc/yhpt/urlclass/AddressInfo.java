@@ -4,17 +4,17 @@ import com.lyqxsc.yhpt.domain.Address;
 
 public class AddressInfo {
 	String userToken;
-	Address address;
+	Address addr;
 	public String getUserToken() {
 		return userToken;
 	}
 	public void setUserToken(String userToken) {
 		this.userToken = userToken;
 	}
-	public Address getAddress() {
-		return address;
+	public Address getAddr() {
+		return addr;
 	}
-	public void setAddress(Address address) {
-		this.address = address;
+	public void setAddr(Address addr) {
+		this.addr = addr;
 	}
 }

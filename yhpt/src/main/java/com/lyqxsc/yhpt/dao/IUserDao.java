@@ -63,14 +63,12 @@ public interface IUserDao {
 	@Update("update user set totalOrderNum=totalOrderNum+#{num},orderNum=orderNum+#{num} where id=#{id}")
 	int addOrderNum(@Param("num") int num, @Param("id") long id);
 	
-	//购买订单数自增
+	//租赁订单数自增
 	@Update("update user set totalOrderNum=totalOrderNum+#{num},rentOrderNum=rentOrderNum+#{num} where id=#{id}")
 	int addRentOrderNum(@Param("num") int num, @Param("id") long id);
 	
-	@Insert({"insert into user(userToken,openID,nikeName,realname,headImgUrl,email,phone,sex,province,city,address,totalOrderNum,orderNum,rentOrderNum,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime,authority) "
-			+ "values(#{userToken},#{openID},#{nikeName},#{realname},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{totalOrderNum},#{orderNum},#{rentOrderNum},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime},#{authority})"})
+	@Insert({"insert into user(id,userToken,openID,nikeName,realName,headImgUrl,email,phone,sex,province,city,address,totalOrderNum,orderNum,rentOrderNum,thisLoginTime,thisLoginIP,lastLoginTime,lastLoginIP,wallet,distributor,addTime,authority) "
+			+ "values(#{id},#{userToken},#{openID},#{nikeName},#{realName},#{headImgUrl},#{email},#{phone},#{sex},#{province},#{city},#{address},#{totalOrderNum},#{orderNum},#{rentOrderNum},#{thisLoginTime},#{thisLoginIP},#{lastLoginTime},#{lastLoginIP},#{wallet},#{distributor},#{addTime},#{authority})"})
 	int addUser(User user);
-	
-	
 	
 }

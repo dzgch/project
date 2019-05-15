@@ -17,6 +17,9 @@ public interface ICollectDao {
 	@Select("select * from collectlist where userid=#{id}")
 	List<Collect> getShoppingByID(@Param("id") long id);
 	
+	@Select("select * from collectlist where commodityid=#{id} and userid=#{userid}")
+	Collect isExist(@Param("id") long id, @Param("userid") long userid);
+	
 	@Select("select max(id) from collectlist")
 	Long getMaxID();
 	

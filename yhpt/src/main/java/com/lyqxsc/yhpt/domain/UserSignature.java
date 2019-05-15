@@ -8,6 +8,7 @@ import java.util.Map;
 public class UserSignature {
 	Map<String,String> signature;
 	User user;
+	String code;
 	public Map<String, String> getSignature() {
 		return signature;
 	}
@@ -19,5 +20,11 @@ public class UserSignature {
 	}
 	public void setUser(User user) {
 		this.user = user;
+	}
+	public String getCode() {
+		return code;
+	}
+	public void setCode(String code) {
+		this.code = code;
 	}
 }

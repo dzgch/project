@@ -74,6 +74,7 @@ public class UserController {
 //		return RetJson.success("success",user);
 //		return RetJson.success("success");
 //	}
+	
 	/**
 	 * root权限
 	 */
@@ -86,7 +87,7 @@ public class UserController {
 	}
 	
 	/**
-	 *  注销
+	 * 注销
 	 * @param param
 	 * @return
 	 */
@@ -98,18 +99,26 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		if(!userService.logout(userToken)) {
-			return RetJson.urlError("logout error", null);
-		}
-		
-		return RetJson.success("logout success",null);
+		return userService.logout(userToken);
 	}
 	
 	
 	/**
-	 *  注册
-	 * @param param
-	 * @return
+	 * 判断凭证过期
+	 */
+	@RequestMapping(value = "/user/isout",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson isOut(@RequestBody UserToken param) {
+		
+		String userToken = param.getUserToken();
+		if(userToken == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		
+		return userService.isOutOfDate(userToken);
+	}
+	
+	/**
+	 * 注册
 	 */
 //	@RequestMapping(value = "/usersigup",produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 //	public RetJson signup(User param) {
@@ -139,10 +148,7 @@ public class UserController {
 		if(userToken == null || code == null) {
 			return RetJson.urlError("参数错误", null);
 		}
-		if(userService.addInvitationCode(userToken,code)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("invitation code error", null);
+		return userService.addInvitationCode(userToken,code);
 	}
 	
 	/**
@@ -154,10 +160,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("参数错误", null);
 		}
-		if(userService.noInvitationCode(userToken)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("error", null);
+		return userService.noInvitationCode(userToken);
 	}
 	
 	/**
@@ -171,11 +174,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		WxHomePage homePage = userService.homePage(userToken);
-		if(homePage == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		return RetJson.success("success", homePage);
+		return userService.homePage(userToken);
 	}
 	
 	/**
@@ -188,11 +187,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		String msg = userService.aboutUs(userToken);
-		if(msg == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		return RetJson.success("success", msg);
+		return userService.aboutUs(userToken);
 	}
 	
 	/**
@@ -207,12 +202,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		WxHomePage homePage = userService.shop(userToken);
-		if(homePage == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		
-		return RetJson.success("success", homePage);
+		return userService.shop(userToken);
 	}
 	
 	/**
@@ -225,12 +215,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		ClassifyList list = userService.classList(userToken);
-		if(list == null) {
-			return RetJson.unknowError("class list error", null);
-		}
-		
-		return RetJson.success("success", list);
+		return userService.classList(userToken);
 	}
 	
 	/**
@@ -245,12 +230,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		List<CommodityBak> list = userService.selectCommodityByClass(userToken,classId,price);
-		if(list == null) {
-			return RetJson.unknowError("class list error", null);
-		}
-		
-		return RetJson.success("success", list);
+		return userService.selectCommodityByClass(userToken,classId,price);
 	}
 	
 	/**
@@ -264,12 +244,7 @@ public class UserController {
 			return RetJson.urlError("参数错误", null);
 		}
 		
-		List<CommodityBak> list = userService.selectCommodityByName(userToken,name);
-		if(list == null) {
-			return RetJson.unknowError("class list error", null);
-		}
-		
-		return RetJson.success("success", list);
+		return userService.selectCommodityByName(userToken,name);
 	}
 	
 	/**
@@ -283,11 +258,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		List<CommodityBak> commodity = userService.selectCommodityByID(userToken,id);
-		if(commodity == null) {
-			return RetJson.unknowError("没有该商品", null);
-		}
-		return RetJson.success("success", commodity);
+		return userService.selectCommodityByID(userToken,id);
 	}
 	
 	/**
@@ -300,12 +271,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		NewCommodity commodity = userService.newShopShow(userToken);
-		if(commodity == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		
-		return RetJson.success("success", commodity);
+		return userService.newShopShow(userToken);
 	}
 	
 	/**
@@ -318,12 +284,7 @@ public class UserController {
 			return RetJson.urlError("no userToken", null);
 		}
 		
-		HotCommodity commodity = userService.hotShopShow(userToken);
-		if(commodity == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		
-		return RetJson.success("success", commodity);
+		return userService.hotShopShow(userToken);
 	}
 	
 	/**
@@ -335,11 +296,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		CommodityPage commodityPage = userService.selectCommodity(userToken);
-		if(commodityPage == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		return RetJson.success("success", commodityPage);
+		return userService.selectCommodity(userToken);
 	}
 	
 	/**
@@ -351,11 +308,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		CommodityPage rentCommodityPage = userService.selectRentCommodity(userToken);
-		if(rentCommodityPage == null) {
-			return RetJson.unknowError("用户不在线", null);
-		}
-		return RetJson.success("success", rentCommodityPage);
+		return userService.selectRentCommodity(userToken);
 	}
 	
 	
@@ -403,10 +356,7 @@ public class UserController {
 		if(userToken == null || orderList == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.batchPresentOrder(userToken,orderList)) {
-			return RetJson.urlError("push order error", null);
-		}
-		return RetJson.success("success");
+		return userService.batchPresentOrder(userToken,orderList);
 	}
 	
 	
@@ -455,10 +405,7 @@ public class UserController {
 		if(userToken == null || orderList == null) {
 			return RetJson.urlError("push order error", null);
 		}
-		if(!userService.batchPresentRentOrder(userToken,orderList)) {
-			return RetJson.urlError("push order error", null);
-		}
-		return RetJson.success("success");
+		return userService.batchPresentRentOrder(userToken,orderList);
 	}
 	
 	
@@ -466,16 +413,12 @@ public class UserController {
 	 * 我的全部购买订单
 	 */
 	@RequestMapping(value = "/usercenter/order", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-	public RetJson  allOrder(@RequestBody UserToken param) {
+	public RetJson allOrder(@RequestBody UserToken param) {
 		String userToken = param.getUserToken();
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getAllOrder(userToken);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getAllOrder(userToken);
 	}
 	
 	/**
@@ -489,11 +432,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		Order order = userService.getOrder(userToken,id);
-		if(order == null) {
-			return RetJson.unknowError("没有该订单", null);
-		}
-		return RetJson.success("success", order);
+		return userService.getOrder(userToken,id);
 	}
 	
 	
@@ -506,11 +445,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 1);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 1);
 	}
 	
 	/**
@@ -523,11 +458,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 2);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 2);
 	}
 	
 	/**
@@ -540,11 +471,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 3);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 3);
 	}
 	
 	/**
@@ -557,11 +484,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 4);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 4);
 	}
 	
 	/**
@@ -574,11 +497,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 5);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 5);
 	}
 	
 	/**
@@ -590,11 +509,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 6);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 6);
 	}
 	
 	
@@ -607,11 +522,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<Order> orderList = userService.getTypeOrder(userToken, 0);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeOrder(userToken, 0);
 	}
 	
 	/**
@@ -627,10 +538,7 @@ public class UserController {
 			return RetJson.urlError("缺少参数", null);
 		}
 
-		if(userService.cancelOrder(userToken, id, reason)) {
-			return RetJson.success("取消订单成功");
-		}
-		return RetJson.unknowError("取消订单失败", null);
+		return userService.cancelOrder(userToken, id, reason);
 	}
 	
 	/**
@@ -642,8 +550,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getAllRentOrder(userToken);
-		return RetJson.success("success", orderList);
+		return userService.getAllRentOrder(userToken);
 	}
 	
 	/**
@@ -657,8 +564,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("logout error, please give me userToken", null);
 		}
-		RentOrder order = userService.getRentOrder(userToken,id);
-		return RetJson.success("success", order);
+		return userService.getRentOrder(userToken,id);
 	}
 	
 	/**
@@ -671,8 +577,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 1);
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 1);
 	}
 	
 	/**
@@ -685,11 +590,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 2);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 2);
 	}
 	
 	/**
@@ -702,11 +603,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 3);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 3);
 	}
 	
 	/**
@@ -719,11 +616,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 4);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 4);
 	}
 	
 	/**
@@ -736,11 +629,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 5);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 5);
 	}
 	
 	/**
@@ -751,11 +640,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 6);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 6);
 	}
 	
 	/**
@@ -767,11 +652,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("present order error", null);
 		}
-		List<RentOrder> orderList = userService.getTypeRentOrder(userToken, 0);
-		if(orderList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", orderList);
+		return userService.getTypeRentOrder(userToken, 0);
 	}
 	
 	/**
@@ -786,11 +667,7 @@ public class UserController {
 		if(userToken == null || id == null || reason == null) {
 			return RetJson.urlError("缺少参数", null);
 		}
-
-		if(userService.cancelRentOrder(userToken, id, reason)) {
-			return RetJson.success("取消订单成功");
-		}
-		return RetJson.unknowError("取消订单失败", null);
+		return userService.cancelRentOrder(userToken, id, reason);
 	}
 	
 	
@@ -803,11 +680,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("list shopcar error", null);
 		}
-		List<ShopCar> shopList = userService.getShopCar(userToken);
-		if(shopList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", shopList);
+		return userService.getShopCar(userToken);
 	}
 	
 	/**
@@ -820,10 +693,7 @@ public class UserController {
 		if(userToken == null || shopCar == null) {
 			return RetJson.urlError("add shopcar error", null);
 		}
-		if(userService.addShopCar(userToken, shopCar)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("false", null);
+		return userService.addShopCar(userToken, shopCar);
 	}
 	
 	/**
@@ -836,10 +706,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("remove shopcar error", null);
 		}
-		if(userService.removeShopCar(userToken, id)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("false", null);
+		return userService.removeShopCar(userToken, id);
 	}
 	
 	/**
@@ -852,11 +719,9 @@ public class UserController {
 		if(userToken == null || shopCar == null) {
 			return RetJson.urlError("update shopcar error", null);
 		}
-		if(userService.updateShopCar(userToken, shopCar)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("false", null);
+		return userService.updateShopCar(userToken, shopCar);
 	}
+
 	
 //	/**
 //	 * 购物车结算
@@ -886,11 +751,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("list collect error", null);
 		}
-		List<Collect> shopList = userService.getCollect(userToken);
-		if(shopList == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success", shopList);
+		return userService.getCollect(userToken);
 	}
 	
 	/**
@@ -903,10 +764,7 @@ public class UserController {
 		if(userToken == null || collect == null) {
 			return RetJson.urlError("add collect error", null);
 		}
-		if(userService.addCollect(userToken, collect)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("false", null);
+		return userService.addCollect(userToken, collect);
 	}
 	
 	/**
@@ -919,11 +777,22 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("remove collect error", null);
 		}
-		if(userService.removeCollect(userToken, id)) {
-			return RetJson.success("success");
-		}
 		
-		return RetJson.success("success");
+		return userService.removeCollect(userToken, id);
+	}
+	
+	/**
+	 * 判断商品是否已收藏
+	 */
+	@RequestMapping(value = "/usercenter/collect/iscollect", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	public RetJson isCollect(@RequestBody UserTokenOne param) {
+		String userToken = param.getUserToken();
+		String id = param.getString();
+		if(userToken == null || id == null) {
+			return RetJson.urlError("参数错误", null);
+		}
+		return userService.isCollect(userToken, Long.parseLong(id));
+		
 	}
 	
 	/**
@@ -936,11 +805,7 @@ public class UserController {
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		List<Appraise> appraise = userService.listAppraise(userToken, id);
-		if(appraise == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success",appraise);
+		return userService.listAppraise(userToken, id);
 	}
 	
 	/**
@@ -952,11 +817,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		List<Appraise> appraise = userService.listMyAppraise(userToken);
-		if(appraise == null) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success",appraise);
+		return userService.listMyAppraise(userToken);
 	}
 	
 	/**
@@ -969,10 +830,7 @@ public class UserController {
 		if(userToken == null || appraise == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(!userService.addAppraise(userToken, appraise)) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success",null);
+		return userService.addAppraise(userToken, appraise);
 	}
 	
 	/**
@@ -985,10 +843,7 @@ public class UserController {
 		if(userToken == null || id == 0) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(!userService.removeAppraise(userToken, id)) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success",null);
+		return userService.removeAppraise(userToken, id);
 	}
 	
 	/**
@@ -997,14 +852,11 @@ public class UserController {
 	@RequestMapping(value = "/usercenter/address/add", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson addAddress(@RequestBody AddressInfo param) {
 		String userToken = param.getUserToken();
-		Address address = param.getAddress();
+		Address address = param.getAddr();
 		if(userToken == null || address == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(userService.addAddress(userToken, address)) {
-			return RetJson.success("success",null);
-		}
-		return RetJson.unknowError("false", null);
+		return userService.addAddress(userToken, address);
 	}
 	
 	
@@ -1018,10 +870,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(!userService.removeAddress(userToken, id)) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success",null);
+		return userService.removeAddress(userToken, id);
 	}
 	
 	
@@ -1031,14 +880,11 @@ public class UserController {
 	@RequestMapping(value = "/usercenter/address/update", method = {RequestMethod.POST, RequestMethod.GET}, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
 	public RetJson updateAddress(@RequestBody AddressInfo param) {
 		String userToken = param.getUserToken();
-		Address address = param.getAddress();
+		Address address = param.getAddr();
 		if(userToken == null || address == null) {
 			return RetJson.urlError("update shopcar error", null);
 		}
-		if(userService.updateAddress(userToken, address)) {
-			return RetJson.success("success");
-		}
-		return RetJson.unknowError("false", null);
+		return userService.updateAddress(userToken, address);
 	}
 	
 	/**
@@ -1050,8 +896,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		List<Address> address = userService.selectAddress(userToken);
-		return RetJson.success("success",address);
+		return userService.selectAddress(userToken);
 	}
 	
 	/**
@@ -1064,10 +909,7 @@ public class UserController {
 		if(userToken == null || id == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		if(!userService.setMainAddr(userToken, Long.parseLong(id))) {
-			return RetJson.unknowError("false", null);
-		}
-		return RetJson.success("success");
+		return userService.setMainAddr(userToken, Long.parseLong(id));
 	}
 
 	
@@ -1080,8 +922,7 @@ public class UserController {
 		if(userToken == null) {
 			return RetJson.urlError("list appraise error", null);
 		}
-		Address address = userService.getMainAddr(userToken);
-		return RetJson.success("success",address);
+		return userService.getMainAddr(userToken);
 	}
-
+	
 }
